@@ -1,20 +1,20 @@
-```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Espoza Fashion — لوحة التحكم</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Espoza Fashion — Admin</title>
+
+<meta name="theme-color" content="#111111">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,"Tahoma",sans-serif;background:#f7f3ef;color:#321f27}
-button,input,select,textarea{font:inherit}
-button{cursor:pointer}
-.hidden{display:none!important}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
 
+<style>
 :root{
   --wine:#641f34;
   --dark:#431321;
@@ -23,585 +23,702 @@ button{cursor:pointer}
   --border:#eadfe1;
   --muted:#8c7d82;
   --green:#198754;
-  --red:#b42318
+  --red:#b42318;
+  --white:#fff;
+  --shadow:0 10px 30px rgba(67,19,33,.08);
 }
 
-.auth{
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body{
+  font-family:"Cairo",sans-serif;
+  background:var(--cream);
+  color:#26171c;
+}
+
+button,
+input,
+textarea,
+select{
+  font-family:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+.hidden{
+  display:none!important;
+}
+
+/* LOGIN */
+
+.login-screen{
   min-height:100vh;
-  display:grid;
-  place-items:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   padding:20px;
-  background:radial-gradient(circle at 20% 20%,#ead7dc,transparent 35%),#f7f3ef
+  background:
+    radial-gradient(circle at top right,rgba(185,152,90,.16),transparent 35%),
+    linear-gradient(135deg,#faf7f2,#f3e9e7);
 }
 
-.auth-card{
-  width:min(430px,100%);
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:28px;
-  padding:34px;
-  box-shadow:0 20px 70px rgba(50,20,30,.12)
-}
-
-.brand{text-align:center;margin-bottom:28px}
-.brand b{
-  font-family:Georgia,serif;
-  letter-spacing:5px;
-  color:var(--wine);
-  font-size:30px
-}
-.brand small{
-  display:block;
-  color:var(--gold);
-  letter-spacing:4px;
-  margin-top:5px
-}
-
-.field{margin-bottom:14px}
-.field label{
-  display:block;
-  font-size:12px;
-  font-weight:800;
-  color:var(--wine);
-  margin-bottom:7px
-}
-
-.field input,
-.field select,
-.field textarea{
+.login-card{
   width:100%;
-  border:1px solid var(--border);
-  border-radius:13px;
-  padding:12px 13px;
+  max-width:430px;
   background:#fff;
-  outline:none
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:38px;
+  box-shadow:0 25px 70px rgba(67,19,33,.12);
 }
 
-.field textarea{
-  min-height:100px;
-  resize:vertical
+.logo{
+  text-align:center;
+  margin-bottom:28px;
 }
 
-.primary,.danger,.ghost{
+.logo h1{
+  font-family:"Playfair Display",serif;
+  color:var(--wine);
+  font-size:34px;
+}
+
+.logo p{
+  color:var(--muted);
+  margin-top:5px;
+}
+
+.form-group{
+  margin-bottom:16px;
+}
+
+.form-group label{
+  display:block;
+  margin-bottom:7px;
+  font-size:14px;
+  font-weight:700;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select{
+  width:100%;
+  padding:13px 14px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#fff;
+  outline:none;
+  transition:.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus{
+  border-color:var(--gold);
+  box-shadow:0 0 0 3px rgba(185,152,90,.12);
+}
+
+textarea{
+  min-height:110px;
+  resize:vertical;
+}
+
+.primary-btn{
+  width:100%;
   border:0;
-  border-radius:13px;
-  padding:12px 16px;
-  font-weight:800
+  background:var(--wine);
+  color:#fff;
+  padding:14px;
+  border-radius:12px;
+  font-weight:800;
+  transition:.2s;
 }
 
-.primary{background:var(--wine);color:#fff}
-.danger{background:#fff0ef;color:var(--red)}
-.ghost{background:#f5edef;color:var(--wine)}
-.full{width:100%}
+.primary-btn:hover{
+  background:var(--dark);
+  transform:translateY(-1px);
+}
 
-.error{
+.error-message{
   color:var(--red);
-  font-size:12px;
-  margin-top:10px;
-  min-height:18px
+  font-size:13px;
+  margin-top:12px;
+  text-align:center;
 }
 
-.app{min-height:100vh}
+/* APP */
+
+.app{
+  min-height:100vh;
+  display:flex;
+}
+
+.sidebar{
+  width:250px;
+  background:var(--dark);
+  color:#fff;
+  position:fixed;
+  right:0;
+  top:0;
+  bottom:0;
+  z-index:50;
+  padding:24px 16px;
+}
+
+.sidebar-logo{
+  text-align:center;
+  padding:8px 0 25px;
+  border-bottom:1px solid rgba(255,255,255,.1);
+  margin-bottom:20px;
+}
+
+.sidebar-logo h2{
+  font-family:"Playfair Display",serif;
+  font-size:27px;
+}
+
+.sidebar-logo span{
+  display:block;
+  font-size:12px;
+  opacity:.65;
+  margin-top:4px;
+}
+
+.nav-item{
+  width:100%;
+  border:0;
+  background:transparent;
+  color:rgba(255,255,255,.78);
+  padding:13px 15px;
+  border-radius:12px;
+  text-align:right;
+  margin-bottom:6px;
+  font-weight:600;
+  transition:.2s;
+}
+
+.nav-item:hover,
+.nav-item.active{
+  background:rgba(255,255,255,.1);
+  color:#fff;
+}
+
+.logout-btn{
+  margin-top:20px;
+  color:#ffb6b0;
+}
+
+.main{
+  flex:1;
+  margin-right:250px;
+  min-width:0;
+}
 
 .topbar{
-  height:72px;
+  height:75px;
   background:#fff;
   border-bottom:1px solid var(--border);
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding:0 22px;
+  padding:0 30px;
   position:sticky;
   top:0;
-  z-index:20
+  z-index:30;
 }
 
-.top-brand{
-  font-family:Georgia,serif;
-  letter-spacing:3px;
+.topbar-title{
+  font-size:21px;
+  font-weight:800;
+  color:var(--dark);
+}
+
+.admin-badge{
+  background:#f5ecef;
   color:var(--wine);
-  font-size:23px
+  padding:8px 13px;
+  border-radius:30px;
+  font-size:13px;
+  font-weight:700;
 }
 
-.top-actions{
-  display:flex;
-  gap:8px;
-  align-items:center
+.content{
+  padding:30px;
 }
 
-.user-email{
-  font-size:11px;
-  color:var(--muted);
-  max-width:220px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap
+/* DASHBOARD */
+
+.page{
+  display:none;
 }
 
-.layout{
-  display:grid;
-  grid-template-columns:220px 1fr;
-  min-height:calc(100vh - 72px)
+.page.active{
+  display:block;
 }
 
-.sidebar{
-  background:#32141f;
-  color:#fff;
-  padding:18px 12px
-}
-
-.navbtn{
-  width:100%;
-  border:0;
-  background:transparent;
-  color:#eadde0;
-  text-align:right;
-  padding:13px 14px;
-  border-radius:12px;
-  margin-bottom:5px;
-  font-weight:700
-}
-
-.navbtn.active,
-.navbtn:hover{
-  background:rgba(255,255,255,.1);
-  color:#fff
-}
-
-.main{
-  padding:24px;
-  max-width:1450px;
-  width:100%;
-  margin:auto
-}
-
-.page-title{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:15px;
-  margin-bottom:20px
-}
-
-.page-title h1{
-  font-family:Georgia,serif;
-  color:var(--wine);
-  font-size:30px
-}
-
-.page-title p{
-  color:var(--muted);
-  font-size:12px;
-  margin-top:5px
-}
-
-.cards{
+.dashboard-grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
-  gap:14px;
-  margin-bottom:20px
+  gap:18px;
+  margin-bottom:25px;
 }
 
 .stat-card{
   background:#fff;
   border:1px solid var(--border);
   border-radius:18px;
-  padding:18px
+  padding:22px;
+  box-shadow:var(--shadow);
+}
+
+.stat-card small{
+  color:var(--muted);
+  font-size:13px;
 }
 
 .stat-card strong{
   display:block;
+  font-size:29px;
   color:var(--wine);
-  font-size:26px
+  margin-top:8px;
 }
 
-.stat-card span{
-  font-size:11px;
-  color:var(--muted)
-}
-
-.panel{
+.section-card{
   background:#fff;
   border:1px solid var(--border);
-  border-radius:20px;
-  padding:20px;
-  margin-bottom:18px
+  border-radius:18px;
+  padding:22px;
+  box-shadow:var(--shadow);
+  margin-bottom:20px;
 }
 
-.panel-head{
+.section-header{
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  gap:12px;
-  margin-bottom:16px
+  align-items:center;
+  gap:15px;
+  margin-bottom:20px;
 }
 
-.panel-head h2{
-  font-size:18px;
-  color:var(--wine)
+.section-header h2{
+  color:var(--dark);
+  font-size:20px;
 }
+
+.btn{
+  border:0;
+  border-radius:10px;
+  padding:10px 15px;
+  font-weight:700;
+}
+
+.btn-primary{
+  background:var(--wine);
+  color:#fff;
+}
+
+.btn-secondary{
+  background:#f3ebed;
+  color:var(--wine);
+}
+
+.btn-danger{
+  background:#fde9e7;
+  color:var(--red);
+}
+
+.btn-success{
+  background:#e8f6ee;
+  color:var(--green);
+}
+
+/* FILTERS */
 
 .filters{
   display:flex;
   gap:10px;
   flex-wrap:wrap;
-  margin-bottom:15px
+  margin-bottom:20px;
 }
 
 .filters input,
 .filters select{
+  padding:11px 13px;
   border:1px solid var(--border);
-  border-radius:12px;
-  padding:10px 12px;
+  border-radius:10px;
   background:#fff;
-  outline:none
+  outline:none;
 }
 
-.product-grid{
+/* PRODUCTS */
+
+.products-grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
-  gap:15px
+  gap:18px;
 }
 
 .product-card{
+  background:#fff;
   border:1px solid var(--border);
-  border-radius:18px;
+  border-radius:16px;
   overflow:hidden;
-  background:#fff
 }
 
-.product-card img{
+.product-image{
   width:100%;
-  height:230px;
+  aspect-ratio:1/1.15;
   object-fit:cover;
-  background:#f2eae7
+  background:#f4eeee;
 }
 
-.pc-body{padding:13px}
+.product-body{
+  padding:15px;
+}
 
-.pc-name{
+.product-name{
+  font-weight:800;
+  color:var(--dark);
+  margin-bottom:7px;
+}
+
+.product-meta{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.price{
   font-weight:800;
   color:var(--wine);
-  margin-bottom:7px
 }
 
-.pc-price{font-weight:800}
-
-.pc-price del{
-  color:#aaa;
-  font-size:11px;
-  margin-right:5px
-}
-
-.pc-meta{
-  font-size:10px;
+.old-price{
   color:var(--muted);
-  margin-top:5px
-}
-
-.badges{
-  display:flex;
-  gap:5px;
-  flex-wrap:wrap;
-  margin:8px 0
-}
-
-.badge{
-  font-size:9px;
-  padding:4px 7px;
-  border-radius:20px;
-  background:#f5edef;
-  color:var(--wine)
-}
-
-.badge.offer{
-  background:var(--wine);
-  color:#fff
-}
-
-.pc-actions{
-  display:flex;
-  gap:7px;
-  margin-top:12px
-}
-
-.pc-actions button{
-  flex:1;
-  padding:9px;
-  border:0;
-  border-radius:10px;
-  font-size:11px;
-  font-weight:800
-}
-
-.edit{
-  background:#f4eef0;
-  color:var(--wine)
-}
-
-.delete{
-  background:#fff0ef;
-  color:var(--red)
-}
-
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(25,10,15,.62);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:18px;
-  z-index:100
-}
-
-.modal.show{display:flex}
-
-.modal-box{
-  background:#fff;
-  width:min(900px,100%);
-  max-height:94vh;
-  overflow:auto;
-  border-radius:24px;
-  padding:22px;
-  position:relative
-}
-
-.modal-close{
-  position:absolute;
-  left:15px;
-  top:15px;
-  width:36px;
-  height:36px;
-  border:0;
-  border-radius:50%;
-  background:#f5edef;
-  color:var(--wine);
-  font-size:20px
-}
-
-.form-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px
-}
-
-.form-grid .wide{
-  grid-column:1/-1
-}
-
-.modal-title{
-  color:var(--wine);
-  font-family:Georgia,serif;
-  font-size:25px;
-  margin-bottom:18px
-}
-
-.inline{
-  display:flex;
-  gap:8px;
-  align-items:center
-}
-
-.check{
-  display:flex;
-  gap:8px;
-  align-items:center;
+  text-decoration:line-through;
   font-size:12px;
-  font-weight:700
 }
 
-.image-list{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px
-}
-
-.image-row{
-  border:1px solid var(--border);
-  border-radius:13px;
-  padding:9px;
-  background:#fcfaf8
-}
-
-.image-row img{
-  width:100%;
-  height:150px;
-  object-fit:cover;
-  border-radius:9px
-}
-
-.image-row input{
-  width:100%;
-  margin-top:7px;
-  border:1px solid var(--border);
-  border-radius:9px;
-  padding:8px
-}
-
-.image-row button{
-  margin-top:7px;
-  width:100%;
-  border:0;
-  border-radius:9px;
-  padding:8px;
-  background:#fff0ef;
-  color:var(--red);
-  font-size:11px
-}
-
-.size-list{
+.product-actions{
   display:flex;
   gap:7px;
-  flex-wrap:wrap
 }
 
-.size-chip{
-  display:flex;
-  align-items:center;
-  gap:5px;
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:6px 8px;
-  font-size:11px
+.product-actions .btn{
+  flex:1;
+  font-size:12px;
 }
 
-.size-chip button{
-  border:0;
-  background:none;
-  color:var(--red)
-}
-
-.dropzone{
-  border:1.5px dashed #cdbcc1;
-  border-radius:15px;
-  padding:18px;
-  text-align:center;
-  color:var(--muted);
-  font-size:12px
-}
-
-.dropzone input{margin-top:10px}
-
-.slide-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:15px
-}
-
-.slide-card{
-  border:1px solid var(--border);
-  border-radius:18px;
-  overflow:hidden
-}
-
-.slide-card img{
-  width:100%;
-  height:180px;
-  object-fit:cover;
-  background:#f2eae7
-}
-
-.slide-body{padding:12px}
-
-.slide-body h3{
-  color:var(--wine);
-  margin-bottom:5px
-}
-
-.slide-body p{
-  font-size:10px;
-  color:var(--muted);
-  line-height:1.6
-}
+/* SETTINGS */
 
 .settings-grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
-  gap:14px
+  gap:20px;
 }
 
-.section-label{
-  font-weight:900;
+.setting-full{
+  grid-column:1/-1;
+}
+
+.save-settings{
+  margin-top:10px;
+}
+
+/* SLIDES */
+
+.slides-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+
+.slide-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+}
+
+.slide-image{
+  width:100%;
+  aspect-ratio:16/9;
+  object-fit:cover;
+  background:#f4eeee;
+}
+
+.slide-body{
+  padding:15px;
+}
+
+.slide-body h3{
+  margin-bottom:6px;
+}
+
+.slide-body p{
+  color:var(--muted);
+  font-size:13px;
+  min-height:42px;
+}
+
+.slide-actions{
+  display:flex;
+  gap:7px;
+  margin-top:12px;
+}
+
+.slide-actions .btn{
+  flex:1;
+}
+
+/* MODAL */
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(20,8,12,.58);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  z-index:100;
+}
+
+.modal.open{
+  display:flex;
+}
+
+.modal-box{
+  background:#fff;
+  width:100%;
+  max-width:760px;
+  max-height:92vh;
+  overflow:auto;
+  border-radius:22px;
+  padding:25px;
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.modal-header h2{
+  color:var(--dark);
+}
+
+.close-btn{
+  width:38px;
+  height:38px;
+  border:0;
+  border-radius:50%;
+  background:#f3ebed;
   color:var(--wine);
-  font-size:14px;
-  margin:4px 0 10px
+  font-size:20px;
 }
 
-.notice{
-  background:#fff8e8;
-  border:1px solid #ead9ad;
-  color:#745b21;
+.modal-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:15px;
+}
+
+.full{
+  grid-column:1/-1;
+}
+
+.checkbox-row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  background:#faf7f2;
+  border:1px solid var(--border);
   padding:12px;
   border-radius:12px;
-  font-size:11px;
-  line-height:1.8;
-  margin-bottom:14px
 }
 
-.toast{
-  position:fixed;
-  bottom:22px;
-  left:22px;
-  background:#32141f;
-  color:#fff;
-  padding:12px 16px;
+.checkbox-row input{
+  width:18px;
+  height:18px;
+}
+
+.image-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.image-row{
+  border:1px solid var(--border);
   border-radius:12px;
-  font-size:12px;
-  opacity:0;
-  transform:translateY(15px);
-  pointer-events:none;
-  transition:.25s;
-  z-index:300
+  padding:12px;
+  display:flex;
+  align-items:center;
+  gap:12px;
 }
 
-.toast.show{
-  opacity:1;
-  transform:none
+.image-preview{
+  width:65px;
+  height:75px;
+  border-radius:9px;
+  object-fit:cover;
+  background:#f4eeee;
 }
 
-.loading{
-  padding:35px;
+.image-info{
+  flex:1;
+}
+
+.image-info input{
+  width:100%;
+  padding:9px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  margin-top:5px;
+}
+
+.empty{
   text-align:center;
   color:var(--muted);
-  font-size:13px
+  padding:35px;
 }
 
-@media(max-width:1000px){
-  .product-grid{grid-template-columns:repeat(3,1fr)}
-  .cards{grid-template-columns:repeat(2,1fr)}
-  .slide-grid{grid-template-columns:repeat(2,1fr)}
+/* TABLE */
+
+.table-wrap{
+  overflow:auto;
 }
 
-@media(max-width:760px){
-  .layout{grid-template-columns:1fr}
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:700px;
+}
+
+th,
+td{
+  padding:13px;
+  border-bottom:1px solid var(--border);
+  text-align:right;
+  font-size:13px;
+}
+
+th{
+  color:var(--dark);
+  background:#faf7f2;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:1100px){
+  .dashboard-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .products-grid{
+    grid-template-columns:repeat(3,1fr);
+  }
+
+  .slides-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:800px){
   .sidebar{
-    display:flex;
-    overflow:auto;
-    gap:5px;
-    padding:8px
+    width:220px;
   }
 
-  .navbtn{
-    width:auto;
-    white-space:nowrap;
-    margin:0
+  .main{
+    margin-right:220px;
   }
 
-  .main{padding:15px}
-  .product-grid{grid-template-columns:repeat(2,1fr)}
-  .form-grid,.settings-grid{grid-template-columns:1fr}
-  .image-list,.slide-grid{grid-template-columns:1fr}
-  .topbar{padding:0 12px}
-  .user-email{display:none}
+  .content{
+    padding:20px;
+  }
+
+  .products-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .settings-grid,
+  .modal-grid{
+    grid-template-columns:1fr;
+  }
+
+  .full{
+    grid-column:auto;
+  }
 }
 
-@media(max-width:430px){
-  .product-grid{grid-template-columns:1fr}
-  .cards{grid-template-columns:1fr}
-  .page-title{
-    align-items:flex-start;
-    flex-direction:column
+@media(max-width:620px){
+  .sidebar{
+    position:relative;
+    width:100%;
+    height:auto;
+    padding:12px;
+  }
+
+  .sidebar-logo{
+    padding-bottom:12px;
+    margin-bottom:10px;
+  }
+
+  .main{
+    margin-right:0;
+  }
+
+  .app{
+    display:block;
+  }
+
+  .nav-item{
+    width:auto;
+    display:inline-block;
+    margin:3px;
+  }
+
+  .logout-btn{
+    margin-top:5px;
+  }
+
+  .topbar{
+    padding:0 15px;
+  }
+
+  .content{
+    padding:15px;
+  }
+
+  .dashboard-grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .products-grid{
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  .slides-grid{
+    grid-template-columns:1fr;
+  }
+
+  .product-body{
+    padding:10px;
+  }
+
+  .product-actions{
+    flex-direction:column;
   }
 }
 </style>
@@ -609,120 +726,149 @@ button{cursor:pointer}
 
 <body>
 
-<div id="loginView" class="auth">
-  <div class="auth-card">
+<!-- LOGIN -->
 
-    <div class="brand">
-      <b>ESPOZA</b>
-      <small>FASHION ADMIN</small>
+<div id="loginScreen" class="login-screen">
+
+  <div class="login-card">
+
+    <div class="logo">
+      <h1>Espoza Fashion</h1>
+      <p>لوحة تحكم المتجر</p>
     </div>
 
-    <div class="field">
-      <label>البريد الإلكتروني</label>
-      <input id="loginEmail" type="email" autocomplete="username" placeholder="admin@example.com">
-    </div>
+    <form id="loginForm">
 
-    <div class="field">
-      <label>كلمة المرور</label>
-      <input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••">
-    </div>
+      <div class="form-group">
+        <label>اسم المستخدم</label>
+        <input
+          id="loginUsername"
+          type="text"
+          placeholder="admin"
+          autocomplete="username"
+          required
+        >
+      </div>
 
-    <button class="primary full" id="loginBtn">
-      دخول لوحة التحكم
-    </button>
+      <div class="form-group">
+        <label>كلمة المرور</label>
+        <input
+          id="loginPassword"
+          type="password"
+          placeholder="••••••••"
+          autocomplete="current-password"
+          required
+        >
+      </div>
 
-    <div class="error" id="loginError"></div>
+      <button class="primary-btn" type="submit">
+        دخول لوحة التحكم
+      </button>
+
+      <div id="loginError" class="error-message"></div>
+
+    </form>
 
   </div>
+
 </div>
 
 
-<div id="appView" class="app hidden">
+<!-- APP -->
 
-  <header class="topbar">
-    <div class="top-brand">ESPOZA FASHION</div>
+<div id="app" class="app hidden">
 
-    <div class="top-actions">
-      <span class="user-email" id="userEmail"></span>
-      <button class="ghost" id="logoutBtn">
-        تسجيل الخروج
-      </button>
+  <!-- SIDEBAR -->
+
+  <aside class="sidebar">
+
+    <div class="sidebar-logo">
+      <h2>Espoza</h2>
+      <span>Fashion Admin</span>
     </div>
-  </header>
+
+    <button class="nav-item active" data-page="dashboard">
+      الرئيسية
+    </button>
+
+    <button class="nav-item" data-page="products">
+      المنتجات
+    </button>
+
+    <button class="nav-item" data-page="settings">
+      إعدادات المتجر
+    </button>
+
+    <button class="nav-item" data-page="slides">
+      السلايدر
+    </button>
+
+    <button class="nav-item logout-btn" id="logoutBtn">
+      تسجيل الخروج
+    </button>
+
+  </aside>
 
 
-  <div class="layout">
+  <!-- MAIN -->
 
-    <aside class="sidebar">
+  <main class="main">
 
-      <button class="navbtn active" data-page="dashboard">
+    <header class="topbar">
+
+      <div id="pageTitle" class="topbar-title">
         الرئيسية
-      </button>
+      </div>
 
-      <button class="navbtn" data-page="products">
-        المنتجات
-      </button>
+      <div class="admin-badge">
+        Admin
+      </div>
 
-      <button class="navbtn" data-page="settings">
-        إعدادات المتجر
-      </button>
-
-      <button class="navbtn" data-page="slides">
-        السلايدر
-      </button>
-
-    </aside>
+    </header>
 
 
-    <main class="main">
+    <div class="content">
+
 
       <!-- DASHBOARD -->
 
-      <section id="page-dashboard" class="page">
+      <section id="page-dashboard" class="page active">
 
-        <div class="page-title">
-          <div>
-            <h1>لوحة التحكم</h1>
-            <p>إدارة Espoza Fashion من مكان واحد.</p>
-          </div>
-        </div>
-
-        <div class="cards">
+        <div class="dashboard-grid">
 
           <div class="stat-card">
+            <small>إجمالي المنتجات</small>
             <strong id="statProducts">0</strong>
-            <span>المنتجات</span>
           </div>
 
           <div class="stat-card">
+            <small>العروض</small>
             <strong id="statOffers">0</strong>
-            <span>العروض</span>
           </div>
 
           <div class="stat-card">
+            <small>السلايدر النشط</small>
             <strong id="statSlides">0</strong>
-            <span>السلايدرات الفعالة</span>
           </div>
 
           <div class="stat-card">
+            <small>إجمالي المتابعين</small>
             <strong id="statFollowers">0</strong>
-            <span>إجمالي المتابعين</span>
           </div>
 
         </div>
 
 
-        <div class="panel">
+        <div class="section-card">
 
-          <div class="panel-head">
-            <h2>آخر المنتجات</h2>
-
-            <button class="primary" onclick="openProductModal()">
-              + إضافة منتج
-            </button>
+          <div class="section-header">
+            <h2>مرحبًا بك في لوحة التحكم</h2>
           </div>
 
-          <div id="recentProducts" class="product-grid"></div>
+          <p style="color:var(--muted);line-height:2">
+            من هنا يمكنك إدارة منتجات Espoza Fashion والسلايدر وإعدادات المتجر.
+            أي بيانات تحفظها في لوحة التحكم يتم تخزينها في Supabase.
+          </p>
 
         </div>
 
@@ -731,46 +877,38 @@ button{cursor:pointer}
 
       <!-- PRODUCTS -->
 
-      <section id="page-products" class="page hidden">
+      <section id="page-products" class="page">
 
-        <div class="page-title">
+        <div class="section-card">
 
-          <div>
-            <h1>المنتجات</h1>
-            <p>
-              إضافة وتعديل وحذف المنتجات، الصور، المقاسات والألوان.
-            </p>
+          <div class="section-header">
+
+            <h2>المنتجات</h2>
+
+            <button class="btn btn-primary" onclick="openProductModal()">
+              + إضافة منتج
+            </button>
+
           </div>
-
-          <button class="primary" onclick="openProductModal()">
-            + إضافة منتج
-          </button>
-
-        </div>
-
-
-        <div class="panel">
 
           <div class="filters">
 
             <input
               id="productSearch"
-              placeholder="ابحثي باسم المنتج أو SKU..."
-              oninput="renderProductList()"
+              type="text"
+              placeholder="ابحث عن منتج..."
             >
 
-            <select
-              id="productCategory"
-              onchange="renderProductList()"
-            >
+            <select id="productCategoryFilter">
               <option value="all">كل التصنيفات</option>
-              <option value="dresses">فساتين</option>
-              <option value="sets">أطقم</option>
+              <option value="dresses">الفساتين</option>
+              <option value="sets">الأطقم</option>
+              <option value="offers">العروضات</option>
             </select>
 
           </div>
 
-          <div id="productList" class="product-grid"></div>
+          <div id="productsGrid" class="products-grid"></div>
 
         </div>
 
@@ -779,122 +917,88 @@ button{cursor:pointer}
 
       <!-- SETTINGS -->
 
-      <section id="page-settings" class="page hidden">
+      <section id="page-settings" class="page">
 
-        <div class="page-title">
+        <div class="section-card">
 
-          <div>
-            <h1>إعدادات المتجر</h1>
-            <p>
-              هذه القيم تظهر مباشرة في موقع الزبائن بعد الحفظ.
-            </p>
-          </div>
-
-        </div>
-
-
-        <div class="panel">
-
-          <div class="notice">
-            رقم الواتساب يجب أن يكون بصيغة دولية، مثال:
-            972595461861 بدون + أو مسافات.
-          </div>
-
-
-          <div class="section-label">
-            بيانات المتجر
+          <div class="section-header">
+            <h2>إعدادات المتجر</h2>
           </div>
 
           <div class="settings-grid">
 
-            <div class="field">
+            <div class="form-group">
               <label>اسم المتجر</label>
-              <input id="setStoreName">
+              <input id="storeName" type="text">
             </div>
 
-            <div class="field">
-              <label>رقم واتساب الطلبات</label>
-              <input id="setWhatsapp" placeholder="972595461861">
+            <div class="form-group">
+              <label>رقم واتساب</label>
+              <input id="storeWhatsapp" type="text">
             </div>
 
-            <div class="field">
+            <div class="form-group">
               <label>Instagram</label>
-              <input id="setInstagram">
+              <input id="storeInstagram" type="text">
             </div>
 
-            <div class="field">
+            <div class="form-group">
               <label>Facebook</label>
-              <input id="setFacebookLink">
+              <input id="storeFacebook" type="text">
             </div>
 
-            <div class="field">
+            <div class="form-group">
               <label>TikTok</label>
-              <input id="setTiktokLink">
+              <input id="storeTiktok" type="text">
             </div>
 
-            <div class="field">
+            <div class="form-group">
               <label>Snapchat</label>
-              <input id="setSnapchatLink">
+              <input id="storeSnapchat" type="text">
             </div>
 
-          </div>
-
-
-          <div class="section-label">
-            الطلبات والتوصيل
-          </div>
-
-          <div class="settings-grid">
-
-            <div class="field">
+            <div class="form-group">
               <label>توصيل الضفة الغربية ₪</label>
-              <input id="setWestbank" type="number" min="0">
+              <input id="deliveryWestBank" type="number">
             </div>
 
-            <div class="field">
+            <div class="form-group">
               <label>توصيل القدس ₪</label>
-              <input id="setJerusalem" type="number" min="0">
+              <input id="deliveryJerusalem" type="number">
             </div>
 
-            <div class="field">
+            <div class="form-group">
               <label>توصيل الداخل ₪</label>
-              <input id="setInside" type="number" min="0">
+              <input id="deliveryInside" type="number">
+            </div>
+
+            <div class="form-group">
+              <label>متابعو Facebook</label>
+              <input id="followersFacebook" type="number">
+            </div>
+
+            <div class="form-group">
+              <label>متابعو Instagram</label>
+              <input id="followersInstagram" type="number">
+            </div>
+
+            <div class="form-group">
+              <label>متابعو TikTok</label>
+              <input id="followersTiktok" type="number">
+            </div>
+
+            <div class="form-group">
+              <label>متابعو Snapchat</label>
+              <input id="followersSnapchat" type="number">
             </div>
 
           </div>
 
-
-          <div class="section-label">
-            أعداد المتابعين
-          </div>
-
-          <div class="settings-grid">
-
-            <div class="field">
-              <label>Facebook</label>
-              <input id="setFacebook" type="number" min="0">
-            </div>
-
-            <div class="field">
-              <label>Instagram</label>
-              <input id="setInstagramFollowers" type="number" min="0">
-            </div>
-
-            <div class="field">
-              <label>TikTok</label>
-              <input id="setTiktok" type="number" min="0">
-            </div>
-
-            <div class="field">
-              <label>Snapchat</label>
-              <input id="setSnapchat" type="number" min="0">
-            </div>
-
-          </div>
-
-
-          <button class="primary" onclick="saveSettings()">
-            حفظ إعدادات المتجر
+          <button
+            id="saveSettingsBtn"
+            class="btn btn-primary save-settings"
+          >
+            حفظ الإعدادات
           </button>
 
         </div>
@@ -904,35 +1008,29 @@ button{cursor:pointer}
 
       <!-- SLIDES -->
 
-      <section id="page-slides" class="page hidden">
+      <section id="page-slides" class="page">
 
-        <div class="page-title">
+        <div class="section-card">
 
-          <div>
-            <h1>السلايدر</h1>
-            <p>
-              غيّري صورة السلايدر والعنوان والوصف والزر والترتيب.
-            </p>
+          <div class="section-header">
+
+            <h2>السلايدر</h2>
+
+            <button class="btn btn-primary" onclick="openSlideModal()">
+              + إضافة سلايدر
+            </button>
+
           </div>
 
-          <button class="primary" onclick="openSlideModal()">
-            + إضافة سلايدر
-          </button>
-
-        </div>
-
-
-        <div class="panel">
-
-          <div id="slideList" class="slide-grid"></div>
+          <div id="slidesGrid" class="slides-grid"></div>
 
         </div>
 
       </section>
 
-    </main>
+    </div>
 
-  </div>
+  </main>
 
 </div>
 
@@ -943,184 +1041,123 @@ button{cursor:pointer}
 
   <div class="modal-box">
 
-    <button
-      class="modal-close"
-      onclick="closeModal('productModal')"
-    >
-      ×
-    </button>
+    <div class="modal-header">
 
-    <h2 id="productModalTitle" class="modal-title">
-      إضافة منتج
-    </h2>
+      <h2 id="productModalTitle">إضافة منتج</h2>
 
+      <button class="close-btn" onclick="closeProductModal()">
+        ×
+      </button>
 
-    <div class="form-grid">
+    </div>
 
-      <div class="field">
-        <label>اسم المنتج</label>
-        <input id="pName">
-      </div>
+    <form id="productForm">
 
-      <div class="field">
-        <label>SKU</label>
-        <input id="pSku">
-      </div>
+      <input id="productId" type="hidden">
 
-      <div class="field">
-        <label>التصنيف</label>
+      <div class="modal-grid">
 
-        <select id="pCategory">
-          <option value="dresses">فساتين</option>
-          <option value="sets">أطقم</option>
-        </select>
-
-      </div>
-
-      <div class="field">
-        <label>السعر ₪</label>
-        <input id="pPrice" type="number" min="0">
-      </div>
-
-      <div class="field">
-        <label>السعر القديم ₪</label>
-        <input id="pOldPrice" type="number" min="0">
-      </div>
-
-      <div class="field">
-
-        <label class="check">
-          <input id="pOffer" type="checkbox">
-          هذا المنتج عرض
-        </label>
-
-      </div>
-
-      <div class="field">
-
-        <label class="check">
-          <input id="pSale" type="checkbox">
-          المنتج عليه تخفيض
-        </label>
-
-      </div>
-
-      <div class="field">
-
-        <label class="check">
-          <input id="pAvailable" type="checkbox" checked>
-          المنتج متاح للزبائن
-        </label>
-
-      </div>
-
-      <div class="field">
-
-        <label class="check">
-          <input id="pActive" type="checkbox" checked>
-          المنتج فعال
-        </label>
-
-      </div>
-
-      <div class="field wide">
-
-        <label>الوصف</label>
-
-        <textarea
-          id="pDescription"
-          placeholder="وصف المنتج..."
-        ></textarea>
-
-      </div>
-
-
-      <!-- SIZES -->
-
-      <div class="wide">
-
-        <div class="section-label">
-          المقاسات
+        <div class="form-group">
+          <label>اسم المنتج</label>
+          <input id="productName" required>
         </div>
 
-        <div class="inline">
+        <div class="form-group">
+          <label>SKU</label>
+          <input id="productSku">
+        </div>
 
+        <div class="form-group">
+          <label>التصنيف</label>
+
+          <select id="productCategory">
+            <option value="dresses">الفساتين</option>
+            <option value="sets">الأطقم</option>
+            <option value="offers">العروضات</option>
+          </select>
+
+        </div>
+
+        <div class="form-group">
+          <label>السعر ₪</label>
+          <input id="productPrice" type="number" min="0" step="0.01" required>
+        </div>
+
+        <div class="form-group">
+          <label>السعر القديم ₪</label>
+          <input id="productOldPrice" type="number" min="0" step="0.01">
+        </div>
+
+        <div class="form-group">
+          <label>المقاسات</label>
           <input
-            id="newSize"
-            class="field"
-            style="margin:0"
-            placeholder="مثال: 42"
+            id="productSizes"
+            placeholder="مثال: 38,40,42,44,46"
           >
-
-          <button class="ghost" onclick="addSize()">
-            إضافة
-          </button>
-
         </div>
 
-        <div
-          id="sizeList"
-          class="size-list"
-          style="margin-top:9px"
-        ></div>
-
-      </div>
-
-
-      <!-- IMAGES -->
-
-      <div class="wide">
-
-        <div class="section-label">
-          الصور والألوان
+        <div class="checkbox-row">
+          <input id="productOffer" type="checkbox">
+          <label for="productOffer">منتج عليه عرض</label>
         </div>
 
-        <div class="dropzone">
+        <div class="checkbox-row">
+          <input id="productAvailable" type="checkbox" checked>
+          <label for="productAvailable">المنتج متوفر</label>
+        </div>
 
-          اختاري صورة أو عدة صور.
-          لكل صورة يمكنك كتابة اللون المرتبط بها.
+        <div class="checkbox-row">
+          <input id="productActive" type="checkbox" checked>
+          <label for="productActive">إظهار المنتج بالموقع</label>
+        </div>
 
-          <br>
+        <div class="form-group full">
+          <label>الوصف</label>
+          <textarea id="productDescription"></textarea>
+        </div>
+
+        <div class="form-group full">
+
+          <label>صور المنتج</label>
 
           <input
-            id="pImages"
+            id="productImagesInput"
             type="file"
             accept="image/*"
             multiple
-            onchange="previewNewImages()"
           >
 
         </div>
 
-        <div
-          id="imageList"
-          class="image-list"
-          style="margin-top:10px"
-        ></div>
+        <div class="form-group full">
+
+          <div id="imageList" class="image-list"></div>
+
+        </div>
 
       </div>
 
-    </div>
+      <div style="display:flex;gap:10px;margin-top:20px">
 
+        <button
+          type="submit"
+          class="btn btn-primary"
+          style="flex:1"
+        >
+          حفظ المنتج
+        </button>
 
-    <div style="display:flex;gap:8px;margin-top:18px">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick="closeProductModal()"
+        >
+          إلغاء
+        </button>
 
-      <button
-        class="primary"
-        id="saveProductBtn"
-        onclick="saveProduct()"
-      >
-        حفظ المنتج
-      </button>
+      </div>
 
-      <button
-        class="ghost"
-        onclick="closeModal('productModal')"
-      >
-        إلغاء
-      </button>
-
-    </div>
+    </form>
 
   </div>
 
@@ -1133,346 +1170,363 @@ button{cursor:pointer}
 
   <div class="modal-box">
 
-    <button
-      class="modal-close"
-      onclick="closeModal('slideModal')"
-    >
-      ×
-    </button>
+    <div class="modal-header">
 
-    <h2 id="slideModalTitle" class="modal-title">
-      إضافة سلايدر
-    </h2>
+      <h2 id="slideModalTitle">إضافة سلايدر</h2>
 
-
-    <div class="form-grid">
-
-      <div class="field">
-        <label>عنوان السلايدر</label>
-        <input id="sTitle">
-      </div>
-
-      <div class="field">
-        <label>الوصف الفرعي</label>
-        <input id="sSubtitle">
-      </div>
-
-      <div class="field">
-        <label>نص الزر</label>
-        <input id="sButtonText" value="استكشفي">
-      </div>
-
-      <div class="field">
-        <label>رابط الزر</label>
-        <input
-          id="sButtonLink"
-          placeholder="مثال: dresses أو offers"
-        >
-      </div>
-
-      <div class="field">
-        <label>الترتيب</label>
-        <input
-          id="sOrder"
-          type="number"
-          value="0"
-        >
-      </div>
-
-      <div class="field">
-
-        <label class="check">
-          <input
-            id="sActive"
-            type="checkbox"
-            checked
-          >
-          سلايدر فعال
-        </label>
-
-      </div>
-
-
-      <div class="field wide">
-
-        <label>صورة السلايدر</label>
-
-        <input
-          id="sImage"
-          type="file"
-          accept="image/*"
-          onchange="previewSlideImage()"
-        >
-
-        <div
-          id="slideImagePreview"
-          style="margin-top:10px"
-        ></div>
-
-      </div>
+      <button class="close-btn" onclick="closeSlideModal()">
+        ×
+      </button>
 
     </div>
 
+    <form id="slideForm">
 
-    <button
-      class="primary"
-      id="saveSlideBtn"
-      onclick="saveSlide()"
-    >
-      حفظ السلايدر
-    </button>
+      <input id="slideId" type="hidden">
+
+      <div class="modal-grid">
+
+        <div class="form-group full">
+          <label>العنوان</label>
+          <input id="slideTitle">
+        </div>
+
+        <div class="form-group full">
+          <label>النص الفرعي</label>
+          <textarea id="slideSubtitle"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>نص الزر</label>
+          <input id="slideButtonText" value="استكشفي">
+        </div>
+
+        <div class="form-group">
+          <label>رابط الزر / التصنيف</label>
+          <select id="slideButtonLink">
+            <option value="all">الكل</option>
+            <option value="dresses">الفساتين</option>
+            <option value="sets">الأطقم</option>
+            <option value="offers">العروضات</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>ترتيب السلايدر</label>
+          <input id="slideOrder" type="number" value="0">
+        </div>
+
+        <div class="checkbox-row">
+          <input id="slideActive" type="checkbox" checked>
+          <label for="slideActive">سلايدر نشط</label>
+        </div>
+
+        <div class="form-group full">
+          <label>صورة السلايدر</label>
+          <input id="slideImageInput" type="file" accept="image/*">
+        </div>
+
+        <div id="slideCurrentImage" class="form-group full"></div>
+
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:20px">
+
+        <button
+          type="submit"
+          class="btn btn-primary"
+          style="flex:1"
+        >
+          حفظ السلايدر
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick="closeSlideModal()"
+        >
+          إلغاء
+        </button>
+
+      </div>
+
+    </form>
 
   </div>
 
 </div>
 
 
-<div id="toast" class="toast"></div>
-
-
 <script>
+/* =========================================================
+   SUPABASE
+========================================================= */
 
 const SUPABASE_URL =
-"https://ptwceqbxusgyutrroayz.supabase.co";
+  "https://ptwceqbxusgyutrroayz.supabase.co";
 
 const SUPABASE_KEY =
-"sb_publishable_Hto6uDekI9TvxTLFs7kYWg_ApV51joA";
+  "sb_publishable_Hto6uDekI9TvxTLFs7kYWg_ApV51joA";
 
 const supabaseClient =
-window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
-
-const BUCKET = "product-images";
-
-let session = null;
-let products = [];
-let slides = [];
-let settings = null;
-
-let editingProductId = null;
-let editingSlideId = null;
-
-let productSizes = [];
-let productImages = [];
-let newImageFiles = [];
-
-
-const $ = id => document.getElementById(id);
-
-
-function toast(msg){
-
-  $("toast").textContent = msg;
-
-  $("toast").classList.add("show");
-
-  setTimeout(
-    () => $("toast").classList.remove("show"),
-    2800
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
   );
 
+const STORAGE_BUCKET = "product-images";
+
+
+/* =========================================================
+   LOCAL ADMIN LOGIN
+========================================================= */
+
+const ADMIN_USERNAME = "admin";
+const ADMIN_PASSWORD = "Espoza@2026#Admin";
+
+let isAdminLoggedIn = false;
+let settings = null;
+let products = [];
+let slides = [];
+let productImages = [];
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function $(id){
+  return document.getElementById(id);
+}
+
+function escapeHtml(value){
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+function safeId(id){
+  return JSON.stringify(String(id));
+}
+
+function formatNumber(value){
+  return Number(value || 0).toLocaleString("en-US");
+}
+
+function showError(message){
+  alert(message);
+}
+
+function showLoading(button,text="جاري الحفظ..."){
+  if(!button) return;
+
+  button.dataset.oldText = button.innerText;
+  button.disabled = true;
+  button.innerText = text;
+}
+
+function hideLoading(button){
+  if(!button) return;
+
+  button.disabled = false;
+  button.innerText =
+    button.dataset.oldText || "حفظ";
 }
 
 
-function closeModal(id){
+/* =========================================================
+   BOOT
+========================================================= */
 
-  $(id).classList.remove("show");
+document.addEventListener("DOMContentLoaded",()=>{
 
-}
+  const logged =
+    localStorage.getItem("espoza_admin_logged");
 
-
-function format(n){
-
-  return Number(n || 0)
-    .toLocaleString("en-US");
-
-}
-
-
-function safe(v){
-
-  return String(v ?? "")
-    .replace(
-      /[&<>"']/g,
-      c => ({
-        "&":"&amp;",
-        "<":"&lt;",
-        ">":"&gt;",
-        '"':"&quot;",
-        "'":"&#039;"
-      }[c])
-    );
-
-}
-
-
-/* =========================
-   AUTH
-========================= */
-
-async function boot(){
-
-  const {data} =
-    await supabaseClient.auth.getSession();
-
-  session = data.session;
-
-  if(session){
-    await showApp();
+  if(logged === "true"){
+    isAdminLoggedIn = true;
+    showApp();
   }else{
     showLogin();
   }
 
-  supabaseClient.auth.onAuthStateChange(
-    async (_event,newSession)=>{
+  $("loginForm").addEventListener("submit",handleLogin);
 
-      session = newSession;
+  $("logoutBtn").addEventListener("click",logout);
 
-      if(session){
-        await showApp();
-      }else{
-        showLogin();
-      }
-
-    }
-  );
-
-}
-
-
-function showLogin(){
-
-  $("loginView")
-    .classList.remove("hidden");
-
-  $("appView")
-    .classList.add("hidden");
-
-}
-
-
-async function showApp(){
-
-  $("loginView")
-    .classList.add("hidden");
-
-  $("appView")
-    .classList.remove("hidden");
-
-  $("userEmail").textContent =
-    session?.user?.email || "";
-
-  await Promise.all([
-    loadProducts(),
-    loadSettings(),
-    loadSlides()
-  ]);
-
-  renderAll();
-
-}
-
-
-$("loginBtn").onclick =
-async()=>{
-
-  const email =
-    $("loginEmail").value.trim();
-
-  const password =
-    $("loginPassword").value;
-
-  $("loginError").textContent = "";
-
-  if(!email || !password){
-
-    $("loginError").textContent =
-      "أدخلي البريد وكلمة المرور.";
-
-    return;
-  }
-
-  const {error} =
-    await supabaseClient.auth
-      .signInWithPassword({
-        email,
-        password
+  document
+    .querySelectorAll(".nav-item[data-page]")
+    .forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        openPage(btn.dataset.page);
       });
+    });
 
-  if(error){
+  $("productSearch")
+    .addEventListener("input",renderProducts);
 
-    $("loginError").textContent =
-      error.message;
+  $("productCategoryFilter")
+    .addEventListener("change",renderProducts);
 
-  }
+  $("productForm")
+    .addEventListener("submit",saveProduct);
 
-};
+  $("productImagesInput")
+    .addEventListener("change",handleProductImages);
 
+  $("slideForm")
+    .addEventListener("submit",saveSlide);
 
-$("loginPassword")
-.addEventListener(
-  "keydown",
-  e=>{
-    if(e.key==="Enter"){
-      $("loginBtn").click();
-    }
-  }
-);
-
-
-$("logoutBtn").onclick =
-async()=>{
-
-  await supabaseClient.auth.signOut();
-
-};
-
-
-/* =========================
-   NAVIGATION
-========================= */
-
-document
-.querySelectorAll(".navbtn")
-.forEach(btn=>{
-
-  btn.onclick = ()=>{
-
-    document
-    .querySelectorAll(".navbtn")
-    .forEach(x =>
-      x.classList.remove("active")
-    );
-
-    btn.classList.add("active");
-
-    document
-    .querySelectorAll(".page")
-    .forEach(p =>
-      p.classList.add("hidden")
-    );
-
-    $("page-"+btn.dataset.page)
-      .classList.remove("hidden");
-
-    if(btn.dataset.page==="products"){
-      renderProductList();
-    }
-
-    if(btn.dataset.page==="slides"){
-      renderSlides();
-    }
-
-  };
+  $("saveSettingsBtn")
+    .addEventListener("click",saveSettings);
 
 });
 
 
-/* =========================
+/* =========================================================
+   LOGIN
+========================================================= */
+
+function showLogin(){
+
+  $("loginScreen").classList.remove("hidden");
+  $("app").classList.add("hidden");
+
+}
+
+function showApp(){
+
+  $("loginScreen").classList.add("hidden");
+  $("app").classList.remove("hidden");
+
+  loadAll();
+
+}
+
+function handleLogin(e){
+
+  e.preventDefault();
+
+  const username =
+    $("loginUsername").value.trim();
+
+  const password =
+    $("loginPassword").value;
+
+  if(
+    username === ADMIN_USERNAME &&
+    password === ADMIN_PASSWORD
+  ){
+
+    isAdminLoggedIn = true;
+
+    localStorage.setItem(
+      "espoza_admin_logged",
+      "true"
+    );
+
+    $("loginError").textContent = "";
+
+    showApp();
+
+  }else{
+
+    $("loginError").textContent =
+      "اسم المستخدم أو كلمة المرور غير صحيحة.";
+
+  }
+
+}
+
+function logout(){
+
+  isAdminLoggedIn = false;
+
+  localStorage.removeItem(
+    "espoza_admin_logged"
+  );
+
+  showLogin();
+
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+function openPage(page){
+
+  document
+    .querySelectorAll(".page")
+    .forEach(p=>{
+      p.classList.remove("active");
+    });
+
+  const target =
+    $("page-"+page);
+
+  if(target){
+    target.classList.add("active");
+  }
+
+  document
+    .querySelectorAll(".nav-item[data-page]")
+    .forEach(btn=>{
+      btn.classList.toggle(
+        "active",
+        btn.dataset.page === page
+      );
+    });
+
+  const titles = {
+    dashboard:"الرئيسية",
+    products:"المنتجات",
+    settings:"إعدادات المتجر",
+    slides:"السلايدر"
+  };
+
+  $("pageTitle").textContent =
+    titles[page] || "لوحة التحكم";
+
+  if(page === "products"){
+    loadProducts();
+  }
+
+  if(page === "settings"){
+    loadSettings();
+  }
+
+  if(page === "slides"){
+    loadSlides();
+  }
+
+}
+
+
+/* =========================================================
+   LOAD ALL
+========================================================= */
+
+async function loadAll(){
+
+  await Promise.allSettled([
+    loadProducts(),
+    loadSlides(),
+    loadSettings()
+  ]);
+
+  updateDashboard();
+
+}
+
+
+/* =========================================================
    PRODUCTS
-========================= */
+========================================================= */
 
 async function loadProducts(){
 
@@ -1480,1283 +1534,442 @@ async function loadProducts(){
     await supabaseClient
       .from("products")
       .select("*")
-      .order(
-        "created_at",
-        {ascending:false}
-      );
+      .order("created_at",{ascending:false});
 
   if(error){
 
     console.error(error);
 
-    toast(error.message);
-
-    products = [];
+    showError(
+      "حدث خطأ أثناء تحميل المنتجات:\n"+
+      error.message
+    );
 
     return;
   }
 
   products = data || [];
 
-}
-
-
-async function openProductModal(id=null){
-
-  resetProductForm();
-
-  if(id !== null){
-
-    editingProductId = id;
-
-    $("productModalTitle").textContent =
-      "تعديل المنتج";
-
-    const p =
-      products.find(
-        x => String(x.id) === String(id)
-      );
-
-    if(!p){
-
-      toast("المنتج غير موجود.");
-
-      return;
-    }
-
-    $("pName").value =
-      p.name || "";
-
-    $("pSku").value =
-      p.sku || "";
-
-    $("pCategory").value =
-      p.category || "dresses";
-
-    $("pPrice").value =
-      p.price ?? "";
-
-    $("pOldPrice").value =
-      p.old_price ?? "";
-
-    $("pOffer").checked =
-      !!p.is_offer;
-
-    $("pSale").checked =
-      !!p.is_sale;
-
-    $("pAvailable").checked =
-      p.is_available !== false;
-
-    $("pActive").checked =
-      p.is_active !== false;
-
-    $("pDescription").value =
-      p.description || "";
-
-
-    const [
-      im,
-      sz,
-      co
-    ] = await Promise.all([
-
-      supabaseClient
-        .from("product_images")
-        .select("*")
-        .eq("product_id",id)
-        .order("sort_order"),
-
-      supabaseClient
-        .from("product_sizes")
-        .select("*")
-        .eq("product_id",id)
-        .order("sort_order"),
-
-      supabaseClient
-        .from("product_colors")
-        .select("*")
-        .eq("product_id",id)
-        .order("sort_order")
-
-    ]);
-
-
-    if(im.error){
-      throw im.error;
-    }
-
-    if(sz.error){
-      throw sz.error;
-    }
-
-    if(co.error){
-      throw co.error;
-    }
-
-
-    productSizes =
-      (sz.data || [])
-      .map(x => String(x.size));
-
-
-    const colors =
-      co.data || [];
-
-
-    productImages =
-      (im.data || [])
-      .map(x => ({
-
-        ...x,
-
-        color:
-          colors.find(
-            c =>
-              String(c.image_id) ===
-              String(x.id)
-          )?.color_name || ""
-
-      }));
-
-
-    renderSizes();
-    renderImages();
-
-  }
-
-
-  $("productModal")
-    .classList.add("show");
+  renderProducts();
+  updateDashboard();
 
 }
 
 
-function resetProductForm(){
+function renderProducts(){
 
-  editingProductId = null;
+  const grid =
+    $("productsGrid");
 
-  productSizes = [];
+  if(!grid) return;
 
-  productImages = [];
+  const search =
+    ($("productSearch")?.value || "")
+      .trim()
+      .toLowerCase();
 
-  newImageFiles = [];
+  const category =
+    $("productCategoryFilter")?.value || "all";
 
+  const filtered =
+    products.filter(p=>{
 
-  $("productModalTitle").textContent =
-    "إضافة منتج";
+      const matchesSearch =
+        !search ||
+        String(p.name || "")
+          .toLowerCase()
+          .includes(search) ||
+        String(p.sku || "")
+          .toLowerCase()
+          .includes(search);
 
-  $("pName").value = "";
-  $("pSku").value = "";
-  $("pCategory").value = "dresses";
-  $("pPrice").value = "";
-  $("pOldPrice").value = "";
+      const matchesCategory =
+        category === "all" ||
+        p.category === category;
 
-  $("pOffer").checked = false;
-  $("pSale").checked = false;
-  $("pAvailable").checked = true;
-  $("pActive").checked = true;
+      return matchesSearch && matchesCategory;
 
-  $("pDescription").value = "";
+    });
 
-  $("newSize").value = "";
-  $("pImages").value = "";
+  if(!filtered.length){
 
-  renderSizes();
-  renderImages();
+    grid.innerHTML =
+      `<div class="empty" style="grid-column:1/-1">
+        لا توجد منتجات.
+      </div>`;
 
-}
-
-
-function addSize(){
-
-  const v =
-    $("newSize")
-      .value
-      .trim();
-
-  if(
-    v &&
-    !productSizes.includes(v)
-  ){
-
-    productSizes.push(v);
-
-    renderSizes();
-
-  }
-
-  $("newSize").value = "";
-
-}
-
-
-$("newSize")
-.addEventListener(
-  "keydown",
-  e=>{
-
-    if(e.key==="Enter"){
-
-      e.preventDefault();
-
-      addSize();
-
-    }
-
-  }
-);
-
-
-function renderSizes(){
-
-  $("sizeList").innerHTML =
-    productSizes
-      .map(
-        (s,i)=>
-        `<span class="size-chip">
-          ${safe(s)}
-          <button
-            onclick="removeSize(${i})"
-          >
-            ×
-          </button>
-        </span>`
-      )
-      .join("")
-      ||
-      `<span style="font-size:11px;color:#999">
-        لم تتم إضافة مقاسات بعد.
-      </span>`;
-
-}
-
-
-function removeSize(index){
-
-  productSizes.splice(index,1);
-
-  renderSizes();
-
-}
-
-
-function previewNewImages(){
-
-  newImageFiles =
-    [...$("pImages").files];
-
-  renderImages();
-
-}
-
-
-function renderImages(){
-
-  const existing =
-    productImages
-      .map(
-        (im,i)=>
-        `<div class="image-row">
-
-          <img
-            src="${safe(im.image_url)}"
-          >
-
-          <input
-            placeholder="اللون المرتبط بهذه الصورة"
-            value="${safe(im.color || "")}"
-            oninput="
-              productImages[${i}].color=this.value
-            "
-          >
-
-          <button
-            onclick="removeExistingImage(${i})"
-          >
-            إزالة الصورة
-          </button>
-
-        </div>`
-      )
-      .join("");
-
-
-  const fresh =
-    newImageFiles
-      .map(
-        (f,i)=>
-        `<div class="image-row">
-
-          <img
-            src="${URL.createObjectURL(f)}"
-          >
-
-          <input
-            id="newColor${i}"
-            placeholder="اللون المرتبط بهذه الصورة"
-          >
-
-        </div>`
-      )
-      .join("");
-
-
-  $("imageList").innerHTML =
-    existing + fresh
-    ||
-    `<div class="loading">
-      لم تتم إضافة صور.
-    </div>`;
-
-}
-
-
-function removeExistingImage(index){
-
-  productImages.splice(index,1);
-
-  renderImages();
-
-}
-
-
-/* =========================
-   STORAGE
-========================= */
-
-async function uploadFile(file,path){
-
-  const {error} =
-    await supabaseClient
-      .storage
-      .from(BUCKET)
-      .upload(
-        path,
-        file,
-        {
-          upsert:false,
-          contentType:file.type
-        }
-      );
-
-  if(error){
-    throw error;
-  }
-
-  const {data} =
-    supabaseClient
-      .storage
-      .from(BUCKET)
-      .getPublicUrl(path);
-
-  return data.publicUrl;
-
-}
-
-
-/* =========================
-   SAVE PRODUCT
-========================= */
-
-async function saveProduct(){
-
-  const btn =
-    $("saveProductBtn");
-
-  btn.disabled = true;
-
-  btn.textContent =
-    "جارٍ الحفظ...";
-
-
-  try{
-
-    const payload = {
-
-      name:
-        $("pName")
-          .value
-          .trim(),
-
-      description:
-        $("pDescription")
-          .value
-          .trim(),
-
-      category:
-        $("pCategory").value,
-
-      price:
-        Number(
-          $("pPrice").value || 0
-        ),
-
-      old_price:
-        $("pOldPrice").value === ""
-          ? null
-          : Number($("pOldPrice").value),
-
-      sku:
-        $("pSku").value.trim()
-          || null,
-
-      is_offer:
-        $("pOffer").checked,
-
-      is_sale:
-        $("pSale").checked,
-
-      is_available:
-        $("pAvailable").checked,
-
-      is_active:
-        $("pActive").checked
-
-    };
-
-
-    if(!payload.name){
-
-      throw new Error(
-        "اكتبي اسم المنتج."
-      );
-
-    }
-
-
-    let id =
-      editingProductId;
-
-
-    /* INSERT */
-
-    if(id === null){
-
-      const {data,error} =
-        await supabaseClient
-          .from("products")
-          .insert(payload)
-          .select()
-          .single();
-
-      if(error){
-        throw error;
-      }
-
-      id = data.id;
-
-    }
-
-
-    /* UPDATE */
-
-    else{
-
-      const {error} =
-        await supabaseClient
-          .from("products")
-          .update(payload)
-          .eq("id",id);
-
-      if(error){
-        throw error;
-      }
-
-    }
-
-
-    /* DELETE OLD RELATIONS */
-
-    const {error:colorsError} =
-      await supabaseClient
-        .from("product_colors")
-        .delete()
-        .eq("product_id",id);
-
-    if(colorsError){
-      throw colorsError;
-    }
-
-
-    const {error:sizesError} =
-      await supabaseClient
-        .from("product_sizes")
-        .delete()
-        .eq("product_id",id);
-
-    if(sizesError){
-      throw sizesError;
-    }
-
-
-    const {error:imagesError} =
-      await supabaseClient
-        .from("product_images")
-        .delete()
-        .eq("product_id",id);
-
-    if(imagesError){
-      throw imagesError;
-    }
-
-
-    /* IMAGE ROWS */
-
-    let imageRows = [];
-
-
-    /* OLD IMAGES */
-
-    for(
-      let i=0;
-      i<productImages.length;
-      i++
-    ){
-
-      const im =
-        productImages[i];
-
-      imageRows.push({
-
-        product_id:id,
-
-        image_url:
-          im.image_url,
-
-        storage_path:
-          im.storage_path || null,
-
-        sort_order:i,
-
-        color:
-          im.color || ""
-
-      });
-
-    }
-
-
-    /* NEW IMAGES */
-
-    for(
-      let i=0;
-      i<newImageFiles.length;
-      i++
-    ){
-
-      const file =
-        newImageFiles[i];
-
-      const ext =
-        (
-          file.name
-            .split(".")
-            .pop()
-          || "jpg"
-        )
-        .toLowerCase();
-
-
-      const path =
-        `products/${crypto.randomUUID()}.${ext}`;
-
-
-      const url =
-        await uploadFile(
-          file,
-          path
-        );
-
-
-      imageRows.push({
-
-        product_id:id,
-
-        image_url:url,
-
-        storage_path:path,
-
-        sort_order:imageRows.length,
-
-        color:
-          $("newColor"+i)
-            ?.value
-            .trim()
-            || ""
-
-      });
-
-    }
-
-
-    /* INSERT IMAGES */
-
-    if(imageRows.length){
-
-      const rows =
-        imageRows.map(
-          x => ({
-
-            product_id:
-              x.product_id,
-
-            image_url:
-              x.image_url,
-
-            storage_path:
-              x.storage_path,
-
-            sort_order:
-              x.sort_order
-
-          })
-        );
-
-
-      const {
-        data:inserted,
-        error:insertError
-      } =
-        await supabaseClient
-          .from("product_images")
-          .insert(rows)
-          .select();
-
-
-      if(insertError){
-        throw insertError;
-      }
-
-
-      /* INSERT COLORS */
-
-      const colorRows =
-        imageRows
-          .map(
-            (x,i)=>{
-
-              if(!x.color){
-                return null;
-              }
-
-              return {
-
-                product_id:id,
-
-                image_id:
-                  inserted[i].id,
-
-                color_name:
-                  x.color,
-
-                sort_order:i
-
-              };
-
-            }
-          )
-          .filter(Boolean);
-
-
-      if(colorRows.length){
-
-        const {error} =
-          await supabaseClient
-            .from("product_colors")
-            .insert(colorRows);
-
-        if(error){
-          throw error;
-        }
-
-      }
-
-
-      /* PRIMARY PRODUCT IMAGE */
-
-      const {error:imageUpdateError} =
-        await supabaseClient
-          .from("products")
-          .update({
-            image_url:
-              inserted[0].image_url
-          })
-          .eq("id",id);
-
-
-      if(imageUpdateError){
-        throw imageUpdateError;
-      }
-
-    }
-
-
-    /* NO IMAGES */
-
-    else{
-
-      const {error} =
-        await supabaseClient
-          .from("products")
-          .update({
-            image_url:null
-          })
-          .eq("id",id);
-
-      if(error){
-        throw error;
-      }
-
-    }
-
-
-    /* INSERT SIZES */
-
-    if(productSizes.length){
-
-      const rows =
-        productSizes.map(
-          (size,i)=>({
-
-            product_id:id,
-
-            size,
-
-            sort_order:i
-
-          })
-        );
-
-
-      const {error} =
-        await supabaseClient
-          .from("product_sizes")
-          .insert(rows);
-
-      if(error){
-        throw error;
-      }
-
-    }
-
-
-    await loadProducts();
-
-    renderAll();
-
-    closeModal("productModal");
-
-    toast(
-      "تم حفظ المنتج بنجاح"
-    );
-
-
-  }catch(e){
-
-    console.error(e);
-
-    toast(
-      e.message ||
-      "حدث خطأ أثناء حفظ المنتج"
-    );
-
-
-  }finally{
-
-    btn.disabled = false;
-
-    btn.textContent =
-      "حفظ المنتج";
-
-  }
-
-}
-
-
-/* =========================
-   DELETE PRODUCT
-========================= */
-
-async function deleteProduct(id){
-
-  if(
-    !confirm(
-      "هل أنت متأكد من حذف المنتج؟"
-    )
-  ){
     return;
   }
 
+  grid.innerHTML =
+    filtered.map(p=>{
 
-  try{
+      const image =
+        p.image_url ||
+        "https://placehold.co/600x700?text=Espoza";
 
-    const {error:colorsError} =
-      await supabaseClient
-        .from("product_colors")
-        .delete()
-        .eq("product_id",id);
+      const oldPrice =
+        p.old_price
+          ? `<span class="old-price">${formatNumber(p.old_price)}₪</span>`
+          : "";
 
-    if(colorsError){
-      throw colorsError;
-    }
+      const offer =
+        p.is_offer
+          ? `<span style="color:var(--green);font-size:11px">عرض</span>`
+          : "";
 
+      const availability =
+        p.is_available === false
+          ? `<span style="color:var(--red);font-size:11px">غير متوفر</span>`
+          : `<span style="color:var(--green);font-size:11px">متوفر</span>`;
 
-    const {error:sizesError} =
-      await supabaseClient
-        .from("product_sizes")
-        .delete()
-        .eq("product_id",id);
+      const id =
+        safeId(p.id);
 
-    if(sizesError){
-      throw sizesError;
-    }
+      return `
+        <div class="product-card">
 
+          <img
+            class="product-image"
+            src="${escapeHtml(image)}"
+            alt="${escapeHtml(p.name)}"
+            onerror="this.src='https://placehold.co/600x700?text=Espoza'"
+          >
 
-    const {error:imagesError} =
-      await supabaseClient
-        .from("product_images")
-        .delete()
-        .eq("product_id",id);
+          <div class="product-body">
 
-    if(imagesError){
-      throw imagesError;
-    }
+            <div class="product-name">
+              ${escapeHtml(p.name || "بدون اسم")}
+            </div>
 
+            <div class="product-meta">
 
-    const {error} =
-      await supabaseClient
-        .from("products")
-        .delete()
-        .eq("id",id);
+              <div>
+                <div class="price">
+                  ${formatNumber(p.price)}₪
+                </div>
+                ${oldPrice}
+              </div>
 
+              <div>
+                ${offer}<br>
+                ${availability}
+              </div>
 
-    if(error){
-      throw error;
-    }
+            </div>
 
+            <div class="product-actions">
 
-    await loadProducts();
+              <button
+                class="btn btn-secondary"
+                onclick="openProductModal(${id})"
+              >
+                تعديل
+              </button>
 
-    renderAll();
+              <button
+                class="btn btn-danger"
+                onclick="deleteProduct(${id})"
+              >
+                حذف
+              </button>
 
-    toast(
-      "تم حذف المنتج"
-    );
+            </div>
 
+          </div>
 
-  }catch(e){
+        </div>
+      `;
 
-    console.error(e);
-
-    toast(
-      e.message ||
-      "تعذر حذف المنتج"
-    );
-
-  }
+    }).join("");
 
 }
 
 
-/* =========================
-   PRODUCT RENDER
-========================= */
+function openProductModal(productId=null){
 
-function productCard(p){
+  productImages = [];
 
-  const id =
-    JSON.stringify(String(p.id));
+  $("productForm").reset();
 
+  $("productId").value = "";
 
-  return `
+  $("productActive").checked = true;
+  $("productAvailable").checked = true;
 
-    <div class="product-card">
+  $("imageList").innerHTML = "";
 
-      <img
-        src="${safe(p.image_url || "")}"
-        alt="${safe(p.name)}"
-        onerror="this.style.opacity=.2"
-      >
+  $("productModalTitle").textContent =
+    productId
+      ? "تعديل المنتج"
+      : "إضافة منتج";
 
-      <div class="pc-body">
+  if(productId){
 
-        <div class="pc-name">
-          ${safe(p.name || "بدون اسم")}
-        </div>
+    const p =
+      products.find(
+        x=>String(x.id) === String(productId)
+      );
 
-        <div class="pc-price">
+    if(!p){
+      showError("لم يتم العثور على المنتج.");
+      return;
+    }
 
-          ₪${format(p.price)}
+    $("productId").value = p.id;
+    $("productName").value = p.name || "";
+    $("productSku").value = p.sku || "";
+    $("productCategory").value =
+      p.category || "dresses";
+    $("productPrice").value =
+      p.price ?? "";
+    $("productOldPrice").value =
+      p.old_price ?? "";
+    $("productOffer").checked =
+      !!p.is_offer;
+    $("productAvailable").checked =
+      p.is_available !== false;
+    $("productActive").checked =
+      p.is_active !== false;
+    $("productDescription").value =
+      p.description || "";
 
-          ${
-            p.old_price
-            ?
-            `<del>
-              ₪${format(p.old_price)}
-            </del>`
-            :
-            ""
-          }
+    loadExistingProductImages(p.id);
 
-        </div>
+  }
 
+  $("productModal").classList.add("open");
 
-        <div class="badges">
-
-          <span class="badge">
-            ${
-              p.category === "sets"
-              ? "طقم"
-              : "فستان"
-            }
-          </span>
-
-
-          ${
-            p.is_offer
-            ?
-            `<span class="badge offer">
-              عرض
-            </span>`
-            :
-            ""
-          }
+}
 
 
-          ${
-            p.is_sale
-            ?
-            `<span class="badge">
-              تخفيض
-            </span>`
-            :
-            ""
-          }
+function closeProductModal(){
+
+  $("productModal")
+    .classList.remove("open");
+
+}
 
 
-          ${
-            p.is_available === false
-            ?
-            `<span class="badge">
-              غير متاح
-            </span>`
-            :
-            ""
-          }
+async function loadExistingProductImages(productId){
+
+  const {data,error} =
+    await supabaseClient
+      .from("product_images")
+      .select("*")
+      .eq("product_id",productId)
+      .order("sort_order",{ascending:true});
+
+  if(error){
+
+    console.error(error);
+    return;
+
+  }
+
+  productImages =
+    (data || []).map(img=>({
+      existing:true,
+      id:img.id,
+      image_url:img.image_url,
+      storage_path:img.storage_path,
+      color:"",
+      file:null
+    }));
+
+  const {data:colors} =
+    await supabaseClient
+      .from("product_colors")
+      .select("*")
+      .eq("product_id",productId);
+
+  (colors || []).forEach(color=>{
+
+    const image =
+      productImages.find(
+        x=>String(x.id) === String(color.image_id)
+      );
+
+    if(image){
+      image.color =
+        color.color_name || "";
+    }
+
+  });
+
+  renderImageList();
+
+}
 
 
-          ${
-            p.is_active === false
-            ?
-            `<span class="badge">
-              مخفي
-            </span>`
-            :
-            ""
-          }
+function handleProductImages(e){
 
-        </div>
+  const files =
+    Array.from(e.target.files || []);
+
+  files.forEach(file=>{
+
+    productImages.push({
+      existing:false,
+      id:null,
+      image_url:URL.createObjectURL(file),
+      storage_path:null,
+      color:"",
+      file
+    });
+
+  });
+
+  renderImageList();
+
+  e.target.value = "";
+
+}
 
 
-        <div class="pc-meta">
-          SKU:
-          ${safe(p.sku || "—")}
-        </div>
+function renderImageList(){
 
+  const container =
+    $("imageList");
 
-        <div class="pc-actions">
+  if(!productImages.length){
 
-          <button
-            class="edit"
-            onclick='openProductModal(${id})'
+    container.innerHTML =
+      `<div class="empty">لم تتم إضافة صور بعد.</div>`;
+
+    return;
+
+  }
+
+  container.innerHTML =
+    productImages.map((img,index)=>{
+
+      return `
+        <div class="image-row">
+
+          <img
+            class="image-preview"
+            src="${escapeHtml(img.image_url)}"
           >
-            تعديل
-          </button>
 
+          <div class="image-info">
+
+            <div style="font-size:12px;color:var(--muted)">
+              الصورة ${index+1}
+            </div>
+
+            <input
+              type="text"
+              value="${escapeHtml(img.color || "")}"
+              placeholder="اسم اللون، مثال: خمري"
+              oninput="updateImageColor(${index},this.value)"
+            >
+
+          </div>
 
           <button
-            class="delete"
-            onclick='deleteProduct(${id})'
+            type="button"
+            class="btn btn-danger"
+            onclick="removeProductImage(${index})"
           >
             حذف
           </button>
 
         </div>
+      `;
 
-      </div>
-
-    </div>
-
-  `;
+    }).join("");
 
 }
 
 
-function renderProductList(){
+function updateImageColor(index,value){
 
-  let arr =
-    [...products];
+  if(productImages[index]){
+    productImages[index].color = value;
+  }
 
-
-  const q =
-    (
-      $("productSearch")
-      ?.value
-      || ""
-    )
-    .toLowerCase()
-    .trim();
+}
 
 
-  const cat =
-    $("productCategory")
-    ?.value
-    || "all";
+function removeProductImage(index){
 
+  const item =
+    productImages[index];
 
-  if(q){
+  if(
+    item &&
+    !item.existing &&
+    item.image_url &&
+    item.image_url.startsWith("blob:")
+  ){
 
-    arr =
-      arr.filter(
-        p =>
-          `${p.name || ""} ${p.sku || ""}`
-            .toLowerCase()
-            .includes(q)
-      );
+    URL.revokeObjectURL(item.image_url);
 
   }
 
+  productImages.splice(index,1);
 
-  if(cat !== "all"){
-
-    arr =
-      arr.filter(
-        p =>
-          p.category === cat
-      );
-
-  }
-
-
-  $("productList").innerHTML =
-    arr.length
-    ?
-    arr.map(productCard).join("")
-    :
-    `<div class="loading">
-      لا توجد منتجات.
-    </div>`;
+  renderImageList();
 
 }
 
 
-function renderRecent(){
+/* =========================================================
+   SAVE PRODUCT
+========================================================= */
 
-  $("recentProducts").innerHTML =
-    products
-      .slice(0,4)
-      .map(productCard)
-      .join("")
-      ||
-      `<div class="loading">
-        لا توجد منتجات.
-      </div>`;
+async function saveProduct(e){
 
-}
+  e.preventDefault();
 
+  const button =
+    e.submitter ||
+    e.target.querySelector('button[type="submit"]');
 
-/* =========================
-   SETTINGS
-========================= */
-
-async function loadSettings(){
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("store_settings")
-      .select("*")
-      .limit(1)
-      .maybeSingle();
-
-
-  if(error){
-
-    console.error(error);
-
-    toast(error.message);
-
-    return;
-  }
-
-
-  settings =
-    data ||
-    {
-
-      id:null,
-
-      store_name:
-        "Espoza Fashion",
-
-      whatsapp:
-        "972595461861",
-
-      instagram:
-        "espoza_fashion",
-
-      facebook:
-        "",
-
-      tiktok:
-        "",
-
-      snapchat:
-        "",
-
-      facebook_followers:
-        22025,
-
-      instagram_followers:
-        900,
-
-      tiktok_followers:
-        700,
-
-      snapchat_followers:
-        500,
-
-      west_bank_delivery:
-        20,
-
-      jerusalem_delivery:
-        30,
-
-      inside_delivery:
-        70
-
-    };
-
-
-  $("setStoreName").value =
-    settings.store_name || "";
-
-  $("setWhatsapp").value =
-    settings.whatsapp || "";
-
-  $("setInstagram").value =
-    settings.instagram || "";
-
-  $("setFacebookLink").value =
-    settings.facebook || "";
-
-  $("setTiktokLink").value =
-    settings.tiktok || "";
-
-  $("setSnapchatLink").value =
-    settings.snapchat || "";
-
-
-  $("setWestbank").value =
-    settings.west_bank_delivery ?? 20;
-
-  $("setJerusalem").value =
-    settings.jerusalem_delivery ?? 30;
-
-  $("setInside").value =
-    settings.inside_delivery ?? 70;
-
-
-  $("setFacebook").value =
-    settings.facebook_followers ?? 0;
-
-  $("setInstagramFollowers").value =
-    settings.instagram_followers ?? 0;
-
-  $("setTiktok").value =
-    settings.tiktok_followers ?? 0;
-
-  $("setSnapchat").value =
-    settings.snapchat_followers ?? 0;
-
-}
-
-
-async function saveSettings(){
+  showLoading(button,"جاري حفظ المنتج...");
 
   try{
 
+    const existingId =
+      $("productId").value.trim();
+
+    let productId =
+      existingId || crypto.randomUUID();
+
     const payload = {
 
-      store_name:
-        $("setStoreName")
-          .value
-          .trim()
-        || "Espoza Fashion",
+      name:
+        $("productName").value.trim(),
 
-      whatsapp:
-        $("setWhatsapp")
-          .value
-          .trim()
-          .replace(/[^0-9]/g,""),
+      sku:
+        $("productSku").value.trim() || null,
 
-      instagram:
-        $("setInstagram")
-          .value
-          .trim(),
+      category:
+        $("productCategory").value,
 
-      facebook:
-        $("setFacebookLink")
-          .value
-          .trim(),
+      price:
+        Number($("productPrice").value || 0),
 
-      tiktok:
-        $("setTiktokLink")
-          .value
-          .trim(),
+      old_price:
+        $("productOldPrice").value
+          ? Number($("productOldPrice").value)
+          : null,
 
-      snapchat:
-        $("setSnapchatLink")
-          .value
-          .trim(),
+      is_offer:
+        $("productOffer").checked,
 
-      facebook_followers:
-        Number(
-          $("setFacebook").value || 0
-        ),
+      is_sale:
+        $("productOffer").checked,
 
-      instagram_followers:
-        Number(
-          $("setInstagramFollowers").value || 0
-        ),
+      is_available:
+        $("productAvailable").checked,
 
-      tiktok_followers:
-        Number(
-          $("setTiktok").value || 0
-        ),
+      is_active:
+        $("productActive").checked,
 
-      snapchat_followers:
-        Number(
-          $("setSnapchat").value || 0
-        ),
-
-      west_bank_delivery:
-        Number(
-          $("setWestbank").value || 0
-        ),
-
-      jerusalem_delivery:
-        Number(
-          $("setJerusalem").value || 0
-        ),
-
-      inside_delivery:
-        Number(
-          $("setInside").value || 0
-        ),
+      description:
+        $("productDescription").value.trim(),
 
       updated_at:
         new Date().toISOString()
@@ -2764,51 +1977,324 @@ async function saveSettings(){
     };
 
 
-    if(settings?.id){
+    /* CREATE / UPDATE */
 
-      payload.id =
-        settings.id;
+    if(existingId){
+
+      const {error} =
+        await supabaseClient
+          .from("products")
+          .update(payload)
+          .eq("id",productId);
+
+      if(error) throw error;
+
+    }else{
+
+      const {error} =
+        await supabaseClient
+          .from("products")
+          .insert({
+            id:productId,
+            ...payload
+          });
+
+      if(error) throw error;
 
     }
 
 
-    const {
-      data,
-      error
-    } =
+    /* DELETE OLD RELATIONS */
+
+    if(existingId){
+
+      const {error:imageDeleteError} =
+        await supabaseClient
+          .from("product_images")
+          .delete()
+          .eq("product_id",productId);
+
+      if(imageDeleteError)
+        throw imageDeleteError;
+
+
+      const {error:colorDeleteError} =
+        await supabaseClient
+          .from("product_colors")
+          .delete()
+          .eq("product_id",productId);
+
+      if(colorDeleteError)
+        throw colorDeleteError;
+
+
+      const {error:sizeDeleteError} =
+        await supabaseClient
+          .from("product_sizes")
+          .delete()
+          .eq("product_id",productId);
+
+      if(sizeDeleteError)
+        throw sizeDeleteError;
+
+    }
+
+
+    /* UPLOAD + INSERT IMAGES */
+
+    let mainImageUrl = null;
+
+    const sizeValues =
+      $("productSizes")
+        .value
+        .split(",")
+        .map(x=>x.trim())
+        .filter(Boolean);
+
+
+    for(let i=0;i<productImages.length;i++){
+
+      const img =
+        productImages[i];
+
+      let imageUrl =
+        img.existing
+          ? img.image_url
+          : null;
+
+      let storagePath =
+        img.existing
+          ? img.storage_path
+          : null;
+
+
+      if(!img.existing && img.file){
+
+        const extension =
+          img.file.name
+            .split(".")
+            .pop()
+            .toLowerCase() || "jpg";
+
+        storagePath =
+          `products/${productId}/${crypto.randomUUID()}.${extension}`;
+
+
+        const {error:uploadError} =
+          await supabaseClient
+            .storage
+            .from(STORAGE_BUCKET)
+            .upload(
+              storagePath,
+              img.file,
+              {
+                upsert:false,
+                contentType:img.file.type
+              }
+            );
+
+        if(uploadError)
+          throw uploadError;
+
+
+        const {data:publicData} =
+          supabaseClient
+            .storage
+            .from(STORAGE_BUCKET)
+            .getPublicUrl(storagePath);
+
+        imageUrl =
+          publicData.publicUrl;
+
+      }
+
+
+      if(!imageUrl)
+        continue;
+
+
+      const {data:imageRow,error:imageError} =
+        await supabaseClient
+          .from("product_images")
+          .insert({
+            product_id:productId,
+            image_url:imageUrl,
+            storage_path:storagePath,
+            sort_order:i
+          })
+          .select()
+          .single();
+
+      if(imageError)
+        throw imageError;
+
+
+      if(i === 0){
+        mainImageUrl = imageUrl;
+      }
+
+
+      if(img.color){
+
+        const {error:colorError} =
+          await supabaseClient
+            .from("product_colors")
+            .insert({
+              product_id:productId,
+              image_id:imageRow.id,
+              color_name:img.color,
+              sort_order:i
+            });
+
+        if(colorError)
+          throw colorError;
+
+      }
+
+    }
+
+
+    /* FALLBACK MAIN IMAGE */
+
+    if(!mainImageUrl){
+
+      mainImageUrl =
+        productImages[0]?.image_url ||
+        null;
+
+    }
+
+
+    /* UPDATE MAIN IMAGE */
+
+    const {error:mainImageError} =
       await supabaseClient
-        .from("store_settings")
-        .upsert(
-          payload,
-          {
-            onConflict:"id"
-          }
-        )
-        .select()
-        .single();
+        .from("products")
+        .update({
+          image_url:mainImageUrl,
+          updated_at:new Date().toISOString()
+        })
+        .eq("id",productId);
+
+    if(mainImageError)
+      throw mainImageError;
 
 
-    if(error){
-      throw error;
+    /* SIZES */
+
+    if(sizeValues.length){
+
+      const sizeRows =
+        sizeValues.map((size,index)=>({
+          product_id:productId,
+          size,
+          sort_order:index
+        }));
+
+      const {error:sizeError} =
+        await supabaseClient
+          .from("product_sizes")
+          .insert(sizeRows);
+
+      if(sizeError)
+        throw sizeError;
+
     }
 
 
-    settings = data;
-
-    updateStats();
-
-    toast(
-      "تم حفظ إعدادات المتجر"
+    alert(
+      existingId
+        ? "تم تعديل المنتج بنجاح ✅"
+        : "تم إضافة المنتج بنجاح ✅"
     );
 
+    closeProductModal();
 
-  }catch(e){
+    await loadProducts();
 
-    console.error(e);
+    updateDashboard();
 
-    toast(
-      e.message ||
-      "تعذر حفظ الإعدادات"
+  }catch(error){
+
+    console.error(error);
+
+    showError(
+      "تعذر حفظ المنتج:\n"+
+      error.message
+    );
+
+  }finally{
+
+    hideLoading(button);
+
+  }
+
+}
+
+
+/* =========================================================
+   DELETE PRODUCT
+========================================================= */
+
+async function deleteProduct(productId){
+
+  const p =
+    products.find(
+      x=>String(x.id) === String(productId)
+    );
+
+  if(!p) return;
+
+  const confirmed =
+    confirm(
+      `هل أنت متأكد من حذف المنتج "${p.name}"؟`
+    );
+
+  if(!confirmed)
+    return;
+
+
+  try{
+
+    await supabaseClient
+      .from("product_colors")
+      .delete()
+      .eq("product_id",productId);
+
+    await supabaseClient
+      .from("product_sizes")
+      .delete()
+      .eq("product_id",productId);
+
+    await supabaseClient
+      .from("product_images")
+      .delete()
+      .eq("product_id",productId);
+
+
+    const {error} =
+      await supabaseClient
+        .from("products")
+        .delete()
+        .eq("id",productId);
+
+    if(error)
+      throw error;
+
+
+    alert("تم حذف المنتج بنجاح ✅");
+
+    await loadProducts();
+
+    updateDashboard();
+
+  }catch(error){
+
+    console.error(error);
+
+    showError(
+      "تعذر حذف المنتج:\n"+
+      error.message
     );
 
   }
@@ -2816,459 +2302,599 @@ async function saveSettings(){
 }
 
 
-/* =========================
-   SLIDER
-========================= */
+/* =========================================================
+   SETTINGS
+========================================================= */
 
-async function loadSlides(){
+async function loadSettings(){
 
-  const {
-    data,
-    error
-  } =
+  const {data,error} =
     await supabaseClient
-      .from("slider")
+      .from("store_settings")
       .select("*")
-      .order(
-        "sort_order",
-        {ascending:true}
-      );
-
+      .limit(1)
+      .maybeSingle();
 
   if(error){
 
     console.error(error);
 
-    toast(error.message);
-
-    slides = [];
+    showError(
+      "تعذر تحميل إعدادات المتجر:\n"+
+      error.message
+    );
 
     return;
-  }
-
-
-  slides = data || [];
-
-}
-
-
-function resetSlideForm(){
-
-  $("slideModalTitle").textContent =
-    "إضافة سلايدر";
-
-  editingSlideId = null;
-
-  $("sTitle").value = "";
-
-  $("sSubtitle").value = "";
-
-  $("sButtonText").value =
-    "استكشفي";
-
-  $("sButtonLink").value =
-    "";
-
-  $("sOrder").value =
-    slides.length;
-
-  $("sActive").checked =
-    true;
-
-  $("sImage").value =
-    "";
-
-  $("slideImagePreview").innerHTML =
-    "";
-
-}
-
-
-function openSlideModal(id=null){
-
-  resetSlideForm();
-
-
-  if(id !== null){
-
-    const s =
-      slides.find(
-        x =>
-          String(x.id) ===
-          String(id)
-      );
-
-
-    if(!s){
-
-      toast(
-        "السلايدر غير موجود."
-      );
-
-      return;
-    }
-
-
-    editingSlideId =
-      id;
-
-
-    $("slideModalTitle").textContent =
-      "تعديل السلايدر";
-
-
-    $("sTitle").value =
-      s.title || "";
-
-
-    $("sSubtitle").value =
-      s.subtitle || "";
-
-
-    $("sButtonText").value =
-      s.button_text ||
-      "استكشفي";
-
-
-    $("sButtonLink").value =
-      s.button_link ||
-      "";
-
-
-    $("sOrder").value =
-      s.sort_order ?? 0;
-
-
-    $("sActive").checked =
-      s.is_active !== false;
-
-
-    $("slideImagePreview").innerHTML =
-      s.image_url
-      ?
-      `<img
-        src="${safe(s.image_url)}"
-        style="
-          width:100%;
-          max-height:250px;
-          object-fit:contain;
-          border-radius:12px;
-          background:#f4efec
-        "
-      >`
-      :
-      "";
 
   }
 
+  settings =
+    data || {
+      id:crypto.randomUUID(),
+      store_name:"Espoza Fashion",
+      whatsapp:"",
+      instagram:"espoza_fashion",
+      facebook:"",
+      tiktok:"",
+      snapchat:"",
+      facebook_followers:22025,
+      instagram_followers:900,
+      tiktok_followers:700,
+      snapchat_followers:500,
+      west_bank_delivery:20,
+      jerusalem_delivery:30,
+      inside_delivery:70
+    };
 
-  $("slideModal")
-    .classList.add("show");
+
+  $("storeName").value =
+    settings.store_name || "Espoza Fashion";
+
+  $("storeWhatsapp").value =
+    settings.whatsapp || "";
+
+  $("storeInstagram").value =
+    settings.instagram || "";
+
+  $("storeFacebook").value =
+    settings.facebook || "";
+
+  $("storeTiktok").value =
+    settings.tiktok || "";
+
+  $("storeSnapchat").value =
+    settings.snapchat || "";
+
+  $("deliveryWestBank").value =
+    settings.west_bank_delivery ?? 20;
+
+  $("deliveryJerusalem").value =
+    settings.jerusalem_delivery ?? 30;
+
+  $("deliveryInside").value =
+    settings.inside_delivery ?? 70;
+
+  $("followersFacebook").value =
+    settings.facebook_followers ?? 22025;
+
+  $("followersInstagram").value =
+    settings.instagram_followers ?? 900;
+
+  $("followersTiktok").value =
+    settings.tiktok_followers ?? 700;
+
+  $("followersSnapchat").value =
+    settings.snapchat_followers ?? 500;
+
+  updateDashboard();
 
 }
 
 
-function previewSlideImage(){
+async function saveSettings(){
 
-  const f =
-    $("sImage").files[0];
+  const button =
+    $("saveSettingsBtn");
 
-  if(!f){
-    return;
-  }
-
-
-  $("slideImagePreview").innerHTML =
-    `<img
-      src="${URL.createObjectURL(f)}"
-      style="
-        width:100%;
-        max-height:250px;
-        object-fit:contain;
-        border-radius:12px;
-        background:#f4efec
-      "
-    >`;
-
-}
-
-
-async function saveSlide(){
-
-  const btn =
-    $("saveSlideBtn");
-
-  btn.disabled = true;
-
-  btn.textContent =
-    "جارٍ الحفظ...";
-
+  showLoading(button,"جاري الحفظ...");
 
   try{
 
-    const old =
-      editingSlideId
-      ?
-      slides.find(
-        x =>
-          String(x.id) ===
-          String(editingSlideId)
-      )
-      :
-      null;
-
-
-    let image_url =
-      old?.image_url || "";
-
-
-    const file =
-      $("sImage").files[0];
-
-
-    if(file){
-
-      const ext =
-        (
-          file.name
-            .split(".")
-            .pop()
-          || "jpg"
-        )
-        .toLowerCase();
-
-
-      const path =
-        `hero/${crypto.randomUUID()}.${ext}`;
-
-
-      image_url =
-        await uploadFile(
-          file,
-          path
-        );
-
-    }
-
-
-    if(!image_url){
-
-      throw new Error(
-        "اختاري صورة للسلايدر."
-      );
-
-    }
+    const id =
+      settings?.id ||
+      crypto.randomUUID();
 
 
     const payload = {
 
-      image_url,
+      id,
 
-      title:
-        $("sTitle")
-          .value
-          .trim(),
+      store_name:
+        $("storeName").value.trim() ||
+        "Espoza Fashion",
 
-      subtitle:
-        $("sSubtitle")
-          .value
-          .trim(),
+      whatsapp:
+        $("storeWhatsapp").value.trim(),
 
-      button_text:
-        $("sButtonText")
-          .value
-          .trim()
-        || "استكشفي",
+      instagram:
+        $("storeInstagram").value.trim(),
 
-      button_link:
-        $("sButtonLink")
-          .value
-          .trim(),
+      facebook:
+        $("storeFacebook").value.trim(),
 
-      sort_order:
-        Number(
-          $("sOrder").value || 0
-        ),
+      tiktok:
+        $("storeTiktok").value.trim(),
 
-      is_active:
-        $("sActive").checked
+      snapchat:
+        $("storeSnapchat").value.trim(),
+
+      facebook_followers:
+        Number($("followersFacebook").value || 0),
+
+      instagram_followers:
+        Number($("followersInstagram").value || 0),
+
+      tiktok_followers:
+        Number($("followersTiktok").value || 0),
+
+      snapchat_followers:
+        Number($("followersSnapchat").value || 0),
+
+      west_bank_delivery:
+        Number($("deliveryWestBank").value || 0),
+
+      jerusalem_delivery:
+        Number($("deliveryJerusalem").value || 0),
+
+      inside_delivery:
+        Number($("deliveryInside").value || 0),
+
+      updated_at:
+        new Date().toISOString()
 
     };
 
 
-    if(editingSlideId !== null){
+    const {data,error} =
+      await supabaseClient
+        .from("store_settings")
+        .upsert(
+          payload,
+          {onConflict:"id"}
+        )
+        .select()
+        .single();
 
-      const {error} =
-        await supabaseClient
-          .from("slider")
-          .update(payload)
-          .eq(
-            "id",
-            editingSlideId
-          );
-
-
-      if(error){
-        throw error;
-      }
-
-    }
+    if(error)
+      throw error;
 
 
-    else{
+    settings = data;
 
-      const {error} =
-        await supabaseClient
-          .from("slider")
-          .insert(payload);
+    alert("تم حفظ إعدادات المتجر بنجاح ✅");
 
+    updateDashboard();
 
-      if(error){
-        throw error;
-      }
+  }catch(error){
 
-    }
+    console.error(error);
 
-
-    await loadSlides();
-
-    renderAll();
-
-    closeModal("slideModal");
-
-    toast(
-      "تم حفظ السلايدر"
+    showError(
+      "تعذر حفظ الإعدادات:\n"+
+      error.message
     );
-
-
-  }catch(e){
-
-    console.error(e);
-
-    toast(
-      e.message ||
-      "تعذر حفظ السلايدر"
-    );
-
 
   }finally{
 
-    btn.disabled = false;
-
-    btn.textContent =
-      "حفظ السلايدر";
+    hideLoading(button);
 
   }
+
+}
+
+
+/* =========================================================
+   SLIDER
+========================================================= */
+
+async function loadSlides(){
+
+  const {data,error} =
+    await supabaseClient
+      .from("slider")
+      .select("*")
+      .order("sort_order",{ascending:true});
+
+  if(error){
+
+    console.error(error);
+
+    showError(
+      "تعذر تحميل السلايدر:\n"+
+      error.message
+    );
+
+    return;
+
+  }
+
+  slides = data || [];
+
+  renderSlides();
+
+  updateDashboard();
 
 }
 
 
 function renderSlides(){
 
-  const c =
-    $("slideList");
+  const grid =
+    $("slidesGrid");
+
+  if(!grid) return;
+
+  if(!slides.length){
+
+    grid.innerHTML =
+      `<div class="empty" style="grid-column:1/-1">
+        لا توجد سلايدرات.
+      </div>`;
+
+    return;
+
+  }
 
 
-  c.innerHTML =
-    slides.length
-    ?
-    slides
-      .map(
-        s=>{
+  grid.innerHTML =
+    slides.map(s=>{
 
-          const id =
-            JSON.stringify(
-              String(s.id)
-            );
+      const id =
+        safeId(s.id);
 
+      const image =
+        s.image_url ||
+        "https://placehold.co/1200x675?text=Espoza";
 
-          return `
+      const active =
+        s.is_active
+          ? `<span style="color:var(--green)">نشط</span>`
+          : `<span style="color:var(--red)">غير نشط</span>`;
 
-            <div class="slide-card">
+      return `
+        <div class="slide-card">
 
-              <img
-                src="${safe(s.image_url)}"
-                onerror="this.style.opacity=.2"
+          <img
+            class="slide-image"
+            src="${escapeHtml(image)}"
+            alt="${escapeHtml(s.title || "")}"
+            onerror="this.src='https://placehold.co/1200x675?text=Espoza'"
+          >
+
+          <div class="slide-body">
+
+            <h3>
+              ${escapeHtml(s.title || "بدون عنوان")}
+            </h3>
+
+            <p>
+              ${escapeHtml(s.subtitle || "")}
+            </p>
+
+            <div style="font-size:12px;margin-top:8px">
+              ${active}
+            </div>
+
+            <div class="slide-actions">
+
+              <button
+                class="btn btn-secondary"
+                onclick="openSlideModal(${id})"
               >
+                تعديل
+              </button>
 
-              <div class="slide-body">
-
-                <h3>
-                  ${safe(
-                    s.title ||
-                    "بدون عنوان"
-                  )}
-                </h3>
-
-                <p>
-                  ${safe(
-                    s.subtitle ||
-                    "بدون وصف"
-                  )}
-                </p>
-
-
-                <div class="badges">
-
-                  <span class="badge">
-                    #${safe(s.sort_order)}
-                  </span>
-
-                  <span class="badge">
-                    ${
-                      s.is_active
-                      ? "فعال"
-                      : "مخفي"
-                    }
-                  </span>
-
-                </div>
-
-
-                <div class="pc-actions">
-
-                  <button
-                    class="edit"
-                    onclick='openSlideModal(${id})'
-                  >
-                    تعديل
-                  </button>
-
-                  <button
-                    class="delete"
-                    onclick='deleteSlide(${id})'
-                  >
-                    حذف
-                  </button>
-
-                </div>
-
-              </div>
+              <button
+                class="btn btn-danger"
+                onclick="deleteSlide(${id})"
+              >
+                حذف
+              </button>
 
             </div>
 
-          `;
+          </div>
 
-        }
-      )
-      .join("")
-    :
-    `<div class="loading">
-      لا توجد سلايدرات.
-    </div>`;
+        </div>
+      `;
+
+    }).join("");
 
 }
 
 
-async function deleteSlide(id){
+function openSlideModal(slideId=null){
 
-  if(
-    !confirm(
-      "حذف هذا السلايدر؟"
-    )
-  ){
-    return;
+  $("slideForm").reset();
+
+  $("slideId").value = "";
+
+  $("slideOrder").value = 0;
+
+  $("slideActive").checked = true;
+
+  $("slideButtonText").value = "استكشفي";
+
+  $("slideCurrentImage").innerHTML = "";
+
+  $("slideModalTitle").textContent =
+    slideId
+      ? "تعديل السلايدر"
+      : "إضافة سلايدر";
+
+
+  if(slideId){
+
+    const s =
+      slides.find(
+        x=>String(x.id) === String(slideId)
+      );
+
+    if(!s){
+      showError("لم يتم العثور على السلايدر.");
+      return;
+    }
+
+    $("slideId").value = s.id;
+
+    $("slideTitle").value =
+      s.title || "";
+
+    $("slideSubtitle").value =
+      s.subtitle || "";
+
+    $("slideButtonText").value =
+      s.button_text || "استكشفي";
+
+    $("slideButtonLink").value =
+      s.button_link || "all";
+
+    $("slideOrder").value =
+      s.sort_order ?? 0;
+
+    $("slideActive").checked =
+      s.is_active !== false;
+
+    if(s.image_url){
+
+      $("slideCurrentImage").innerHTML = `
+        <label>الصورة الحالية</label>
+        <img
+          src="${escapeHtml(s.image_url)}"
+          style="
+            width:100%;
+            max-height:260px;
+            object-fit:cover;
+            border-radius:12px;
+            margin-top:8px;
+          "
+        >
+      `;
+
+    }
+
   }
+
+
+  $("slideModal").classList.add("open");
+
+}
+
+
+function closeSlideModal(){
+
+  $("slideModal")
+    .classList.remove("open");
+
+}
+
+
+/* =========================================================
+   SAVE SLIDE
+========================================================= */
+
+async function saveSlide(e){
+
+  e.preventDefault();
+
+  const button =
+    e.submitter ||
+    e.target.querySelector('button[type="submit"]');
+
+  showLoading(button,"جاري حفظ السلايدر...");
+
+  try{
+
+    const existingId =
+      $("slideId").value.trim();
+
+    const slideId =
+      existingId ||
+      crypto.randomUUID();
+
+
+    let imageUrl = null;
+
+
+    if(existingId){
+
+      const existing =
+        slides.find(
+          x=>String(x.id) === String(existingId)
+        );
+
+      imageUrl =
+        existing?.image_url || null;
+
+    }
+
+
+    const file =
+      $("slideImageInput").files?.[0];
+
+
+    if(file){
+
+      const extension =
+        file.name
+          .split(".")
+          .pop()
+          .toLowerCase() || "jpg";
+
+      const storagePath =
+        `hero/${slideId}/${crypto.randomUUID()}.${extension}`;
+
+
+      const {error:uploadError} =
+        await supabaseClient
+          .storage
+          .from(STORAGE_BUCKET)
+          .upload(
+            storagePath,
+            file,
+            {
+              upsert:false,
+              contentType:file.type
+            }
+          );
+
+      if(uploadError)
+        throw uploadError;
+
+
+      const {data:publicData} =
+        supabaseClient
+          .storage
+          .from(STORAGE_BUCKET)
+          .getPublicUrl(storagePath);
+
+      imageUrl =
+        publicData.publicUrl;
+
+    }
+
+
+    const payload = {
+
+      id:slideId,
+
+      title:
+        $("slideTitle").value.trim(),
+
+      subtitle:
+        $("slideSubtitle").value.trim(),
+
+      button_text:
+        $("slideButtonText").value.trim() ||
+        "استكشفي",
+
+      button_link:
+        $("slideButtonLink").value,
+
+      sort_order:
+        Number($("slideOrder").value || 0),
+
+      is_active:
+        $("slideActive").checked,
+
+      image_url:
+        imageUrl
+
+    };
+
+
+    if(existingId){
+
+      const {error} =
+        await supabaseClient
+          .from("slider")
+          .update(payload)
+          .eq("id",existingId);
+
+      if(error)
+        throw error;
+
+    }else{
+
+      if(!imageUrl){
+
+        throw new Error(
+          "أضف صورة للسلايدر قبل الحفظ."
+        );
+
+      }
+
+      const {error} =
+        await supabaseClient
+          .from("slider")
+          .insert(payload);
+
+      if(error)
+        throw error;
+
+    }
+
+
+    alert(
+      existingId
+        ? "تم تعديل السلايدر بنجاح ✅"
+        : "تم إضافة السلايدر بنجاح ✅"
+    );
+
+    closeSlideModal();
+
+    await loadSlides();
+
+    updateDashboard();
+
+  }catch(error){
+
+    console.error(error);
+
+    showError(
+      "تعذر حفظ السلايدر:\n"+
+      error.message
+    );
+
+  }finally{
+
+    hideLoading(button);
+
+  }
+
+}
+
+
+/* =========================================================
+   DELETE SLIDE
+========================================================= */
+
+async function deleteSlide(slideId){
+
+  const s =
+    slides.find(
+      x=>String(x.id) === String(slideId)
+    );
+
+  if(!s) return;
+
+  const confirmed =
+    confirm(
+      `هل أنت متأكد من حذف السلايدر "${s.title || ""}"؟`
+    );
+
+  if(!confirmed)
+    return;
 
 
   try{
@@ -3277,30 +2903,24 @@ async function deleteSlide(id){
       await supabaseClient
         .from("slider")
         .delete()
-        .eq("id",id);
+        .eq("id",slideId);
 
-
-    if(error){
+    if(error)
       throw error;
-    }
 
+    alert("تم حذف السلايدر بنجاح ✅");
 
     await loadSlides();
 
-    renderAll();
+    updateDashboard();
 
-    toast(
-      "تم حذف السلايدر"
-    );
+  }catch(error){
 
+    console.error(error);
 
-  }catch(e){
-
-    console.error(e);
-
-    toast(
-      e.message ||
-      "تعذر حذف السلايدر"
+    showError(
+      "تعذر حذف السلايدر:\n"+
+      error.message
     );
 
   }
@@ -3308,95 +2928,76 @@ async function deleteSlide(id){
 }
 
 
-/* =========================
-   STATS
-========================= */
+/* =========================================================
+   DASHBOARD
+========================================================= */
 
-function updateStats(){
+function updateDashboard(){
 
-  $("statProducts")
-    .textContent =
-      products.length;
+  $("statProducts").textContent =
+    formatNumber(products.length);
 
 
-  $("statOffers")
-    .textContent =
+  $("statOffers").textContent =
+    formatNumber(
       products.filter(
-        p => p.is_offer
-      ).length;
-
-
-  $("statSlides")
-    .textContent =
-      slides.filter(
-        s => s.is_active
-      ).length;
-
-
-  const followers =
-    Number(
-      settings?.facebook_followers || 0
-    )
-    +
-    Number(
-      settings?.instagram_followers || 0
-    )
-    +
-    Number(
-      settings?.tiktok_followers || 0
-    )
-    +
-    Number(
-      settings?.snapchat_followers || 0
+        p=>p.is_offer === true
+      ).length
     );
 
 
-  $("statFollowers")
-    .textContent =
-      format(followers);
+  $("statSlides").textContent =
+    formatNumber(
+      slides.filter(
+        s=>s.is_active === true
+      ).length
+    );
+
+
+  const followers =
+    Number(settings?.facebook_followers || 0) +
+    Number(settings?.instagram_followers || 0) +
+    Number(settings?.tiktok_followers || 0) +
+    Number(settings?.snapchat_followers || 0);
+
+  $("statFollowers").textContent =
+    formatNumber(followers);
 
 }
 
 
-function renderAll(){
+/* =========================================================
+   MODAL CLICK OUTSIDE
+========================================================= */
 
-  updateStats();
+document.addEventListener("click",(e)=>{
 
-  renderProductList();
+  if(e.target === $("productModal")){
+    closeProductModal();
+  }
 
-  renderRecent();
+  if(e.target === $("slideModal")){
+    closeSlideModal();
+  }
 
-  renderSlides();
-
-}
-
-
-/* =========================
-   MODAL CLICK
-========================= */
-
-document
-.querySelectorAll(".modal")
-.forEach(
-  m =>
-    m.addEventListener(
-      "click",
-      e=>{
-        if(e.target === m){
-          m.classList.remove("show");
-        }
-      }
-    )
-);
+});
 
 
-/* START */
+/* =========================================================
+   ESC CLOSE
+========================================================= */
 
-boot();
+document.addEventListener("keydown",(e)=>{
 
+  if(e.key !== "Escape")
+    return;
+
+  closeProductModal();
+  closeSlideModal();
+
+});
 </script>
 
 </body>
 </html>
-```
 
