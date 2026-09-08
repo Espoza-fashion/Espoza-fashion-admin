@@ -1,193 +1,3402 @@
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Espoza Fashion — لوحة التحكم</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,"Tahoma",sans-serif;background:#f7f3ef;color:#321f27}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
-:root{--wine:#641f34;--dark:#431321;--cream:#faf7f2;--gold:#b9985a;--border:#eadfe1;--muted:#8c7d82;--green:#198754;--red:#b42318}
-.auth{min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 20% 20%,#ead7dc,transparent 35%),#f7f3ef}.auth-card{width:min(430px,100%);background:#fff;border:1px solid var(--border);border-radius:28px;padding:34px;box-shadow:0 20px 70px rgba(50,20,30,.12)}.brand{text-align:center;margin-bottom:28px}.brand b{font-family:Georgia,serif;letter-spacing:5px;color:var(--wine);font-size:30px}.brand small{display:block;color:var(--gold);letter-spacing:4px;margin-top:5px}.field{margin-bottom:14px}.field label{display:block;font-size:12px;font-weight:800;color:var(--wine);margin-bottom:7px}.field input,.field select,.field textarea{width:100%;border:1px solid var(--border);border-radius:13px;padding:12px 13px;background:#fff;outline:none}.field textarea{min-height:100px;resize:vertical}.primary,.danger,.ghost{border:0;border-radius:13px;padding:12px 16px;font-weight:800}.primary{background:var(--wine);color:#fff}.danger{background:#fff0ef;color:var(--red)}.ghost{background:#f5edef;color:var(--wine)}.full{width:100%}.error{color:var(--red);font-size:12px;margin-top:10px;min-height:18px}
-.app{min-height:100vh}.topbar{height:72px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;z-index:20}.top-brand{font-family:Georgia,serif;letter-spacing:3px;color:var(--wine);font-size:23px}.top-actions{display:flex;gap:8px;align-items:center}.user-email{font-size:11px;color:var(--muted);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 72px)}.sidebar{background:#32141f;color:#fff;padding:18px 12px}.navbtn{width:100%;border:0;background:transparent;color:#eadde0;text-align:right;padding:13px 14px;border-radius:12px;margin-bottom:5px;font-weight:700}.navbtn.active,.navbtn:hover{background:rgba(255,255,255,.1);color:#fff}.main{padding:24px;max-width:1450px;width:100%;margin:auto}.page-title{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:20px}.page-title h1{font-family:Georgia,serif;color:var(--wine);font-size:30px}.page-title p{color:var(--muted);font-size:12px;margin-top:5px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}.stat-card{background:#fff;border:1px solid var(--border);border-radius:18px;padding:18px}.stat-card strong{display:block;color:var(--wine);font-size:26px}.stat-card span{font-size:11px;color:var(--muted)}.panel{background:#fff;border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:18px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.panel-head h2{font-size:18px;color:var(--wine)}.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px}.filters input,.filters select{border:1px solid var(--border);border-radius:12px;padding:10px 12px;background:#fff;outline:none}.product-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.product-card{border:1px solid var(--border);border-radius:18px;overflow:hidden;background:#fff}.product-card img{width:100%;height:230px;object-fit:cover;background:#f2eae7}.pc-body{padding:13px}.pc-name{font-weight:800;color:var(--wine);margin-bottom:7px}.pc-price{font-weight:800}.pc-price del{color:#aaa;font-size:11px;margin-right:5px}.pc-meta{font-size:10px;color:var(--muted);margin-top:5px}.badges{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}.badge{font-size:9px;padding:4px 7px;border-radius:20px;background:#f5edef;color:var(--wine)}.badge.offer{background:var(--wine);color:#fff}.pc-actions{display:flex;gap:7px;margin-top:12px}.pc-actions button{flex:1;padding:9px;border:0;border-radius:10px;font-size:11px;font-weight:800}.edit{background:#f4eef0;color:var(--wine)}.delete{background:#fff0ef;color:var(--red)}
-.modal{position:fixed;inset:0;background:rgba(25,10,15,.62);display:none;align-items:center;justify-content:center;padding:18px;z-index:100}.modal.show{display:flex}.modal-box{background:#fff;width:min(900px,100%);max-height:94vh;overflow:auto;border-radius:24px;padding:22px;position:relative}.modal-close{position:absolute;left:15px;top:15px;width:36px;height:36px;border:0;border-radius:50%;background:#f5edef;color:var(--wine);font-size:20px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form-grid .wide{grid-column:1/-1}.modal-title{color:var(--wine);font-family:Georgia,serif;font-size:25px;margin-bottom:18px}.inline{display:flex;gap:8px;align-items:center}.check{display:flex;gap:8px;align-items:center;font-size:12px;font-weight:700}.image-list{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.image-row{border:1px solid var(--border);border-radius:13px;padding:9px;background:#fcfaf8}.image-row img{width:100%;height:150px;object-fit:cover;border-radius:9px}.image-row input{width:100%;margin-top:7px;border:1px solid var(--border);border-radius:9px;padding:8px}.image-row button{margin-top:7px;width:100%;border:0;border-radius:9px;padding:8px;background:#fff0ef;color:var(--red);font-size:11px}.size-list{display:flex;gap:7px;flex-wrap:wrap}.size-chip{display:flex;align-items:center;gap:5px;border:1px solid var(--border);border-radius:10px;padding:6px 8px;font-size:11px}.size-chip button{border:0;background:none;color:var(--red)}.dropzone{border:1.5px dashed #cdbcc1;border-radius:15px;padding:18px;text-align:center;color:var(--muted);font-size:12px}.dropzone input{margin-top:10px}.slide-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.slide-card{border:1px solid var(--border);border-radius:18px;overflow:hidden}.slide-card img{width:100%;height:180px;object-fit:cover;background:#f2eae7}.slide-body{padding:12px}.slide-body h3{color:var(--wine);margin-bottom:5px}.slide-body p{font-size:10px;color:var(--muted);line-height:1.6}.settings-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.section-label{font-weight:900;color:var(--wine);font-size:14px;margin:4px 0 10px}.notice{background:#fff8e8;border:1px solid #ead9ad;color:#745b21;padding:12px;border-radius:12px;font-size:11px;line-height:1.8;margin-bottom:14px}
-.toast{position:fixed;bottom:22px;left:22px;background:#32141f;color:#fff;padding:12px 16px;border-radius:12px;font-size:12px;opacity:0;transform:translateY(15px);pointer-events:none;transition:.25s;z-index:300}.toast.show{opacity:1;transform:none}.loading{padding:35px;text-align:center;color:var(--muted);font-size:13px}
-@media(max-width:1000px){.product-grid{grid-template-columns:repeat(3,1fr)}.cards{grid-template-columns:repeat(2,1fr)}.slide-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:760px){.layout{grid-template-columns:1fr}.sidebar{display:flex;overflow:auto;gap:5px;padding:8px}.navbtn{width:auto;white-space:nowrap;margin:0}.main{padding:15px}.product-grid{grid-template-columns:repeat(2,1fr)}.form-grid,.settings-grid{grid-template-columns:1fr}.image-list,.slide-grid{grid-template-columns:1fr}.topbar{padding:0 12px}.user-email{display:none}}@media(max-width:430px){.product-grid{grid-template-columns:1fr}.cards{grid-template-columns:1fr}.page-title{align-items:flex-start;flex-direction:column}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,"Tahoma",sans-serif;background:#f7f3ef;color:#321f27}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+
+:root{
+  --wine:#641f34;
+  --dark:#431321;
+  --cream:#faf7f2;
+  --gold:#b9985a;
+  --border:#eadfe1;
+  --muted:#8c7d82;
+  --green:#198754;
+  --red:#b42318
+}
+
+.auth{
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:20px;
+  background:radial-gradient(circle at 20% 20%,#ead7dc,transparent 35%),#f7f3ef
+}
+
+.auth-card{
+  width:min(430px,100%);
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:28px;
+  padding:34px;
+  box-shadow:0 20px 70px rgba(50,20,30,.12)
+}
+
+.brand{text-align:center;margin-bottom:28px}
+.brand b{
+  font-family:Georgia,serif;
+  letter-spacing:5px;
+  color:var(--wine);
+  font-size:30px
+}
+.brand small{
+  display:block;
+  color:var(--gold);
+  letter-spacing:4px;
+  margin-top:5px
+}
+
+.field{margin-bottom:14px}
+.field label{
+  display:block;
+  font-size:12px;
+  font-weight:800;
+  color:var(--wine);
+  margin-bottom:7px
+}
+
+.field input,
+.field select,
+.field textarea{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:13px;
+  padding:12px 13px;
+  background:#fff;
+  outline:none
+}
+
+.field textarea{
+  min-height:100px;
+  resize:vertical
+}
+
+.primary,.danger,.ghost{
+  border:0;
+  border-radius:13px;
+  padding:12px 16px;
+  font-weight:800
+}
+
+.primary{background:var(--wine);color:#fff}
+.danger{background:#fff0ef;color:var(--red)}
+.ghost{background:#f5edef;color:var(--wine)}
+.full{width:100%}
+
+.error{
+  color:var(--red);
+  font-size:12px;
+  margin-top:10px;
+  min-height:18px
+}
+
+.app{min-height:100vh}
+
+.topbar{
+  height:72px;
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 22px;
+  position:sticky;
+  top:0;
+  z-index:20
+}
+
+.top-brand{
+  font-family:Georgia,serif;
+  letter-spacing:3px;
+  color:var(--wine);
+  font-size:23px
+}
+
+.top-actions{
+  display:flex;
+  gap:8px;
+  align-items:center
+}
+
+.user-email{
+  font-size:11px;
+  color:var(--muted);
+  max-width:220px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap
+}
+
+.layout{
+  display:grid;
+  grid-template-columns:220px 1fr;
+  min-height:calc(100vh - 72px)
+}
+
+.sidebar{
+  background:#32141f;
+  color:#fff;
+  padding:18px 12px
+}
+
+.navbtn{
+  width:100%;
+  border:0;
+  background:transparent;
+  color:#eadde0;
+  text-align:right;
+  padding:13px 14px;
+  border-radius:12px;
+  margin-bottom:5px;
+  font-weight:700
+}
+
+.navbtn.active,
+.navbtn:hover{
+  background:rgba(255,255,255,.1);
+  color:#fff
+}
+
+.main{
+  padding:24px;
+  max-width:1450px;
+  width:100%;
+  margin:auto
+}
+
+.page-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  margin-bottom:20px
+}
+
+.page-title h1{
+  font-family:Georgia,serif;
+  color:var(--wine);
+  font-size:30px
+}
+
+.page-title p{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:5px
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  margin-bottom:20px
+}
+
+.stat-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:18px
+}
+
+.stat-card strong{
+  display:block;
+  color:var(--wine);
+  font-size:26px
+}
+
+.stat-card span{
+  font-size:11px;
+  color:var(--muted)
+}
+
+.panel{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:20px;
+  margin-bottom:18px
+}
+
+.panel-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:16px
+}
+
+.panel-head h2{
+  font-size:18px;
+  color:var(--wine)
+}
+
+.filters{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:15px
+}
+
+.filters input,
+.filters select{
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:10px 12px;
+  background:#fff;
+  outline:none
+}
+
+.product-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px
+}
+
+.product-card{
+  border:1px solid var(--border);
+  border-radius:18px;
+  overflow:hidden;
+  background:#fff
+}
+
+.product-card img{
+  width:100%;
+  height:230px;
+  object-fit:cover;
+  background:#f2eae7
+}
+
+.pc-body{padding:13px}
+
+.pc-name{
+  font-weight:800;
+  color:var(--wine);
+  margin-bottom:7px
+}
+
+.pc-price{font-weight:800}
+
+.pc-price del{
+  color:#aaa;
+  font-size:11px;
+  margin-right:5px
+}
+
+.pc-meta{
+  font-size:10px;
+  color:var(--muted);
+  margin-top:5px
+}
+
+.badges{
+  display:flex;
+  gap:5px;
+  flex-wrap:wrap;
+  margin:8px 0
+}
+
+.badge{
+  font-size:9px;
+  padding:4px 7px;
+  border-radius:20px;
+  background:#f5edef;
+  color:var(--wine)
+}
+
+.badge.offer{
+  background:var(--wine);
+  color:#fff
+}
+
+.pc-actions{
+  display:flex;
+  gap:7px;
+  margin-top:12px
+}
+
+.pc-actions button{
+  flex:1;
+  padding:9px;
+  border:0;
+  border-radius:10px;
+  font-size:11px;
+  font-weight:800
+}
+
+.edit{
+  background:#f4eef0;
+  color:var(--wine)
+}
+
+.delete{
+  background:#fff0ef;
+  color:var(--red)
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(25,10,15,.62);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  z-index:100
+}
+
+.modal.show{display:flex}
+
+.modal-box{
+  background:#fff;
+  width:min(900px,100%);
+  max-height:94vh;
+  overflow:auto;
+  border-radius:24px;
+  padding:22px;
+  position:relative
+}
+
+.modal-close{
+  position:absolute;
+  left:15px;
+  top:15px;
+  width:36px;
+  height:36px;
+  border:0;
+  border-radius:50%;
+  background:#f5edef;
+  color:var(--wine);
+  font-size:20px
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px
+}
+
+.form-grid .wide{
+  grid-column:1/-1
+}
+
+.modal-title{
+  color:var(--wine);
+  font-family:Georgia,serif;
+  font-size:25px;
+  margin-bottom:18px
+}
+
+.inline{
+  display:flex;
+  gap:8px;
+  align-items:center
+}
+
+.check{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  font-size:12px;
+  font-weight:700
+}
+
+.image-list{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px
+}
+
+.image-row{
+  border:1px solid var(--border);
+  border-radius:13px;
+  padding:9px;
+  background:#fcfaf8
+}
+
+.image-row img{
+  width:100%;
+  height:150px;
+  object-fit:cover;
+  border-radius:9px
+}
+
+.image-row input{
+  width:100%;
+  margin-top:7px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  padding:8px
+}
+
+.image-row button{
+  margin-top:7px;
+  width:100%;
+  border:0;
+  border-radius:9px;
+  padding:8px;
+  background:#fff0ef;
+  color:var(--red);
+  font-size:11px
+}
+
+.size-list{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap
+}
+
+.size-chip{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:6px 8px;
+  font-size:11px
+}
+
+.size-chip button{
+  border:0;
+  background:none;
+  color:var(--red)
+}
+
+.dropzone{
+  border:1.5px dashed #cdbcc1;
+  border-radius:15px;
+  padding:18px;
+  text-align:center;
+  color:var(--muted);
+  font-size:12px
+}
+
+.dropzone input{margin-top:10px}
+
+.slide-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px
+}
+
+.slide-card{
+  border:1px solid var(--border);
+  border-radius:18px;
+  overflow:hidden
+}
+
+.slide-card img{
+  width:100%;
+  height:180px;
+  object-fit:cover;
+  background:#f2eae7
+}
+
+.slide-body{padding:12px}
+
+.slide-body h3{
+  color:var(--wine);
+  margin-bottom:5px
+}
+
+.slide-body p{
+  font-size:10px;
+  color:var(--muted);
+  line-height:1.6
+}
+
+.settings-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px
+}
+
+.section-label{
+  font-weight:900;
+  color:var(--wine);
+  font-size:14px;
+  margin:4px 0 10px
+}
+
+.notice{
+  background:#fff8e8;
+  border:1px solid #ead9ad;
+  color:#745b21;
+  padding:12px;
+  border-radius:12px;
+  font-size:11px;
+  line-height:1.8;
+  margin-bottom:14px
+}
+
+.toast{
+  position:fixed;
+  bottom:22px;
+  left:22px;
+  background:#32141f;
+  color:#fff;
+  padding:12px 16px;
+  border-radius:12px;
+  font-size:12px;
+  opacity:0;
+  transform:translateY(15px);
+  pointer-events:none;
+  transition:.25s;
+  z-index:300
+}
+
+.toast.show{
+  opacity:1;
+  transform:none
+}
+
+.loading{
+  padding:35px;
+  text-align:center;
+  color:var(--muted);
+  font-size:13px
+}
+
+@media(max-width:1000px){
+  .product-grid{grid-template-columns:repeat(3,1fr)}
+  .cards{grid-template-columns:repeat(2,1fr)}
+  .slide-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+@media(max-width:760px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{
+    display:flex;
+    overflow:auto;
+    gap:5px;
+    padding:8px
+  }
+
+  .navbtn{
+    width:auto;
+    white-space:nowrap;
+    margin:0
+  }
+
+  .main{padding:15px}
+  .product-grid{grid-template-columns:repeat(2,1fr)}
+  .form-grid,.settings-grid{grid-template-columns:1fr}
+  .image-list,.slide-grid{grid-template-columns:1fr}
+  .topbar{padding:0 12px}
+  .user-email{display:none}
+}
+
+@media(max-width:430px){
+  .product-grid{grid-template-columns:1fr}
+  .cards{grid-template-columns:1fr}
+  .page-title{
+    align-items:flex-start;
+    flex-direction:column
+  }
+}
 </style>
 </head>
+
 <body>
+
 <div id="loginView" class="auth">
   <div class="auth-card">
-    <div class="brand"><b>ESPOZA</b><small>FASHION ADMIN</small></div>
-    <div class="field"><label>البريد الإلكتروني</label><input id="loginEmail" type="email" autocomplete="username" placeholder="admin@example.com"></div>
-    <div class="field"><label>كلمة المرور</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••"></div>
-    <button class="primary full" id="loginBtn">دخول لوحة التحكم</button>
+
+    <div class="brand">
+      <b>ESPOZA</b>
+      <small>FASHION ADMIN</small>
+    </div>
+
+    <div class="field">
+      <label>البريد الإلكتروني</label>
+      <input id="loginEmail" type="email" autocomplete="username" placeholder="admin@example.com">
+    </div>
+
+    <div class="field">
+      <label>كلمة المرور</label>
+      <input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••">
+    </div>
+
+    <button class="primary full" id="loginBtn">
+      دخول لوحة التحكم
+    </button>
+
     <div class="error" id="loginError"></div>
+
   </div>
 </div>
+
 
 <div id="appView" class="app hidden">
-  <header class="topbar"><div class="top-brand">ESPOZA FASHION</div><div class="top-actions"><span class="user-email" id="userEmail"></span><button class="ghost" id="logoutBtn">تسجيل الخروج</button></div></header>
+
+  <header class="topbar">
+    <div class="top-brand">ESPOZA FASHION</div>
+
+    <div class="top-actions">
+      <span class="user-email" id="userEmail"></span>
+      <button class="ghost" id="logoutBtn">
+        تسجيل الخروج
+      </button>
+    </div>
+  </header>
+
+
   <div class="layout">
+
     <aside class="sidebar">
-      <button class="navbtn active" data-page="dashboard">الرئيسية</button>
-      <button class="navbtn" data-page="products">المنتجات</button>
-      <button class="navbtn" data-page="settings">إعدادات المتجر</button>
-      <button class="navbtn" data-page="slides">السلايدر</button>
+
+      <button class="navbtn active" data-page="dashboard">
+        الرئيسية
+      </button>
+
+      <button class="navbtn" data-page="products">
+        المنتجات
+      </button>
+
+      <button class="navbtn" data-page="settings">
+        إعدادات المتجر
+      </button>
+
+      <button class="navbtn" data-page="slides">
+        السلايدر
+      </button>
+
     </aside>
+
+
     <main class="main">
+
+      <!-- DASHBOARD -->
+
       <section id="page-dashboard" class="page">
-        <div class="page-title"><div><h1>لوحة التحكم</h1><p>إدارة Espoza Fashion من مكان واحد.</p></div></div>
-        <div class="cards"><div class="stat-card"><strong id="statProducts">0</strong><span>المنتجات</span></div><div class="stat-card"><strong id="statOffers">0</strong><span>العروض</span></div><div class="stat-card"><strong id="statSlides">0</strong><span>السلايدرات الفعالة</span></div><div class="stat-card"><strong id="statFollowers">0</strong><span>إجمالي المتابعين</span></div></div>
-        <div class="panel"><div class="panel-head"><h2>آخر المنتجات</h2><button class="primary" onclick="openProductModal()">+ إضافة منتج</button></div><div id="recentProducts" class="product-grid"></div></div>
+
+        <div class="page-title">
+          <div>
+            <h1>لوحة التحكم</h1>
+            <p>إدارة Espoza Fashion من مكان واحد.</p>
+          </div>
+        </div>
+
+        <div class="cards">
+
+          <div class="stat-card">
+            <strong id="statProducts">0</strong>
+            <span>المنتجات</span>
+          </div>
+
+          <div class="stat-card">
+            <strong id="statOffers">0</strong>
+            <span>العروض</span>
+          </div>
+
+          <div class="stat-card">
+            <strong id="statSlides">0</strong>
+            <span>السلايدرات الفعالة</span>
+          </div>
+
+          <div class="stat-card">
+            <strong id="statFollowers">0</strong>
+            <span>إجمالي المتابعين</span>
+          </div>
+
+        </div>
+
+
+        <div class="panel">
+
+          <div class="panel-head">
+            <h2>آخر المنتجات</h2>
+
+            <button class="primary" onclick="openProductModal()">
+              + إضافة منتج
+            </button>
+          </div>
+
+          <div id="recentProducts" class="product-grid"></div>
+
+        </div>
+
       </section>
+
+
+      <!-- PRODUCTS -->
 
       <section id="page-products" class="page hidden">
-        <div class="page-title"><div><h1>المنتجات</h1><p>إضافة وتعديل وحذف المنتجات، الصور، المقاسات والألوان.</p></div><button class="primary" onclick="openProductModal()">+ إضافة منتج</button></div>
-        <div class="panel"><div class="filters"><input id="productSearch" placeholder="ابحثي باسم المنتج أو SKU..." oninput="renderProductList()"><select id="productCategory" onchange="renderProductList()"><option value="all">كل التصنيفات</option><option value="dresses">فساتين</option><option value="sets">أطقم</option></select></div><div id="productList" class="product-grid"></div></div>
+
+        <div class="page-title">
+
+          <div>
+            <h1>المنتجات</h1>
+            <p>
+              إضافة وتعديل وحذف المنتجات، الصور، المقاسات والألوان.
+            </p>
+          </div>
+
+          <button class="primary" onclick="openProductModal()">
+            + إضافة منتج
+          </button>
+
+        </div>
+
+
+        <div class="panel">
+
+          <div class="filters">
+
+            <input
+              id="productSearch"
+              placeholder="ابحثي باسم المنتج أو SKU..."
+              oninput="renderProductList()"
+            >
+
+            <select
+              id="productCategory"
+              onchange="renderProductList()"
+            >
+              <option value="all">كل التصنيفات</option>
+              <option value="dresses">فساتين</option>
+              <option value="sets">أطقم</option>
+            </select>
+
+          </div>
+
+          <div id="productList" class="product-grid"></div>
+
+        </div>
+
       </section>
+
+
+      <!-- SETTINGS -->
 
       <section id="page-settings" class="page hidden">
-        <div class="page-title"><div><h1>إعدادات المتجر</h1><p>هذه القيم تظهر مباشرة في موقع الزبائن بعد الحفظ.</p></div></div>
-        <div class="panel"><div class="notice">رقم الواتساب يجب أن يكون بصيغة دولية، مثال: 972595461861 بدون + أو مسافات.</div>
-          <div class="section-label">الطلبات والتوصيل</div>
-          <div class="settings-grid">
-            <div class="field"><label>رقم واتساب الطلبات</label><input id="setWhatsapp" placeholder="972595461861"></div>
-            <div></div>
-            <div class="field"><label>توصيل الضفة الغربية ₪</label><input id="setWestbank" type="number" min="0"></div>
-            <div class="field"><label>توصيل القدس ₪</label><input id="setJerusalem" type="number" min="0"></div>
-            <div class="field"><label>توصيل الداخل ₪</label><input id="setInside" type="number" min="0"></div>
+
+        <div class="page-title">
+
+          <div>
+            <h1>إعدادات المتجر</h1>
+            <p>
+              هذه القيم تظهر مباشرة في موقع الزبائن بعد الحفظ.
+            </p>
           </div>
-          <div class="section-label">أعداد المتابعين</div>
-          <div class="settings-grid">
-            <div class="field"><label>Facebook</label><input id="setFacebook" type="number" min="0"></div>
-            <div class="field"><label>Instagram</label><input id="setInstagram" type="number" min="0"></div>
-            <div class="field"><label>TikTok</label><input id="setTiktok" type="number" min="0"></div>
-            <div class="field"><label>Snapchat</label><input id="setSnapchat" type="number" min="0"></div>
-          </div>
-          <button class="primary" onclick="saveSettings()">حفظ إعدادات المتجر</button>
+
         </div>
+
+
+        <div class="panel">
+
+          <div class="notice">
+            رقم الواتساب يجب أن يكون بصيغة دولية، مثال:
+            972595461861 بدون + أو مسافات.
+          </div>
+
+
+          <div class="section-label">
+            بيانات المتجر
+          </div>
+
+          <div class="settings-grid">
+
+            <div class="field">
+              <label>اسم المتجر</label>
+              <input id="setStoreName">
+            </div>
+
+            <div class="field">
+              <label>رقم واتساب الطلبات</label>
+              <input id="setWhatsapp" placeholder="972595461861">
+            </div>
+
+            <div class="field">
+              <label>Instagram</label>
+              <input id="setInstagram">
+            </div>
+
+            <div class="field">
+              <label>Facebook</label>
+              <input id="setFacebookLink">
+            </div>
+
+            <div class="field">
+              <label>TikTok</label>
+              <input id="setTiktokLink">
+            </div>
+
+            <div class="field">
+              <label>Snapchat</label>
+              <input id="setSnapchatLink">
+            </div>
+
+          </div>
+
+
+          <div class="section-label">
+            الطلبات والتوصيل
+          </div>
+
+          <div class="settings-grid">
+
+            <div class="field">
+              <label>توصيل الضفة الغربية ₪</label>
+              <input id="setWestbank" type="number" min="0">
+            </div>
+
+            <div class="field">
+              <label>توصيل القدس ₪</label>
+              <input id="setJerusalem" type="number" min="0">
+            </div>
+
+            <div class="field">
+              <label>توصيل الداخل ₪</label>
+              <input id="setInside" type="number" min="0">
+            </div>
+
+          </div>
+
+
+          <div class="section-label">
+            أعداد المتابعين
+          </div>
+
+          <div class="settings-grid">
+
+            <div class="field">
+              <label>Facebook</label>
+              <input id="setFacebook" type="number" min="0">
+            </div>
+
+            <div class="field">
+              <label>Instagram</label>
+              <input id="setInstagramFollowers" type="number" min="0">
+            </div>
+
+            <div class="field">
+              <label>TikTok</label>
+              <input id="setTiktok" type="number" min="0">
+            </div>
+
+            <div class="field">
+              <label>Snapchat</label>
+              <input id="setSnapchat" type="number" min="0">
+            </div>
+
+          </div>
+
+
+          <button class="primary" onclick="saveSettings()">
+            حفظ إعدادات المتجر
+          </button>
+
+        </div>
+
       </section>
+
+
+      <!-- SLIDES -->
 
       <section id="page-slides" class="page hidden">
-        <div class="page-title"><div><h1>السلايدر</h1><p>غيّري صورة السلايدر والعنوان والزر والتصنيف والترتيب.</p></div><button class="primary" onclick="openSlideModal()">+ إضافة سلايدر</button></div>
-        <div class="panel"><div id="slideList" class="slide-grid"></div></div>
+
+        <div class="page-title">
+
+          <div>
+            <h1>السلايدر</h1>
+            <p>
+              غيّري صورة السلايدر والعنوان والوصف والزر والترتيب.
+            </p>
+          </div>
+
+          <button class="primary" onclick="openSlideModal()">
+            + إضافة سلايدر
+          </button>
+
+        </div>
+
+
+        <div class="panel">
+
+          <div id="slideList" class="slide-grid"></div>
+
+        </div>
+
       </section>
+
     </main>
+
   </div>
+
 </div>
 
-<div id="productModal" class="modal"><div class="modal-box"><button class="modal-close" onclick="closeModal('productModal')">×</button><h2 id="productModalTitle" class="modal-title">إضافة منتج</h2>
-  <div class="form-grid">
-    <div class="field"><label>اسم المنتج</label><input id="pName"></div>
-    <div class="field"><label>SKU</label><input id="pSku"></div>
-    <div class="field"><label>التصنيف</label><select id="pCategory"><option value="dresses">فساتين</option><option value="sets">أطقم</option></select></div>
-    <div class="field"><label>السعر ₪</label><input id="pPrice" type="number" min="0"></div>
-    <div class="field"><label>السعر القديم ₪</label><input id="pOldPrice" type="number" min="0"></div>
-    <div class="field"><label class="check"><input id="pOffer" type="checkbox"> هذا المنتج عرض</label></div>
-    <div class="field"><label class="check"><input id="pAvailable" type="checkbox" checked> المنتج ظاهر للزبائن</label></div>
-    <div class="field wide"><label>الوصف</label><textarea id="pDescription" placeholder="وصف المنتج..."></textarea></div>
-    <div class="wide"><div class="section-label">المقاسات</div><div class="inline"><input id="newSize" class="field" style="margin:0" placeholder="مثال: 42"><button class="ghost" onclick="addSize()">إضافة</button></div><div id="sizeList" class="size-list" style="margin-top:9px"></div></div>
-    <div class="wide"><div class="section-label">الصور والألوان</div><div class="dropzone">اختاري صورة أو عدة صور. لكل صورة يمكنك كتابة اللون المرتبط بها.<br><input id="pImages" type="file" accept="image/*" multiple onchange="previewNewImages()"></div><div id="imageList" class="image-list" style="margin-top:10px"></div></div>
-  </div>
-  <div style="display:flex;gap:8px;margin-top:18px"><button class="primary" id="saveProductBtn" onclick="saveProduct()">حفظ المنتج</button><button class="ghost" onclick="closeModal('productModal')">إلغاء</button></div>
-</div></div>
 
-<div id="slideModal" class="modal"><div class="modal-box"><button class="modal-close" onclick="closeModal('slideModal')">×</button><h2 id="slideModalTitle" class="modal-title">إضافة سلايدر</h2>
-  <div class="form-grid">
-    <div class="field"><label>العنوان بالعربي</label><input id="sTitleAr"></div><div class="field"><label>العنوان بالإنجليزي</label><input id="sTitleEn"></div>
-    <div class="field"><label>وصف بالعربي</label><input id="sDescAr"></div><div class="field"><label>وصف بالإنجليزي</label><input id="sDescEn"></div>
-    <div class="field"><label>نص الزر بالعربي</label><input id="sButtonAr" value="استكشفي"></div><div class="field"><label>نص الزر بالإنجليزي</label><input id="sButtonEn" value="Explore"></div>
-    <div class="field"><label>التصنيف عند الضغط</label><select id="sCategory"><option value="all">الكل</option><option value="dresses">الفساتين</option><option value="sets">الأطقم</option><option value="offers">العروضات</option></select></div><div class="field"><label>الترتيب</label><input id="sOrder" type="number" value="0"></div>
-    <div class="field wide"><label>صورة السلايدر</label><input id="sImage" type="file" accept="image/*" onchange="previewSlideImage()"><div id="slideImagePreview" style="margin-top:10px"></div></div>
-    <div class="field wide"><label class="check"><input id="sActive" type="checkbox" checked> سلايدر فعال</label></div>
+<!-- PRODUCT MODAL -->
+
+<div id="productModal" class="modal">
+
+  <div class="modal-box">
+
+    <button
+      class="modal-close"
+      onclick="closeModal('productModal')"
+    >
+      ×
+    </button>
+
+    <h2 id="productModalTitle" class="modal-title">
+      إضافة منتج
+    </h2>
+
+
+    <div class="form-grid">
+
+      <div class="field">
+        <label>اسم المنتج</label>
+        <input id="pName">
+      </div>
+
+      <div class="field">
+        <label>SKU</label>
+        <input id="pSku">
+      </div>
+
+      <div class="field">
+        <label>التصنيف</label>
+
+        <select id="pCategory">
+          <option value="dresses">فساتين</option>
+          <option value="sets">أطقم</option>
+        </select>
+
+      </div>
+
+      <div class="field">
+        <label>السعر ₪</label>
+        <input id="pPrice" type="number" min="0">
+      </div>
+
+      <div class="field">
+        <label>السعر القديم ₪</label>
+        <input id="pOldPrice" type="number" min="0">
+      </div>
+
+      <div class="field">
+
+        <label class="check">
+          <input id="pOffer" type="checkbox">
+          هذا المنتج عرض
+        </label>
+
+      </div>
+
+      <div class="field">
+
+        <label class="check">
+          <input id="pSale" type="checkbox">
+          المنتج عليه تخفيض
+        </label>
+
+      </div>
+
+      <div class="field">
+
+        <label class="check">
+          <input id="pAvailable" type="checkbox" checked>
+          المنتج متاح للزبائن
+        </label>
+
+      </div>
+
+      <div class="field">
+
+        <label class="check">
+          <input id="pActive" type="checkbox" checked>
+          المنتج فعال
+        </label>
+
+      </div>
+
+      <div class="field wide">
+
+        <label>الوصف</label>
+
+        <textarea
+          id="pDescription"
+          placeholder="وصف المنتج..."
+        ></textarea>
+
+      </div>
+
+
+      <!-- SIZES -->
+
+      <div class="wide">
+
+        <div class="section-label">
+          المقاسات
+        </div>
+
+        <div class="inline">
+
+          <input
+            id="newSize"
+            class="field"
+            style="margin:0"
+            placeholder="مثال: 42"
+          >
+
+          <button class="ghost" onclick="addSize()">
+            إضافة
+          </button>
+
+        </div>
+
+        <div
+          id="sizeList"
+          class="size-list"
+          style="margin-top:9px"
+        ></div>
+
+      </div>
+
+
+      <!-- IMAGES -->
+
+      <div class="wide">
+
+        <div class="section-label">
+          الصور والألوان
+        </div>
+
+        <div class="dropzone">
+
+          اختاري صورة أو عدة صور.
+          لكل صورة يمكنك كتابة اللون المرتبط بها.
+
+          <br>
+
+          <input
+            id="pImages"
+            type="file"
+            accept="image/*"
+            multiple
+            onchange="previewNewImages()"
+          >
+
+        </div>
+
+        <div
+          id="imageList"
+          class="image-list"
+          style="margin-top:10px"
+        ></div>
+
+      </div>
+
+    </div>
+
+
+    <div style="display:flex;gap:8px;margin-top:18px">
+
+      <button
+        class="primary"
+        id="saveProductBtn"
+        onclick="saveProduct()"
+      >
+        حفظ المنتج
+      </button>
+
+      <button
+        class="ghost"
+        onclick="closeModal('productModal')"
+      >
+        إلغاء
+      </button>
+
+    </div>
+
   </div>
-  <button class="primary" id="saveSlideBtn" onclick="saveSlide()">حفظ السلايدر</button>
-</div></div>
+
+</div>
+
+
+<!-- SLIDE MODAL -->
+
+<div id="slideModal" class="modal">
+
+  <div class="modal-box">
+
+    <button
+      class="modal-close"
+      onclick="closeModal('slideModal')"
+    >
+      ×
+    </button>
+
+    <h2 id="slideModalTitle" class="modal-title">
+      إضافة سلايدر
+    </h2>
+
+
+    <div class="form-grid">
+
+      <div class="field">
+        <label>عنوان السلايدر</label>
+        <input id="sTitle">
+      </div>
+
+      <div class="field">
+        <label>الوصف الفرعي</label>
+        <input id="sSubtitle">
+      </div>
+
+      <div class="field">
+        <label>نص الزر</label>
+        <input id="sButtonText" value="استكشفي">
+      </div>
+
+      <div class="field">
+        <label>رابط الزر</label>
+        <input
+          id="sButtonLink"
+          placeholder="مثال: dresses أو offers"
+        >
+      </div>
+
+      <div class="field">
+        <label>الترتيب</label>
+        <input
+          id="sOrder"
+          type="number"
+          value="0"
+        >
+      </div>
+
+      <div class="field">
+
+        <label class="check">
+          <input
+            id="sActive"
+            type="checkbox"
+            checked
+          >
+          سلايدر فعال
+        </label>
+
+      </div>
+
+
+      <div class="field wide">
+
+        <label>صورة السلايدر</label>
+
+        <input
+          id="sImage"
+          type="file"
+          accept="image/*"
+          onchange="previewSlideImage()"
+        >
+
+        <div
+          id="slideImagePreview"
+          style="margin-top:10px"
+        ></div>
+
+      </div>
+
+    </div>
+
+
+    <button
+      class="primary"
+      id="saveSlideBtn"
+      onclick="saveSlide()"
+    >
+      حفظ السلايدر
+    </button>
+
+  </div>
+
+</div>
+
+
 <div id="toast" class="toast"></div>
 
-<script>
-const SUPABASE_URL="https://ptwceqbxusgyutrroayz.supabase.co";
-const SUPABASE_KEY="sb_publishable_Hto6uDekI9TvxTLFs7kYWg_ApV51joA";
-const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-const BUCKET="product-images";
-let session=null, products=[], slides=[], settings=null;
-let editingProductId=null, editingSlideId=null;
-let productSizes=[], productImages=[], newImageFiles=[];
 
-const $=id=>document.getElementById(id);
-function toast(msg){$('toast').textContent=msg;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2800)}
-function closeModal(id){$(id).classList.remove('show')}
-function format(n){return Number(n||0).toLocaleString('en-US')}
-function safe(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+<script>
+
+const SUPABASE_URL =
+"https://ptwceqbxusgyutrroayz.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_Hto6uDekI9TvxTLFs7kYWg_ApV51joA";
+
+const supabaseClient =
+window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+const BUCKET = "product-images";
+
+let session = null;
+let products = [];
+let slides = [];
+let settings = null;
+
+let editingProductId = null;
+let editingSlideId = null;
+
+let productSizes = [];
+let productImages = [];
+let newImageFiles = [];
+
+
+const $ = id => document.getElementById(id);
+
+
+function toast(msg){
+
+  $("toast").textContent = msg;
+
+  $("toast").classList.add("show");
+
+  setTimeout(
+    () => $("toast").classList.remove("show"),
+    2800
+  );
+
+}
+
+
+function closeModal(id){
+
+  $(id).classList.remove("show");
+
+}
+
+
+function format(n){
+
+  return Number(n || 0)
+    .toLocaleString("en-US");
+
+}
+
+
+function safe(v){
+
+  return String(v ?? "")
+    .replace(
+      /[&<>"']/g,
+      c => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#039;"
+      }[c])
+    );
+
+}
+
+
+/* =========================
+   AUTH
+========================= */
 
 async function boot(){
-  const {data}=await supabaseClient.auth.getSession();
-  session=data.session;
-  if(session) showApp(); else showLogin();
-  supabaseClient.auth.onAuthStateChange((_event,newSession)=>{session=newSession;if(session)showApp();else showLogin()});
-}
-function showLogin(){$('loginView').classList.remove('hidden');$('appView').classList.add('hidden')}
-async function showApp(){
-  $('loginView').classList.add('hidden');$('appView').classList.remove('hidden');$('userEmail').textContent=session?.user?.email||'';
-  await Promise.all([loadProducts(),loadSettings(),loadSlides()]);
-  renderAll();
-}
-$('loginBtn').onclick=async()=>{const email=$('loginEmail').value.trim(),password=$('loginPassword').value; $('loginError').textContent=''; if(!email||!password){$('loginError').textContent='أدخلي البريد وكلمة المرور.';return} const {error}=await supabaseClient.auth.signInWithPassword({email,password}); if(error)$('loginError').textContent=error.message};
-$('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')$('loginBtn').click()});
-$('logoutBtn').onclick=async()=>{await supabaseClient.auth.signOut()};
 
-document.querySelectorAll('.navbtn').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.navbtn').forEach(x=>x.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));$('page-'+btn.dataset.page).classList.remove('hidden');if(btn.dataset.page==='products')renderProductList();if(btn.dataset.page==='slides')renderSlides()});
+  const {data} =
+    await supabaseClient.auth.getSession();
+
+  session = data.session;
+
+  if(session){
+    await showApp();
+  }else{
+    showLogin();
+  }
+
+  supabaseClient.auth.onAuthStateChange(
+    async (_event,newSession)=>{
+
+      session = newSession;
+
+      if(session){
+        await showApp();
+      }else{
+        showLogin();
+      }
+
+    }
+  );
+
+}
+
+
+function showLogin(){
+
+  $("loginView")
+    .classList.remove("hidden");
+
+  $("appView")
+    .classList.add("hidden");
+
+}
+
+
+async function showApp(){
+
+  $("loginView")
+    .classList.add("hidden");
+
+  $("appView")
+    .classList.remove("hidden");
+
+  $("userEmail").textContent =
+    session?.user?.email || "";
+
+  await Promise.all([
+    loadProducts(),
+    loadSettings(),
+    loadSlides()
+  ]);
+
+  renderAll();
+
+}
+
+
+$("loginBtn").onclick =
+async()=>{
+
+  const email =
+    $("loginEmail").value.trim();
+
+  const password =
+    $("loginPassword").value;
+
+  $("loginError").textContent = "";
+
+  if(!email || !password){
+
+    $("loginError").textContent =
+      "أدخلي البريد وكلمة المرور.";
+
+    return;
+  }
+
+  const {error} =
+    await supabaseClient.auth
+      .signInWithPassword({
+        email,
+        password
+      });
+
+  if(error){
+
+    $("loginError").textContent =
+      error.message;
+
+  }
+
+};
+
+
+$("loginPassword")
+.addEventListener(
+  "keydown",
+  e=>{
+    if(e.key==="Enter"){
+      $("loginBtn").click();
+    }
+  }
+);
+
+
+$("logoutBtn").onclick =
+async()=>{
+
+  await supabaseClient.auth.signOut();
+
+};
+
+
+/* =========================
+   NAVIGATION
+========================= */
+
+document
+.querySelectorAll(".navbtn")
+.forEach(btn=>{
+
+  btn.onclick = ()=>{
+
+    document
+    .querySelectorAll(".navbtn")
+    .forEach(x =>
+      x.classList.remove("active")
+    );
+
+    btn.classList.add("active");
+
+    document
+    .querySelectorAll(".page")
+    .forEach(p =>
+      p.classList.add("hidden")
+    );
+
+    $("page-"+btn.dataset.page)
+      .classList.remove("hidden");
+
+    if(btn.dataset.page==="products"){
+      renderProductList();
+    }
+
+    if(btn.dataset.page==="slides"){
+      renderSlides();
+    }
+
+  };
+
+});
+
+
+/* =========================
+   PRODUCTS
+========================= */
 
 async function loadProducts(){
-  const {data,error}=await supabaseClient.from('products').select('*').order('created_at',{ascending:false});
-  if(error){toast(error.message);return} products=data||[];
+
+  const {data,error} =
+    await supabaseClient
+      .from("products")
+      .select("*")
+      .order(
+        "created_at",
+        {ascending:false}
+      );
+
+  if(error){
+
+    console.error(error);
+
+    toast(error.message);
+
+    products = [];
+
+    return;
+  }
+
+  products = data || [];
+
 }
+
+
+async function openProductModal(id=null){
+
+  resetProductForm();
+
+  if(id !== null){
+
+    editingProductId = id;
+
+    $("productModalTitle").textContent =
+      "تعديل المنتج";
+
+    const p =
+      products.find(
+        x => String(x.id) === String(id)
+      );
+
+    if(!p){
+
+      toast("المنتج غير موجود.");
+
+      return;
+    }
+
+    $("pName").value =
+      p.name || "";
+
+    $("pSku").value =
+      p.sku || "";
+
+    $("pCategory").value =
+      p.category || "dresses";
+
+    $("pPrice").value =
+      p.price ?? "";
+
+    $("pOldPrice").value =
+      p.old_price ?? "";
+
+    $("pOffer").checked =
+      !!p.is_offer;
+
+    $("pSale").checked =
+      !!p.is_sale;
+
+    $("pAvailable").checked =
+      p.is_available !== false;
+
+    $("pActive").checked =
+      p.is_active !== false;
+
+    $("pDescription").value =
+      p.description || "";
+
+
+    const [
+      im,
+      sz,
+      co
+    ] = await Promise.all([
+
+      supabaseClient
+        .from("product_images")
+        .select("*")
+        .eq("product_id",id)
+        .order("sort_order"),
+
+      supabaseClient
+        .from("product_sizes")
+        .select("*")
+        .eq("product_id",id)
+        .order("sort_order"),
+
+      supabaseClient
+        .from("product_colors")
+        .select("*")
+        .eq("product_id",id)
+        .order("sort_order")
+
+    ]);
+
+
+    if(im.error){
+      throw im.error;
+    }
+
+    if(sz.error){
+      throw sz.error;
+    }
+
+    if(co.error){
+      throw co.error;
+    }
+
+
+    productSizes =
+      (sz.data || [])
+      .map(x => String(x.size));
+
+
+    const colors =
+      co.data || [];
+
+
+    productImages =
+      (im.data || [])
+      .map(x => ({
+
+        ...x,
+
+        color:
+          colors.find(
+            c =>
+              String(c.image_id) ===
+              String(x.id)
+          )?.color_name || ""
+
+      }));
+
+
+    renderSizes();
+    renderImages();
+
+  }
+
+
+  $("productModal")
+    .classList.add("show");
+
+}
+
+
+function resetProductForm(){
+
+  editingProductId = null;
+
+  productSizes = [];
+
+  productImages = [];
+
+  newImageFiles = [];
+
+
+  $("productModalTitle").textContent =
+    "إضافة منتج";
+
+  $("pName").value = "";
+  $("pSku").value = "";
+  $("pCategory").value = "dresses";
+  $("pPrice").value = "";
+  $("pOldPrice").value = "";
+
+  $("pOffer").checked = false;
+  $("pSale").checked = false;
+  $("pAvailable").checked = true;
+  $("pActive").checked = true;
+
+  $("pDescription").value = "";
+
+  $("newSize").value = "";
+  $("pImages").value = "";
+
+  renderSizes();
+  renderImages();
+
+}
+
+
+function addSize(){
+
+  const v =
+    $("newSize")
+      .value
+      .trim();
+
+  if(
+    v &&
+    !productSizes.includes(v)
+  ){
+
+    productSizes.push(v);
+
+    renderSizes();
+
+  }
+
+  $("newSize").value = "";
+
+}
+
+
+$("newSize")
+.addEventListener(
+  "keydown",
+  e=>{
+
+    if(e.key==="Enter"){
+
+      e.preventDefault();
+
+      addSize();
+
+    }
+
+  }
+);
+
+
+function renderSizes(){
+
+  $("sizeList").innerHTML =
+    productSizes
+      .map(
+        (s,i)=>
+        `<span class="size-chip">
+          ${safe(s)}
+          <button
+            onclick="removeSize(${i})"
+          >
+            ×
+          </button>
+        </span>`
+      )
+      .join("")
+      ||
+      `<span style="font-size:11px;color:#999">
+        لم تتم إضافة مقاسات بعد.
+      </span>`;
+
+}
+
+
+function removeSize(index){
+
+  productSizes.splice(index,1);
+
+  renderSizes();
+
+}
+
+
+function previewNewImages(){
+
+  newImageFiles =
+    [...$("pImages").files];
+
+  renderImages();
+
+}
+
+
+function renderImages(){
+
+  const existing =
+    productImages
+      .map(
+        (im,i)=>
+        `<div class="image-row">
+
+          <img
+            src="${safe(im.image_url)}"
+          >
+
+          <input
+            placeholder="اللون المرتبط بهذه الصورة"
+            value="${safe(im.color || "")}"
+            oninput="
+              productImages[${i}].color=this.value
+            "
+          >
+
+          <button
+            onclick="removeExistingImage(${i})"
+          >
+            إزالة الصورة
+          </button>
+
+        </div>`
+      )
+      .join("");
+
+
+  const fresh =
+    newImageFiles
+      .map(
+        (f,i)=>
+        `<div class="image-row">
+
+          <img
+            src="${URL.createObjectURL(f)}"
+          >
+
+          <input
+            id="newColor${i}"
+            placeholder="اللون المرتبط بهذه الصورة"
+          >
+
+        </div>`
+      )
+      .join("");
+
+
+  $("imageList").innerHTML =
+    existing + fresh
+    ||
+    `<div class="loading">
+      لم تتم إضافة صور.
+    </div>`;
+
+}
+
+
+function removeExistingImage(index){
+
+  productImages.splice(index,1);
+
+  renderImages();
+
+}
+
+
+/* =========================
+   STORAGE
+========================= */
+
+async function uploadFile(file,path){
+
+  const {error} =
+    await supabaseClient
+      .storage
+      .from(BUCKET)
+      .upload(
+        path,
+        file,
+        {
+          upsert:false,
+          contentType:file.type
+        }
+      );
+
+  if(error){
+    throw error;
+  }
+
+  const {data} =
+    supabaseClient
+      .storage
+      .from(BUCKET)
+      .getPublicUrl(path);
+
+  return data.publicUrl;
+
+}
+
+
+/* =========================
+   SAVE PRODUCT
+========================= */
+
+async function saveProduct(){
+
+  const btn =
+    $("saveProductBtn");
+
+  btn.disabled = true;
+
+  btn.textContent =
+    "جارٍ الحفظ...";
+
+
+  try{
+
+    const payload = {
+
+      name:
+        $("pName")
+          .value
+          .trim(),
+
+      description:
+        $("pDescription")
+          .value
+          .trim(),
+
+      category:
+        $("pCategory").value,
+
+      price:
+        Number(
+          $("pPrice").value || 0
+        ),
+
+      old_price:
+        $("pOldPrice").value === ""
+          ? null
+          : Number($("pOldPrice").value),
+
+      sku:
+        $("pSku").value.trim()
+          || null,
+
+      is_offer:
+        $("pOffer").checked,
+
+      is_sale:
+        $("pSale").checked,
+
+      is_available:
+        $("pAvailable").checked,
+
+      is_active:
+        $("pActive").checked
+
+    };
+
+
+    if(!payload.name){
+
+      throw new Error(
+        "اكتبي اسم المنتج."
+      );
+
+    }
+
+
+    let id =
+      editingProductId;
+
+
+    /* INSERT */
+
+    if(id === null){
+
+      const {data,error} =
+        await supabaseClient
+          .from("products")
+          .insert(payload)
+          .select()
+          .single();
+
+      if(error){
+        throw error;
+      }
+
+      id = data.id;
+
+    }
+
+
+    /* UPDATE */
+
+    else{
+
+      const {error} =
+        await supabaseClient
+          .from("products")
+          .update(payload)
+          .eq("id",id);
+
+      if(error){
+        throw error;
+      }
+
+    }
+
+
+    /* DELETE OLD RELATIONS */
+
+    const {error:colorsError} =
+      await supabaseClient
+        .from("product_colors")
+        .delete()
+        .eq("product_id",id);
+
+    if(colorsError){
+      throw colorsError;
+    }
+
+
+    const {error:sizesError} =
+      await supabaseClient
+        .from("product_sizes")
+        .delete()
+        .eq("product_id",id);
+
+    if(sizesError){
+      throw sizesError;
+    }
+
+
+    const {error:imagesError} =
+      await supabaseClient
+        .from("product_images")
+        .delete()
+        .eq("product_id",id);
+
+    if(imagesError){
+      throw imagesError;
+    }
+
+
+    /* IMAGE ROWS */
+
+    let imageRows = [];
+
+
+    /* OLD IMAGES */
+
+    for(
+      let i=0;
+      i<productImages.length;
+      i++
+    ){
+
+      const im =
+        productImages[i];
+
+      imageRows.push({
+
+        product_id:id,
+
+        image_url:
+          im.image_url,
+
+        storage_path:
+          im.storage_path || null,
+
+        sort_order:i,
+
+        color:
+          im.color || ""
+
+      });
+
+    }
+
+
+    /* NEW IMAGES */
+
+    for(
+      let i=0;
+      i<newImageFiles.length;
+      i++
+    ){
+
+      const file =
+        newImageFiles[i];
+
+      const ext =
+        (
+          file.name
+            .split(".")
+            .pop()
+          || "jpg"
+        )
+        .toLowerCase();
+
+
+      const path =
+        `products/${crypto.randomUUID()}.${ext}`;
+
+
+      const url =
+        await uploadFile(
+          file,
+          path
+        );
+
+
+      imageRows.push({
+
+        product_id:id,
+
+        image_url:url,
+
+        storage_path:path,
+
+        sort_order:imageRows.length,
+
+        color:
+          $("newColor"+i)
+            ?.value
+            .trim()
+            || ""
+
+      });
+
+    }
+
+
+    /* INSERT IMAGES */
+
+    if(imageRows.length){
+
+      const rows =
+        imageRows.map(
+          x => ({
+
+            product_id:
+              x.product_id,
+
+            image_url:
+              x.image_url,
+
+            storage_path:
+              x.storage_path,
+
+            sort_order:
+              x.sort_order
+
+          })
+        );
+
+
+      const {
+        data:inserted,
+        error:insertError
+      } =
+        await supabaseClient
+          .from("product_images")
+          .insert(rows)
+          .select();
+
+
+      if(insertError){
+        throw insertError;
+      }
+
+
+      /* INSERT COLORS */
+
+      const colorRows =
+        imageRows
+          .map(
+            (x,i)=>{
+
+              if(!x.color){
+                return null;
+              }
+
+              return {
+
+                product_id:id,
+
+                image_id:
+                  inserted[i].id,
+
+                color_name:
+                  x.color,
+
+                sort_order:i
+
+              };
+
+            }
+          )
+          .filter(Boolean);
+
+
+      if(colorRows.length){
+
+        const {error} =
+          await supabaseClient
+            .from("product_colors")
+            .insert(colorRows);
+
+        if(error){
+          throw error;
+        }
+
+      }
+
+
+      /* PRIMARY PRODUCT IMAGE */
+
+      const {error:imageUpdateError} =
+        await supabaseClient
+          .from("products")
+          .update({
+            image_url:
+              inserted[0].image_url
+          })
+          .eq("id",id);
+
+
+      if(imageUpdateError){
+        throw imageUpdateError;
+      }
+
+    }
+
+
+    /* NO IMAGES */
+
+    else{
+
+      const {error} =
+        await supabaseClient
+          .from("products")
+          .update({
+            image_url:null
+          })
+          .eq("id",id);
+
+      if(error){
+        throw error;
+      }
+
+    }
+
+
+    /* INSERT SIZES */
+
+    if(productSizes.length){
+
+      const rows =
+        productSizes.map(
+          (size,i)=>({
+
+            product_id:id,
+
+            size,
+
+            sort_order:i
+
+          })
+        );
+
+
+      const {error} =
+        await supabaseClient
+          .from("product_sizes")
+          .insert(rows);
+
+      if(error){
+        throw error;
+      }
+
+    }
+
+
+    await loadProducts();
+
+    renderAll();
+
+    closeModal("productModal");
+
+    toast(
+      "تم حفظ المنتج بنجاح"
+    );
+
+
+  }catch(e){
+
+    console.error(e);
+
+    toast(
+      e.message ||
+      "حدث خطأ أثناء حفظ المنتج"
+    );
+
+
+  }finally{
+
+    btn.disabled = false;
+
+    btn.textContent =
+      "حفظ المنتج";
+
+  }
+
+}
+
+
+/* =========================
+   DELETE PRODUCT
+========================= */
+
+async function deleteProduct(id){
+
+  if(
+    !confirm(
+      "هل أنت متأكد من حذف المنتج؟"
+    )
+  ){
+    return;
+  }
+
+
+  try{
+
+    const {error:colorsError} =
+      await supabaseClient
+        .from("product_colors")
+        .delete()
+        .eq("product_id",id);
+
+    if(colorsError){
+      throw colorsError;
+    }
+
+
+    const {error:sizesError} =
+      await supabaseClient
+        .from("product_sizes")
+        .delete()
+        .eq("product_id",id);
+
+    if(sizesError){
+      throw sizesError;
+    }
+
+
+    const {error:imagesError} =
+      await supabaseClient
+        .from("product_images")
+        .delete()
+        .eq("product_id",id);
+
+    if(imagesError){
+      throw imagesError;
+    }
+
+
+    const {error} =
+      await supabaseClient
+        .from("products")
+        .delete()
+        .eq("id",id);
+
+
+    if(error){
+      throw error;
+    }
+
+
+    await loadProducts();
+
+    renderAll();
+
+    toast(
+      "تم حذف المنتج"
+    );
+
+
+  }catch(e){
+
+    console.error(e);
+
+    toast(
+      e.message ||
+      "تعذر حذف المنتج"
+    );
+
+  }
+
+}
+
+
+/* =========================
+   PRODUCT RENDER
+========================= */
+
+function productCard(p){
+
+  const id =
+    JSON.stringify(String(p.id));
+
+
+  return `
+
+    <div class="product-card">
+
+      <img
+        src="${safe(p.image_url || "")}"
+        alt="${safe(p.name)}"
+        onerror="this.style.opacity=.2"
+      >
+
+      <div class="pc-body">
+
+        <div class="pc-name">
+          ${safe(p.name || "بدون اسم")}
+        </div>
+
+        <div class="pc-price">
+
+          ₪${format(p.price)}
+
+          ${
+            p.old_price
+            ?
+            `<del>
+              ₪${format(p.old_price)}
+            </del>`
+            :
+            ""
+          }
+
+        </div>
+
+
+        <div class="badges">
+
+          <span class="badge">
+            ${
+              p.category === "sets"
+              ? "طقم"
+              : "فستان"
+            }
+          </span>
+
+
+          ${
+            p.is_offer
+            ?
+            `<span class="badge offer">
+              عرض
+            </span>`
+            :
+            ""
+          }
+
+
+          ${
+            p.is_sale
+            ?
+            `<span class="badge">
+              تخفيض
+            </span>`
+            :
+            ""
+          }
+
+
+          ${
+            p.is_available === false
+            ?
+            `<span class="badge">
+              غير متاح
+            </span>`
+            :
+            ""
+          }
+
+
+          ${
+            p.is_active === false
+            ?
+            `<span class="badge">
+              مخفي
+            </span>`
+            :
+            ""
+          }
+
+        </div>
+
+
+        <div class="pc-meta">
+          SKU:
+          ${safe(p.sku || "—")}
+        </div>
+
+
+        <div class="pc-actions">
+
+          <button
+            class="edit"
+            onclick='openProductModal(${id})'
+          >
+            تعديل
+          </button>
+
+
+          <button
+            class="delete"
+            onclick='deleteProduct(${id})'
+          >
+            حذف
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+function renderProductList(){
+
+  let arr =
+    [...products];
+
+
+  const q =
+    (
+      $("productSearch")
+      ?.value
+      || ""
+    )
+    .toLowerCase()
+    .trim();
+
+
+  const cat =
+    $("productCategory")
+    ?.value
+    || "all";
+
+
+  if(q){
+
+    arr =
+      arr.filter(
+        p =>
+          `${p.name || ""} ${p.sku || ""}`
+            .toLowerCase()
+            .includes(q)
+      );
+
+  }
+
+
+  if(cat !== "all"){
+
+    arr =
+      arr.filter(
+        p =>
+          p.category === cat
+      );
+
+  }
+
+
+  $("productList").innerHTML =
+    arr.length
+    ?
+    arr.map(productCard).join("")
+    :
+    `<div class="loading">
+      لا توجد منتجات.
+    </div>`;
+
+}
+
+
+function renderRecent(){
+
+  $("recentProducts").innerHTML =
+    products
+      .slice(0,4)
+      .map(productCard)
+      .join("")
+      ||
+      `<div class="loading">
+        لا توجد منتجات.
+      </div>`;
+
+}
+
+
+/* =========================
+   SETTINGS
+========================= */
+
 async function loadSettings(){
-  const {data,error}=await supabaseClient.from('store_settings').select('*').eq('id',1).maybeSingle();
-  if(error){toast(error.message);return}
-  settings=data||{id:1,whatsapp:'972595461861',delivery_westbank:20,delivery_jerusalem:30,delivery_inside:70,followers_facebook:22025,followers_instagram:900,followers_tiktok:700,followers_snapchat:500};
-  $('setWhatsapp').value=settings.whatsapp||'';$('setWestbank').value=settings.delivery_westbank??20;$('setJerusalem').value=settings.delivery_jerusalem??30;$('setInside').value=settings.delivery_inside??70;$('setFacebook').value=settings.followers_facebook??0;$('setInstagram').value=settings.followers_instagram??0;$('setTiktok').value=settings.followers_tiktok??0;$('setSnapchat').value=settings.followers_snapchat??0;
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("store_settings")
+      .select("*")
+      .limit(1)
+      .maybeSingle();
+
+
+  if(error){
+
+    console.error(error);
+
+    toast(error.message);
+
+    return;
+  }
+
+
+  settings =
+    data ||
+    {
+
+      id:null,
+
+      store_name:
+        "Espoza Fashion",
+
+      whatsapp:
+        "972595461861",
+
+      instagram:
+        "espoza_fashion",
+
+      facebook:
+        "",
+
+      tiktok:
+        "",
+
+      snapchat:
+        "",
+
+      facebook_followers:
+        22025,
+
+      instagram_followers:
+        900,
+
+      tiktok_followers:
+        700,
+
+      snapchat_followers:
+        500,
+
+      west_bank_delivery:
+        20,
+
+      jerusalem_delivery:
+        30,
+
+      inside_delivery:
+        70
+
+    };
+
+
+  $("setStoreName").value =
+    settings.store_name || "";
+
+  $("setWhatsapp").value =
+    settings.whatsapp || "";
+
+  $("setInstagram").value =
+    settings.instagram || "";
+
+  $("setFacebookLink").value =
+    settings.facebook || "";
+
+  $("setTiktokLink").value =
+    settings.tiktok || "";
+
+  $("setSnapchatLink").value =
+    settings.snapchat || "";
+
+
+  $("setWestbank").value =
+    settings.west_bank_delivery ?? 20;
+
+  $("setJerusalem").value =
+    settings.jerusalem_delivery ?? 30;
+
+  $("setInside").value =
+    settings.inside_delivery ?? 70;
+
+
+  $("setFacebook").value =
+    settings.facebook_followers ?? 0;
+
+  $("setInstagramFollowers").value =
+    settings.instagram_followers ?? 0;
+
+  $("setTiktok").value =
+    settings.tiktok_followers ?? 0;
+
+  $("setSnapchat").value =
+    settings.snapchat_followers ?? 0;
+
 }
-async function loadSlides(){const {data,error}=await supabaseClient.from('hero_slides').select('*').order('sort_order',{ascending:true});if(error){toast(error.message);return}slides=data||[]}
 
-function renderAll(){updateStats();renderProductList();renderRecent();renderSlides()}
-function updateStats(){ $('statProducts').textContent=products.length;$('statOffers').textContent=products.filter(p=>p.is_offer).length;$('statSlides').textContent=slides.filter(s=>s.is_active).length;$('statFollowers').textContent=format(Number(settings?.followers_facebook||0)+Number(settings?.followers_instagram||0)+Number(settings?.followers_tiktok||0)+Number(settings?.followers_snapchat||0)) }
-function productCard(p){return `<div class="product-card"><img src="${safe(p.image_url||'')}" alt="${safe(p.name)}" onerror="this.style.opacity=.2"><div class="pc-body"><div class="pc-name">${safe(p.name||'بدون اسم')}</div><div class="pc-price">₪${format(p.price)} ${p.old_price?`<del>₪${format(p.old_price)}</del>`:''}</div><div class="badges"><span class="badge">${p.category==='sets'?'طقم':'فستان'}</span>${p.is_offer?'<span class="badge offer">عرض</span>':''}${p.is_available===false?'<span class="badge">مخفي</span>':''}</div><div class="pc-meta">SKU: ${safe(p.sku||'—')}</div><div class="pc-actions"><button class="edit" onclick="openProductModal(${p.id})">تعديل</button><button class="delete" onclick="deleteProduct(${p.id})">حذف</button></div></div></div>`}
-function renderProductList(){let arr=[...products];const q=($('productSearch')?.value||'').toLowerCase().trim(),cat=$('productCategory')?.value||'all';if(q)arr=arr.filter(p=>`${p.name||''} ${p.sku||''}`.toLowerCase().includes(q));if(cat!=='all')arr=arr.filter(p=>p.category===cat);$('productList').innerHTML=arr.length?arr.map(productCard).join(''):'<div class="loading">لا توجد منتجات.</div>'}
-function renderRecent(){$('recentProducts').innerHTML=products.slice(0,4).map(productCard).join('')||'<div class="loading">لا توجد منتجات.</div>'}
 
-function resetProductForm(){editingProductId=null;productSizes=[];productImages=[];newImageFiles=[];$('productModalTitle').textContent='إضافة منتج';$('pName').value='';$('pSku').value='';$('pCategory').value='dresses';$('pPrice').value='';$('pOldPrice').value='';$('pOffer').checked=false;$('pAvailable').checked=true;$('pDescription').value='';$('newSize').value='';$('pImages').value='';renderSizes();renderImages()}
-async function openProductModal(id=null){resetProductForm();if(id!=null){editingProductId=id;$('productModalTitle').textContent='تعديل المنتج';const p=products.find(x=>String(x.id)===String(id));if(!p)return;$('pName').value=p.name||'';$('pSku').value=p.sku||'';$('pCategory').value=p.category||'dresses';$('pPrice').value=p.price??'';$('pOldPrice').value=p.old_price??'';$('pOffer').checked=!!p.is_offer;$('pAvailable').checked=p.is_available!==false;$('pDescription').value=p.description||'';const [im,sz,co]=await Promise.all([supabaseClient.from('product_images').select('*').eq('product_id',id).order('sort_order'),supabaseClient.from('product_sizes').select('*').eq('product_id',id).order('sort_order'),supabaseClient.from('product_colors').select('*').eq('product_id',id).order('sort_order')]);productSizes=(sz.data||[]).map(x=>String(x.size));const colors=co.data||[];productImages=(im.data||[]).map(x=>({...x,color:colors.find(c=>String(c.image_id)===String(x.id))?.color_name||''}));renderSizes();renderImages()} $('productModal').classList.add('show')}
-function addSize(){const v=$('newSize').value.trim();if(v&&!productSizes.includes(v)){productSizes.push(v);renderSizes()}$('newSize').value=''}
-$('newSize').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addSize()}})
-function renderSizes(){$('sizeList').innerHTML=productSizes.map((s,i)=>`<span class="size-chip">${safe(s)}<button onclick="productSizes.splice(${i},1);renderSizes()">×</button></span>`).join('')||'<span style="font-size:11px;color:#999">لم تتم إضافة مقاسات بعد.</span>'}
-function previewNewImages(){newImageFiles=[...$('pImages').files];renderImages()}
-function renderImages(){const existing=productImages.map((im,i)=>`<div class="image-row" data-kind="existing" data-index="${i}"><img src="${safe(im.image_url)}"><input placeholder="اللون المرتبط بهذه الصورة" value="${safe(im.color||'')}" oninput="productImages[${i}].color=this.value"><button onclick="productImages.splice(${i},1);renderImages()">إزالة الصورة</button></div>`).join('');const fresh=newImageFiles.map((f,i)=>`<div class="image-row"><img src="${URL.createObjectURL(f)}"><input id="newColor${i}" placeholder="اللون المرتبط بهذه الصورة"></div>`).join('');$('imageList').innerHTML=existing+fresh||'<div class="loading">لم تتم إضافة صور.</div>'}
+async function saveSettings(){
 
-async function uploadFile(file,path){const {error}=await supabaseClient.storage.from(BUCKET).upload(path,file,{upsert:false});if(error)throw error;const {data}=supabaseClient.storage.from(BUCKET).getPublicUrl(path);return data.publicUrl}
-async function saveProduct(){const btn=$('saveProductBtn');btn.disabled=true;btn.textContent='جارٍ الحفظ...';try{const payload={name:$('pName').value.trim(),description:$('pDescription').value.trim(),category:$('pCategory').value,price:Number($('pPrice').value||0),old_price:$('pOldPrice').value===''?null:Number($('pOldPrice').value),sku:$('pSku').value.trim()||null,is_offer:$('pOffer').checked,is_available:$('pAvailable').checked};if(!payload.name)throw new Error('اكتبي اسم المنتج.');let id=editingProductId;if(id==null){const {data,error}=await supabaseClient.from('products').insert(payload).select().single();if(error)throw error;id=data.id}else{const {error}=await supabaseClient.from('products').update(payload).eq('id',id);if(error)throw error}
-  const {error:delColors}=await supabaseClient.from('product_colors').delete().eq('product_id',id);if(delColors)throw delColors;const {error:delSizes}=await supabaseClient.from('product_sizes').delete().eq('product_id',id);if(delSizes)throw delSizes;const {error:delImages}=await supabaseClient.from('product_images').delete().eq('product_id',id);if(delImages)throw delImages;
-  let imageRows=[];for(let i=0;i<productImages.length;i++){const im=productImages[i];imageRows.push({product_id:id,image_url:im.image_url,storage_path:im.storage_path||null,sort_order:i,color:im.color||''})}
-  for(let i=0;i<newImageFiles.length;i++){const file=newImageFiles[i],ext=(file.name.split('.').pop()||'jpg').toLowerCase(),path=`products/${crypto.randomUUID()}.${ext}`,url=await uploadFile(file,path);imageRows.push({product_id:id,image_url:url,storage_path:path,sort_order:imageRows.length,color:$(`newColor${i}`)?.value.trim()||''})}
-  if(imageRows.length){const rows=imageRows.map(x=>({product_id:id,image_url:x.image_url,storage_path:x.storage_path,sort_order:x.sort_order}));const {data:inserted,error:ie}=await supabaseClient.from('product_images').insert(rows).select();if(ie)throw ie;const colorRows=imageRows.map((x,i)=>x.color?{product_id:id,image_id:inserted[i].id,color_name:x.color,sort_order:i}:null).filter(Boolean);if(colorRows.length){const {error:ce}=await supabaseClient.from('product_colors').insert(colorRows);if(ce)throw ce}const {error:ue}=await supabaseClient.from('products').update({image_url:inserted[0].image_url}).eq('id',id);if(ue)throw ue}
-  if(productSizes.length){const {error:se}=await supabaseClient.from('product_sizes').insert(productSizes.map((size,i)=>({product_id:id,size,sort_order:i})));if(se)throw se}
-  await loadProducts();renderAll();closeModal('productModal');toast('تم حفظ المنتج بنجاح');
-}catch(e){console.error(e);toast(e.message||'حدث خطأ أثناء الحفظ')}finally{btn.disabled=false;btn.textContent='حفظ المنتج'}}
+  try{
 
-async function deleteProduct(id){if(!confirm('هل أنت متأكد من حذف المنتج؟'))return;try{await supabaseClient.from('product_colors').delete().eq('product_id',id);await supabaseClient.from('product_sizes').delete().eq('product_id',id);await supabaseClient.from('product_images').delete().eq('product_id',id);const {error}=await supabaseClient.from('products').delete().eq('id',id);if(error)throw error;await loadProducts();renderAll();toast('تم حذف المنتج')}catch(e){toast(e.message||'تعذر حذف المنتج')}}
+    const payload = {
 
-async function saveSettings(){const payload={id:1,whatsapp:$('setWhatsapp').value.trim().replace(/[^0-9]/g,''),delivery_westbank:Number($('setWestbank').value||0),delivery_jerusalem:Number($('setJerusalem').value||0),delivery_inside:Number($('setInside').value||0),followers_facebook:Number($('setFacebook').value||0),followers_instagram:Number($('setInstagram').value||0),followers_tiktok:Number($('setTiktok').value||0),followers_snapchat:Number($('setSnapchat').value||0),updated_at:new Date().toISOString()};try{const {error}=await supabaseClient.from('store_settings').upsert(payload,{onConflict:'id'});if(error)throw error;settings=payload;updateStats();toast('تم حفظ إعدادات المتجر')}catch(e){toast(e.message||'تعذر حفظ الإعدادات')}}
+      store_name:
+        $("setStoreName")
+          .value
+          .trim()
+        || "Espoza Fashion",
 
-function resetSlideForm(){$('slideModalTitle').textContent='إضافة سلايدر';editingSlideId=null;$('sTitleAr').value='';$('sTitleEn').value='';$('sDescAr').value='';$('sDescEn').value='';$('sButtonAr').value='استكشفي';$('sButtonEn').value='Explore';$('sCategory').value='all';$('sOrder').value=slides.length;$('sActive').checked=true;$('sImage').value='';$('slideImagePreview').innerHTML=''}
-function openSlideModal(id=null){resetSlideForm();if(id!=null){const s=slides.find(x=>String(x.id)===String(id));if(!s)return;editingSlideId=id;$('slideModalTitle').textContent='تعديل السلايدر';$('sTitleAr').value=s.title_ar||'';$('sTitleEn').value=s.title_en||'';$('sDescAr').value=s.description_ar||'';$('sDescEn').value=s.description_en||'';$('sButtonAr').value=s.button_ar||'استكشفي';$('sButtonEn').value=s.button_en||'Explore';$('sCategory').value=s.category||'all';$('sOrder').value=s.sort_order??0;$('sActive').checked=s.is_active!==false;$('slideImagePreview').innerHTML=s.image_url?`<img src="${safe(s.image_url)}" style="width:100%;max-height:250px;object-fit:contain;border-radius:12px;background:#f4efec">`:''}$('slideModal').classList.add('show')}
-function previewSlideImage(){const f=$('sImage').files[0];if(!f)return;$('slideImagePreview').innerHTML=`<img src="${URL.createObjectURL(f)}" style="width:100%;max-height:250px;object-fit:contain;border-radius:12px;background:#f4efec">`}
-async function saveSlide(){const btn=$('saveSlideBtn');btn.disabled=true;btn.textContent='جارٍ الحفظ...';try{const old=editingSlideId?slides.find(x=>String(x.id)===String(editingSlideId)):null;let image_url=old?.image_url||'',storage_path=old?.storage_path||null;const file=$('sImage').files[0];if(file){const ext=(file.name.split('.').pop()||'jpg').toLowerCase(),path=`hero/${crypto.randomUUID()}.${ext}`;image_url=await uploadFile(file,path);storage_path=path}if(!image_url)throw new Error('اختاري صورة للسلايدر.');const payload={title_ar:$('sTitleAr').value.trim(),title_en:$('sTitleEn').value.trim(),description_ar:$('sDescAr').value.trim(),description_en:$('sDescEn').value.trim(),button_ar:$('sButtonAr').value.trim()||'استكشفي',button_en:$('sButtonEn').value.trim()||'Explore',category:$('sCategory').value,sort_order:Number($('sOrder').value||0),is_active:$('sActive').checked,image_url,storage_path,updated_at:new Date().toISOString()};let error;if(editingSlideId){({error}=await supabaseClient.from('hero_slides').update(payload).eq('id',editingSlideId))}else{({error}=await supabaseClient.from('hero_slides').insert(payload))}if(error)throw error;await loadSlides();renderAll();closeModal('slideModal');toast('تم حفظ السلايدر')}catch(e){toast(e.message||'تعذر حفظ السلايدر')}finally{btn.disabled=false;btn.textContent='حفظ السلايدر'}}
-function renderSlides(){const c=$('slideList');c.innerHTML=slides.length?slides.map(s=>`<div class="slide-card"><img src="${safe(s.image_url)}"><div class="slide-body"><h3>${safe(s.title_ar||s.title_en)}</h3><p>${safe(s.description_ar||'بدون وصف')}</p><div class="badges"><span class="badge">#${s.sort_order}</span><span class="badge">${s.is_active?'فعال':'مخفي'}</span><span class="badge">${safe(s.category)}</span></div><div class="pc-actions"><button class="edit" onclick="openSlideModal(${s.id})">تعديل</button><button class="delete" onclick="deleteSlide(${s.id})">حذف</button></div></div></div>`).join(''):'<div class="loading">لا توجد سلايدرات.</div>'}
-async function deleteSlide(id){if(!confirm('حذف هذا السلايدر؟'))return;const {error}=await supabaseClient.from('hero_slides').delete().eq('id',id);if(error){toast(error.message);return}await loadSlides();renderAll();toast('تم حذف السلايدر')}
+      whatsapp:
+        $("setWhatsapp")
+          .value
+          .trim()
+          .replace(/[^0-9]/g,""),
 
-document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show')}));
+      instagram:
+        $("setInstagram")
+          .value
+          .trim(),
+
+      facebook:
+        $("setFacebookLink")
+          .value
+          .trim(),
+
+      tiktok:
+        $("setTiktokLink")
+          .value
+          .trim(),
+
+      snapchat:
+        $("setSnapchatLink")
+          .value
+          .trim(),
+
+      facebook_followers:
+        Number(
+          $("setFacebook").value || 0
+        ),
+
+      instagram_followers:
+        Number(
+          $("setInstagramFollowers").value || 0
+        ),
+
+      tiktok_followers:
+        Number(
+          $("setTiktok").value || 0
+        ),
+
+      snapchat_followers:
+        Number(
+          $("setSnapchat").value || 0
+        ),
+
+      west_bank_delivery:
+        Number(
+          $("setWestbank").value || 0
+        ),
+
+      jerusalem_delivery:
+        Number(
+          $("setJerusalem").value || 0
+        ),
+
+      inside_delivery:
+        Number(
+          $("setInside").value || 0
+        ),
+
+      updated_at:
+        new Date().toISOString()
+
+    };
+
+
+    if(settings?.id){
+
+      payload.id =
+        settings.id;
+
+    }
+
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("store_settings")
+        .upsert(
+          payload,
+          {
+            onConflict:"id"
+          }
+        )
+        .select()
+        .single();
+
+
+    if(error){
+      throw error;
+    }
+
+
+    settings = data;
+
+    updateStats();
+
+    toast(
+      "تم حفظ إعدادات المتجر"
+    );
+
+
+  }catch(e){
+
+    console.error(e);
+
+    toast(
+      e.message ||
+      "تعذر حفظ الإعدادات"
+    );
+
+  }
+
+}
+
+
+/* =========================
+   SLIDER
+========================= */
+
+async function loadSlides(){
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("slider")
+      .select("*")
+      .order(
+        "sort_order",
+        {ascending:true}
+      );
+
+
+  if(error){
+
+    console.error(error);
+
+    toast(error.message);
+
+    slides = [];
+
+    return;
+  }
+
+
+  slides = data || [];
+
+}
+
+
+function resetSlideForm(){
+
+  $("slideModalTitle").textContent =
+    "إضافة سلايدر";
+
+  editingSlideId = null;
+
+  $("sTitle").value = "";
+
+  $("sSubtitle").value = "";
+
+  $("sButtonText").value =
+    "استكشفي";
+
+  $("sButtonLink").value =
+    "";
+
+  $("sOrder").value =
+    slides.length;
+
+  $("sActive").checked =
+    true;
+
+  $("sImage").value =
+    "";
+
+  $("slideImagePreview").innerHTML =
+    "";
+
+}
+
+
+function openSlideModal(id=null){
+
+  resetSlideForm();
+
+
+  if(id !== null){
+
+    const s =
+      slides.find(
+        x =>
+          String(x.id) ===
+          String(id)
+      );
+
+
+    if(!s){
+
+      toast(
+        "السلايدر غير موجود."
+      );
+
+      return;
+    }
+
+
+    editingSlideId =
+      id;
+
+
+    $("slideModalTitle").textContent =
+      "تعديل السلايدر";
+
+
+    $("sTitle").value =
+      s.title || "";
+
+
+    $("sSubtitle").value =
+      s.subtitle || "";
+
+
+    $("sButtonText").value =
+      s.button_text ||
+      "استكشفي";
+
+
+    $("sButtonLink").value =
+      s.button_link ||
+      "";
+
+
+    $("sOrder").value =
+      s.sort_order ?? 0;
+
+
+    $("sActive").checked =
+      s.is_active !== false;
+
+
+    $("slideImagePreview").innerHTML =
+      s.image_url
+      ?
+      `<img
+        src="${safe(s.image_url)}"
+        style="
+          width:100%;
+          max-height:250px;
+          object-fit:contain;
+          border-radius:12px;
+          background:#f4efec
+        "
+      >`
+      :
+      "";
+
+  }
+
+
+  $("slideModal")
+    .classList.add("show");
+
+}
+
+
+function previewSlideImage(){
+
+  const f =
+    $("sImage").files[0];
+
+  if(!f){
+    return;
+  }
+
+
+  $("slideImagePreview").innerHTML =
+    `<img
+      src="${URL.createObjectURL(f)}"
+      style="
+        width:100%;
+        max-height:250px;
+        object-fit:contain;
+        border-radius:12px;
+        background:#f4efec
+      "
+    >`;
+
+}
+
+
+async function saveSlide(){
+
+  const btn =
+    $("saveSlideBtn");
+
+  btn.disabled = true;
+
+  btn.textContent =
+    "جارٍ الحفظ...";
+
+
+  try{
+
+    const old =
+      editingSlideId
+      ?
+      slides.find(
+        x =>
+          String(x.id) ===
+          String(editingSlideId)
+      )
+      :
+      null;
+
+
+    let image_url =
+      old?.image_url || "";
+
+
+    const file =
+      $("sImage").files[0];
+
+
+    if(file){
+
+      const ext =
+        (
+          file.name
+            .split(".")
+            .pop()
+          || "jpg"
+        )
+        .toLowerCase();
+
+
+      const path =
+        `hero/${crypto.randomUUID()}.${ext}`;
+
+
+      image_url =
+        await uploadFile(
+          file,
+          path
+        );
+
+    }
+
+
+    if(!image_url){
+
+      throw new Error(
+        "اختاري صورة للسلايدر."
+      );
+
+    }
+
+
+    const payload = {
+
+      image_url,
+
+      title:
+        $("sTitle")
+          .value
+          .trim(),
+
+      subtitle:
+        $("sSubtitle")
+          .value
+          .trim(),
+
+      button_text:
+        $("sButtonText")
+          .value
+          .trim()
+        || "استكشفي",
+
+      button_link:
+        $("sButtonLink")
+          .value
+          .trim(),
+
+      sort_order:
+        Number(
+          $("sOrder").value || 0
+        ),
+
+      is_active:
+        $("sActive").checked
+
+    };
+
+
+    if(editingSlideId !== null){
+
+      const {error} =
+        await supabaseClient
+          .from("slider")
+          .update(payload)
+          .eq(
+            "id",
+            editingSlideId
+          );
+
+
+      if(error){
+        throw error;
+      }
+
+    }
+
+
+    else{
+
+      const {error} =
+        await supabaseClient
+          .from("slider")
+          .insert(payload);
+
+
+      if(error){
+        throw error;
+      }
+
+    }
+
+
+    await loadSlides();
+
+    renderAll();
+
+    closeModal("slideModal");
+
+    toast(
+      "تم حفظ السلايدر"
+    );
+
+
+  }catch(e){
+
+    console.error(e);
+
+    toast(
+      e.message ||
+      "تعذر حفظ السلايدر"
+    );
+
+
+  }finally{
+
+    btn.disabled = false;
+
+    btn.textContent =
+      "حفظ السلايدر";
+
+  }
+
+}
+
+
+function renderSlides(){
+
+  const c =
+    $("slideList");
+
+
+  c.innerHTML =
+    slides.length
+    ?
+    slides
+      .map(
+        s=>{
+
+          const id =
+            JSON.stringify(
+              String(s.id)
+            );
+
+
+          return `
+
+            <div class="slide-card">
+
+              <img
+                src="${safe(s.image_url)}"
+                onerror="this.style.opacity=.2"
+              >
+
+              <div class="slide-body">
+
+                <h3>
+                  ${safe(
+                    s.title ||
+                    "بدون عنوان"
+                  )}
+                </h3>
+
+                <p>
+                  ${safe(
+                    s.subtitle ||
+                    "بدون وصف"
+                  )}
+                </p>
+
+
+                <div class="badges">
+
+                  <span class="badge">
+                    #${safe(s.sort_order)}
+                  </span>
+
+                  <span class="badge">
+                    ${
+                      s.is_active
+                      ? "فعال"
+                      : "مخفي"
+                    }
+                  </span>
+
+                </div>
+
+
+                <div class="pc-actions">
+
+                  <button
+                    class="edit"
+                    onclick='openSlideModal(${id})'
+                  >
+                    تعديل
+                  </button>
+
+                  <button
+                    class="delete"
+                    onclick='deleteSlide(${id})'
+                  >
+                    حذف
+                  </button>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          `;
+
+        }
+      )
+      .join("")
+    :
+    `<div class="loading">
+      لا توجد سلايدرات.
+    </div>`;
+
+}
+
+
+async function deleteSlide(id){
+
+  if(
+    !confirm(
+      "حذف هذا السلايدر؟"
+    )
+  ){
+    return;
+  }
+
+
+  try{
+
+    const {error} =
+      await supabaseClient
+        .from("slider")
+        .delete()
+        .eq("id",id);
+
+
+    if(error){
+      throw error;
+    }
+
+
+    await loadSlides();
+
+    renderAll();
+
+    toast(
+      "تم حذف السلايدر"
+    );
+
+
+  }catch(e){
+
+    console.error(e);
+
+    toast(
+      e.message ||
+      "تعذر حذف السلايدر"
+    );
+
+  }
+
+}
+
+
+/* =========================
+   STATS
+========================= */
+
+function updateStats(){
+
+  $("statProducts")
+    .textContent =
+      products.length;
+
+
+  $("statOffers")
+    .textContent =
+      products.filter(
+        p => p.is_offer
+      ).length;
+
+
+  $("statSlides")
+    .textContent =
+      slides.filter(
+        s => s.is_active
+      ).length;
+
+
+  const followers =
+    Number(
+      settings?.facebook_followers || 0
+    )
+    +
+    Number(
+      settings?.instagram_followers || 0
+    )
+    +
+    Number(
+      settings?.tiktok_followers || 0
+    )
+    +
+    Number(
+      settings?.snapchat_followers || 0
+    );
+
+
+  $("statFollowers")
+    .textContent =
+      format(followers);
+
+}
+
+
+function renderAll(){
+
+  updateStats();
+
+  renderProductList();
+
+  renderRecent();
+
+  renderSlides();
+
+}
+
+
+/* =========================
+   MODAL CLICK
+========================= */
+
+document
+.querySelectorAll(".modal")
+.forEach(
+  m =>
+    m.addEventListener(
+      "click",
+      e=>{
+        if(e.target === m){
+          m.classList.remove("show");
+        }
+      }
+    )
+);
+
+
+/* START */
+
 boot();
+
 </script>
+
 </body>
 </html>
+```
+
