@@ -1266,7 +1266,7 @@ const SUPABASE_URL =
   "https://ptwceqbxusgyutrroayz.supabase.co";
 
 const SUPABASE_KEY =
-  "sb_publishable_Hto6uDekI9TvxTLFs7kYWg_ApV51joA";
+  "sb_publishable_Hto6uDekI9TvxTLFs7kYWg_ApV51joa";
 
 const supabaseClient =
   window.supabase.createClient(
@@ -1548,12 +1548,108 @@ async function loadProducts(){
     return;
   }
 
+
+  const baseProducts =
+    data || [];
+
+
   /*
-    تحميل المنتجات فقط من Supabase.
-    لا يوجد هنا حذف أو استبدال لقاعدة البيانات.
+    إذا كانت المنتجات فارغة،
+    لا نحتاج لطلب صور.
   */
 
-  products = data || [];
+  if(!baseProducts.length){
+
+    products = [];
+
+    renderProducts();
+    updateDashboard();
+
+    return;
+
+  }
+
+
+  /*
+    تحميل صور product_images لكل المنتجات
+    بدون تعديل أو حذف أي بيانات.
+  */
+
+  const productIds =
+    baseProducts
+      .map(p=>p.id)
+      .filter(Boolean);
+
+
+  const {
+    data:imageRows,
+    error:imageError
+  } =
+    await supabaseClient
+      .from("product_images")
+      .select(
+        "id,product_id,image_url,sort_order"
+      )
+      .in("product_id",productIds)
+      .order("sort_order",{ascending:true});
+
+
+  if(imageError){
+
+    /*
+      خطأ الصور لا يمنع تحميل المنتجات.
+    */
+
+    console.warn(
+      "تعذر تحميل صور المنتجات:",
+      imageError
+    );
+
+  }
+
+
+  /*
+    أخذ أول صورة لكل منتج.
+  */
+
+  const firstImages = {};
+
+
+  (imageRows || []).forEach(img=>{
+
+    if(
+      img.product_id &&
+      img.image_url &&
+      !firstImages[img.product_id]
+    ){
+
+      firstImages[img.product_id] =
+        img.image_url;
+
+    }
+
+  });
+
+
+  /*
+    الصورة الأساسية:
+    1. products.image_url
+    2. أول صورة من product_images
+    3. null
+  */
+
+  products =
+    baseProducts.map(p=>({
+
+      ...p,
+
+      image_url:
+        p.image_url ||
+        firstImages[p.id] ||
+        null
+
+    }));
+
 
   renderProducts();
   updateDashboard();
@@ -1739,9 +1835,6 @@ function openProductModal(productId=null){
     $("productDescription").value =
       p.description || "";
 
-    /*
-      تحميل المقاسات أيضًا عند التعديل.
-    */
     loadExistingProductSizes(p.id);
 
     loadExistingProductImages(p.id);
@@ -1802,6 +1895,7 @@ async function loadExistingProductImages(productId){
 
   }
 
+
   productImages =
     (data || []).map(img=>({
       existing:true,
@@ -1812,11 +1906,50 @@ async function loadExistingProductImages(productId){
       file:null
     }));
 
+
+  /*
+    إذا لم توجد product_images،
+    نستخدم products.image_url كصورة موجودة.
+    هذا يمنع اختفاء الصور القديمة.
+  */
+
+  if(!productImages.length){
+
+    const product =
+      products.find(
+        x=>String(x.id) === String(productId)
+      );
+
+    if(product?.image_url){
+
+      productImages = [{
+
+        existing:true,
+
+        id:null,
+
+        image_url:
+          product.image_url,
+
+        storage_path:null,
+
+        color:"",
+
+        file:null
+
+      }];
+
+    }
+
+  }
+
+
   const {data:colors} =
     await supabaseClient
       .from("product_colors")
       .select("*")
       .eq("product_id",productId);
+
 
   (colors || []).forEach(color=>{
 
@@ -1826,11 +1959,14 @@ async function loadExistingProductImages(productId){
       );
 
     if(image){
+
       image.color =
         color.color_name || "";
+
     }
 
   });
+
 
   renderImageList();
 
@@ -1845,12 +1981,20 @@ function handleProductImages(e){
   files.forEach(file=>{
 
     productImages.push({
+
       existing:false,
+
       id:null,
-      image_url:URL.createObjectURL(file),
+
+      image_url:
+        URL.createObjectURL(file),
+
       storage_path:null,
+
       color:"",
+
       file
+
     });
 
   });
@@ -1952,9 +2096,6 @@ function removeProductImage(index){
 
 /* =========================================================
    SAVE PRODUCT
-   التعديل المهم:
-   الإضافة INSERT فقط
-   التعديل UPDATE للمنتج المحدد فقط
 ========================================================= */
 
 async function saveProduct(e){
@@ -1972,18 +2113,33 @@ async function saveProduct(e){
     const existingId =
       $("productId").value.trim();
 
-    /*
-      إذا كان productId موجودًا = تعديل.
-      إذا لم يكن موجودًا = إضافة منتج جديد.
-    */
 
     const isEditing =
       !!existingId;
+
 
     const productId =
       isEditing
         ? existingId
         : crypto.randomUUID();
+
+
+    /*
+      حفظ الصورة الأساسية القديمة قبل أي حذف للعلاقات.
+      هذا مهم للمنتجات القديمة التي لديها image_url
+      ولكن لا يوجد لها product_images.
+    */
+
+    const existingProduct =
+      isEditing
+        ? products.find(
+            x=>String(x.id) === String(productId)
+          )
+        : null;
+
+
+    const existingMainImageUrl =
+      existingProduct?.image_url || null;
 
 
     const payload = {
@@ -2028,7 +2184,6 @@ async function saveProduct(e){
 
     /* =====================================================
        ADD
-       لا يوجد أي DELETE أثناء إضافة منتج جديد.
     ===================================================== */
 
     if(!isEditing){
@@ -2049,7 +2204,6 @@ async function saveProduct(e){
 
     /* =====================================================
        UPDATE
-       نعدل المنتج صاحب الـ UUID المحدد فقط.
     ===================================================== */
 
     else{
@@ -2078,8 +2232,7 @@ async function saveProduct(e){
 
     /* =====================================================
        DELETE OLD RELATIONS
-       هذا الجزء فقط عند تعديل نفس المنتج.
-       لا يؤثر على أي منتج آخر.
+       للمنتج المحدد فقط.
     ===================================================== */
 
     if(isEditing){
@@ -2122,6 +2275,7 @@ async function saveProduct(e){
 
     let mainImageUrl = null;
 
+
     const sizeValues =
       $("productSizes")
         .value
@@ -2135,10 +2289,12 @@ async function saveProduct(e){
       const img =
         productImages[i];
 
+
       let imageUrl =
         img.existing
           ? img.image_url
           : null;
+
 
       let storagePath =
         img.existing
@@ -2153,6 +2309,7 @@ async function saveProduct(e){
             .split(".")
             .pop()
             .toLowerCase() || "jpg";
+
 
         storagePath =
           `products/${productId}/${crypto.randomUUID()}.${extension}`;
@@ -2171,6 +2328,7 @@ async function saveProduct(e){
               }
             );
 
+
         if(uploadError)
           throw uploadError;
 
@@ -2180,6 +2338,7 @@ async function saveProduct(e){
             .storage
             .from(STORAGE_BUCKET)
             .getPublicUrl(storagePath);
+
 
         imageUrl =
           publicData.publicUrl;
@@ -2203,29 +2362,41 @@ async function saveProduct(e){
           .select()
           .single();
 
+
       if(imageError)
         throw imageError;
 
 
       if(i === 0){
-        mainImageUrl = imageUrl;
+
+        mainImageUrl =
+          imageUrl;
+
       }
 
 
       if(img.color){
 
-        const {error:colorError} =
-          await supabaseClient
-            .from("product_colors")
-            .insert({
-              product_id:productId,
-              image_id:imageRow.id,
-              color_name:img.color,
-              sort_order:i
-            });
+        /*
+          لا نضيف اللون إلا إذا كان لدينا image_id.
+        */
 
-        if(colorError)
-          throw colorError;
+        if(imageRow?.id){
+
+          const {error:colorError} =
+            await supabaseClient
+              .from("product_colors")
+              .insert({
+                product_id:productId,
+                image_id:imageRow.id,
+                color_name:img.color,
+                sort_order:i
+              });
+
+          if(colorError)
+            throw colorError;
+
+        }
 
       }
 
@@ -2240,6 +2411,7 @@ async function saveProduct(e){
 
       mainImageUrl =
         productImages[0]?.image_url ||
+        existingMainImageUrl ||
         null;
 
     }
@@ -2247,7 +2419,7 @@ async function saveProduct(e){
 
     /* =====================================================
        UPDATE MAIN IMAGE
-       لنفس المنتج فقط.
+       للمنتج المحدد فقط.
     ===================================================== */
 
     const {error:mainImageError} =
@@ -2258,6 +2430,7 @@ async function saveProduct(e){
           updated_at:new Date().toISOString()
         })
         .eq("id",productId);
+
 
     if(mainImageError)
       throw mainImageError;
@@ -2271,15 +2444,21 @@ async function saveProduct(e){
 
       const sizeRows =
         sizeValues.map((size,index)=>({
+
           product_id:productId,
+
           size,
+
           sort_order:index
+
         }));
+
 
       const {error:sizeError} =
         await supabaseClient
           .from("product_sizes")
           .insert(sizeRows);
+
 
       if(sizeError)
         throw sizeError;
@@ -2297,11 +2476,14 @@ async function saveProduct(e){
         : "تم إضافة المنتج بنجاح ✅"
     );
 
+
     closeProductModal();
+
 
     await loadProducts();
 
     updateDashboard();
+
 
   }catch(error){
 
@@ -2328,10 +2510,6 @@ async function saveProduct(e){
 
 async function deleteProduct(productId){
 
-  /*
-    التحقق من وجود UUID.
-  */
-
   if(!productId){
 
     showError(
@@ -2342,10 +2520,6 @@ async function deleteProduct(productId){
 
   }
 
-
-  /*
-    البحث عن المنتج المحدد فقط.
-  */
 
   const p =
     products.find(
@@ -2378,6 +2552,31 @@ async function deleteProduct(productId){
   try{
 
     /*
+      أولًا نقرأ مسارات الصور الخاصة بهذا المنتج فقط.
+      حتى نستطيع حذفها من Storage بعد حذف المنتج.
+    */
+
+    const {
+      data:productImageRows,
+      error:productImagesReadError
+    } =
+      await supabaseClient
+        .from("product_images")
+        .select("storage_path")
+        .eq("product_id",productId);
+
+
+    if(productImagesReadError)
+      throw productImagesReadError;
+
+
+    const storagePaths =
+      (productImageRows || [])
+        .map(x=>x.storage_path)
+        .filter(Boolean);
+
+
+    /*
       حذف ألوان المنتج المحدد فقط.
     */
 
@@ -2386,6 +2585,7 @@ async function deleteProduct(productId){
         .from("product_colors")
         .delete()
         .eq("product_id",productId);
+
 
     if(colorError)
       throw colorError;
@@ -2401,12 +2601,13 @@ async function deleteProduct(productId){
         .delete()
         .eq("product_id",productId);
 
+
     if(sizeError)
       throw sizeError;
 
 
     /*
-      حذف صور المنتج المحدد فقط.
+      حذف صور المنتج المحدد فقط من جدول الصور.
     */
 
     const {error:imageError} =
@@ -2414,6 +2615,7 @@ async function deleteProduct(productId){
         .from("product_images")
         .delete()
         .eq("product_id",productId);
+
 
     if(imageError)
       throw imageError;
@@ -2426,13 +2628,17 @@ async function deleteProduct(productId){
       تمنع حذف باقي المنتجات.
     */
 
-    const {data:deletedProduct,error:productError} =
+    const {
+      data:deletedProduct,
+      error:productError
+    } =
       await supabaseClient
         .from("products")
         .delete()
         .eq("id",productId)
         .select()
         .single();
+
 
     if(productError)
       throw productError;
@@ -2448,8 +2654,39 @@ async function deleteProduct(productId){
 
 
     /*
+      حذف ملفات الصور من Storage.
+      هذه المسارات تخص هذا المنتج فقط.
+      
+      إذا رفضت صلاحيات Storage الحذف،
+      لا نعيد المنتج ولا نحذف منتجات أخرى.
+    */
+
+    if(storagePaths.length){
+
+      const {
+        error:storageError
+      } =
+        await supabaseClient
+          .storage
+          .from(STORAGE_BUCKET)
+          .remove(storagePaths);
+
+
+      if(storageError){
+
+        console.warn(
+          "تم حذف المنتج، لكن تعذر حذف بعض ملفات الصور من Storage:",
+          storageError
+        );
+
+      }
+
+    }
+
+
+    /*
       تحديث القائمة الموجودة على الشاشة فقط.
-      باقي المنتجات تبقى.
+      باقي المنتجات تبقى كما هي.
     */
 
     products =
@@ -2931,6 +3168,7 @@ async function saveSlide(e){
           .pop()
           .toLowerCase() || "jpg";
 
+
       const storagePath =
         `hero/${slideId}/${crypto.randomUUID()}.${extension}`;
 
@@ -2948,6 +3186,7 @@ async function saveSlide(e){
             }
           );
 
+
       if(uploadError)
         throw uploadError;
 
@@ -2957,6 +3196,7 @@ async function saveSlide(e){
           .storage
           .from(STORAGE_BUCKET)
           .getPublicUrl(storagePath);
+
 
       imageUrl =
         publicData.publicUrl;
@@ -3031,11 +3271,14 @@ async function saveSlide(e){
         : "تم إضافة السلايدر بنجاح ✅"
     );
 
+
     closeSlideModal();
+
 
     await loadSlides();
 
     updateDashboard();
+
 
   }catch(error){
 
@@ -3068,10 +3311,12 @@ async function deleteSlide(slideId){
 
   if(!s) return;
 
+
   const confirmed =
     confirm(
       `هل أنت متأكد من حذف السلايدر "${s.title || ""}"؟`
     );
+
 
   if(!confirmed)
     return;
@@ -3088,11 +3333,14 @@ async function deleteSlide(slideId){
     if(error)
       throw error;
 
+
     alert("تم حذف السلايدر بنجاح ✅");
+
 
     await loadSlides();
 
     updateDashboard();
+
 
   }catch(error){
 
@@ -3139,6 +3387,7 @@ function updateDashboard(){
     Number(settings?.instagram_followers || 0) +
     Number(settings?.tiktok_followers || 0) +
     Number(settings?.snapchat_followers || 0);
+
 
   $("statFollowers").textContent =
     formatNumber(followers);
