@@ -1548,6 +1548,11 @@ async function loadProducts(){
     return;
   }
 
+  /*
+    تحميل المنتجات فقط من Supabase.
+    لا يوجد هنا حذف أو استبدال لقاعدة البيانات.
+  */
+
   products = data || [];
 
   renderProducts();
@@ -1734,6 +1739,11 @@ function openProductModal(productId=null){
     $("productDescription").value =
       p.description || "";
 
+    /*
+      تحميل المقاسات أيضًا عند التعديل.
+    */
+    loadExistingProductSizes(p.id);
+
     loadExistingProductImages(p.id);
 
   }
@@ -1747,6 +1757,31 @@ function closeProductModal(){
 
   $("productModal")
     .classList.remove("open");
+
+}
+
+
+async function loadExistingProductSizes(productId){
+
+  const {data,error} =
+    await supabaseClient
+      .from("product_sizes")
+      .select("*")
+      .eq("product_id",productId)
+      .order("sort_order",{ascending:true});
+
+  if(error){
+
+    console.error(error);
+    return;
+
+  }
+
+  $("productSizes").value =
+    (data || [])
+      .map(x=>x.size)
+      .filter(Boolean)
+      .join(",");
 
 }
 
@@ -1917,6 +1952,9 @@ function removeProductImage(index){
 
 /* =========================================================
    SAVE PRODUCT
+   التعديل المهم:
+   الإضافة INSERT فقط
+   التعديل UPDATE للمنتج المحدد فقط
 ========================================================= */
 
 async function saveProduct(e){
@@ -1934,8 +1972,19 @@ async function saveProduct(e){
     const existingId =
       $("productId").value.trim();
 
-    let productId =
-      existingId || crypto.randomUUID();
+    /*
+      إذا كان productId موجودًا = تعديل.
+      إذا لم يكن موجودًا = إضافة منتج جديد.
+    */
+
+    const isEditing =
+      !!existingId;
+
+    const productId =
+      isEditing
+        ? existingId
+        : crypto.randomUUID();
+
 
     const payload = {
 
@@ -1977,19 +2026,12 @@ async function saveProduct(e){
     };
 
 
-    /* CREATE / UPDATE */
+    /* =====================================================
+       ADD
+       لا يوجد أي DELETE أثناء إضافة منتج جديد.
+    ===================================================== */
 
-    if(existingId){
-
-      const {error} =
-        await supabaseClient
-          .from("products")
-          .update(payload)
-          .eq("id",productId);
-
-      if(error) throw error;
-
-    }else{
+    if(!isEditing){
 
       const {error} =
         await supabaseClient
@@ -1999,14 +2041,48 @@ async function saveProduct(e){
             ...payload
           });
 
-      if(error) throw error;
+      if(error)
+        throw error;
 
     }
 
 
-    /* DELETE OLD RELATIONS */
+    /* =====================================================
+       UPDATE
+       نعدل المنتج صاحب الـ UUID المحدد فقط.
+    ===================================================== */
 
-    if(existingId){
+    else{
+
+      const {data,error} =
+        await supabaseClient
+          .from("products")
+          .update(payload)
+          .eq("id",productId)
+          .select()
+          .single();
+
+      if(error)
+        throw error;
+
+      if(!data){
+
+        throw new Error(
+          "لم يتم العثور على المنتج المطلوب تعديله."
+        );
+
+      }
+
+    }
+
+
+    /* =====================================================
+       DELETE OLD RELATIONS
+       هذا الجزء فقط عند تعديل نفس المنتج.
+       لا يؤثر على أي منتج آخر.
+    ===================================================== */
+
+    if(isEditing){
 
       const {error:imageDeleteError} =
         await supabaseClient
@@ -2040,7 +2116,9 @@ async function saveProduct(e){
     }
 
 
-    /* UPLOAD + INSERT IMAGES */
+    /* =====================================================
+       UPLOAD + INSERT IMAGES
+    ===================================================== */
 
     let mainImageUrl = null;
 
@@ -2154,7 +2232,9 @@ async function saveProduct(e){
     }
 
 
-    /* FALLBACK MAIN IMAGE */
+    /* =====================================================
+       FALLBACK MAIN IMAGE
+    ===================================================== */
 
     if(!mainImageUrl){
 
@@ -2165,7 +2245,10 @@ async function saveProduct(e){
     }
 
 
-    /* UPDATE MAIN IMAGE */
+    /* =====================================================
+       UPDATE MAIN IMAGE
+       لنفس المنتج فقط.
+    ===================================================== */
 
     const {error:mainImageError} =
       await supabaseClient
@@ -2180,7 +2263,9 @@ async function saveProduct(e){
       throw mainImageError;
 
 
-    /* SIZES */
+    /* =====================================================
+       SIZES
+    ===================================================== */
 
     if(sizeValues.length){
 
@@ -2202,8 +2287,12 @@ async function saveProduct(e){
     }
 
 
+    /* =====================================================
+       SUCCESS
+    ===================================================== */
+
     alert(
-      existingId
+      isEditing
         ? "تم تعديل المنتج بنجاح ✅"
         : "تم إضافة المنتج بنجاح ✅"
     );
@@ -2234,21 +2323,53 @@ async function saveProduct(e){
 
 /* =========================================================
    DELETE PRODUCT
+   حذف منتج واحد فقط
 ========================================================= */
 
 async function deleteProduct(productId){
+
+  /*
+    التحقق من وجود UUID.
+  */
+
+  if(!productId){
+
+    showError(
+      "لم يتم تحديد المنتج المطلوب حذفه."
+    );
+
+    return;
+
+  }
+
+
+  /*
+    البحث عن المنتج المحدد فقط.
+  */
 
   const p =
     products.find(
       x=>String(x.id) === String(productId)
     );
 
-  if(!p) return;
+
+  if(!p){
+
+    showError(
+      "لم يتم العثور على المنتج."
+    );
+
+    return;
+
+  }
+
 
   const confirmed =
     confirm(
-      `هل أنت متأكد من حذف المنتج "${p.name}"؟`
+      `هل أنت متأكد من حذف المنتج "${p.name}"؟\n\n`+
+      `سيتم حذف هذا المنتج فقط ولن يتم حذف باقي المنتجات.`
     );
+
 
   if(!confirmed)
     return;
@@ -2256,37 +2377,96 @@ async function deleteProduct(productId){
 
   try{
 
-    await supabaseClient
-      .from("product_colors")
-      .delete()
-      .eq("product_id",productId);
+    /*
+      حذف ألوان المنتج المحدد فقط.
+    */
 
-    await supabaseClient
-      .from("product_sizes")
-      .delete()
-      .eq("product_id",productId);
+    const {error:colorError} =
+      await supabaseClient
+        .from("product_colors")
+        .delete()
+        .eq("product_id",productId);
 
-    await supabaseClient
-      .from("product_images")
-      .delete()
-      .eq("product_id",productId);
+    if(colorError)
+      throw colorError;
 
 
-    const {error} =
+    /*
+      حذف مقاسات المنتج المحدد فقط.
+    */
+
+    const {error:sizeError} =
+      await supabaseClient
+        .from("product_sizes")
+        .delete()
+        .eq("product_id",productId);
+
+    if(sizeError)
+      throw sizeError;
+
+
+    /*
+      حذف صور المنتج المحدد فقط.
+    */
+
+    const {error:imageError} =
+      await supabaseClient
+        .from("product_images")
+        .delete()
+        .eq("product_id",productId);
+
+    if(imageError)
+      throw imageError;
+
+
+    /*
+      حذف المنتج المحدد فقط.
+      مهم جدًا:
+      .eq("id",productId)
+      تمنع حذف باقي المنتجات.
+    */
+
+    const {data:deletedProduct,error:productError} =
       await supabaseClient
         .from("products")
         .delete()
-        .eq("id",productId);
+        .eq("id",productId)
+        .select()
+        .single();
 
-    if(error)
-      throw error;
+    if(productError)
+      throw productError;
 
 
-    alert("تم حذف المنتج بنجاح ✅");
+    if(!deletedProduct){
 
-    await loadProducts();
+      throw new Error(
+        "لم يتم حذف المنتج المطلوب."
+      );
+
+    }
+
+
+    /*
+      تحديث القائمة الموجودة على الشاشة فقط.
+      باقي المنتجات تبقى.
+    */
+
+    products =
+      products.filter(
+        x=>String(x.id) !== String(productId)
+      );
+
+
+    renderProducts();
 
     updateDashboard();
+
+
+    alert(
+      `تم حذف المنتج "${p.name}" فقط بنجاح ✅`
+    );
+
 
   }catch(error){
 
