@@ -1,3 +1,4 @@
+```html
 <script>
 
 "use strict";
@@ -46,23 +47,23 @@ let productImages = [];
    HELPERS
 ================================ */
 
-const $ =
-id => document.getElementById(id);
+const $ = id =>
+  document.getElementById(id);
 
 
 const esc = s =>
-String(s ?? "")
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
+  String(s ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
 
 
 const bool = (v,d=true) =>
-v === null || v === undefined
-  ? d
-  : !!v;
+  v === null || v === undefined
+    ? d
+    : !!v;
 
 
 /* ================================
@@ -95,15 +96,20 @@ function toast(msg){
 
 async function q(query){
 
-  const { data, error } = await query;
+  const { data, error } =
+    await query;
 
   if(error){
-    console.error("Supabase error:", error);
+
+    console.error(
+      "Supabase error:",
+      error
+    );
+
     throw error;
   }
 
   return data;
-
 }
 
 
@@ -130,9 +136,7 @@ async function isAdmin(){
     );
 
     throw error;
-
   }
-
 }
 
 
@@ -142,25 +146,33 @@ async function isAdmin(){
 
 function showLogin(){
 
-  $("loginScreen")
-    .classList.remove("hidden");
+  const login =
+    $("loginScreen");
 
-  $("app")
-    .classList.add("hidden");
+  const app =
+    $("app");
 
+  if(login)
+    login.classList.remove("hidden");
+
+  if(app)
+    app.classList.add("hidden");
 }
 
 
 function showApp(){
 
-  $("loginScreen")
-    .classList.add("hidden");
+  const login =
+    $("loginScreen");
 
-  $("app")
-    .classList.remove("hidden");
+  const app =
+    $("app");
 
-  loadAll();
+  if(login)
+    login.classList.add("hidden");
 
+  if(app)
+    app.classList.remove("hidden");
 }
 
 
@@ -174,6 +186,7 @@ async function uploadImage(
 ){
 
   if(!file){
+
     throw new Error(
       "لم يتم اختيار صورة."
     );
@@ -183,22 +196,19 @@ async function uploadImage(
   const ext =
     (
       file.name
-      .split(".")
-      .pop()
+        .split(".")
+        .pop()
       ||
       "jpg"
-    )
-    .toLowerCase();
+    ).toLowerCase();
 
 
   const path =
     `${folder}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
 
 
-  await q(
-
-    sb
-      .storage
+  const upload =
+    await sb.storage
       .from(BUCKET)
       .upload(
         path,
@@ -207,14 +217,15 @@ async function uploadImage(
           cacheControl:"3600",
           upsert:false
         }
-      )
+      );
 
-  );
+
+  if(upload.error)
+    throw upload.error;
 
 
   const { data } =
-    sb
-      .storage
+    sb.storage
       .from(BUCKET)
       .getPublicUrl(path);
 
@@ -224,7 +235,6 @@ async function uploadImage(
     throw new Error(
       "تعذر الحصول على رابط الصورة."
     );
-
   }
 
 
@@ -237,7 +247,6 @@ async function uploadImage(
       path
 
   };
-
 }
 
 
@@ -284,10 +293,16 @@ function openPage(name){
   };
 
 
-  $("pageTitle").textContent =
-    titles[name]
-    ||
-    "لوحة التحكم";
+  const title =
+    $("pageTitle");
+
+  if(title){
+
+    title.textContent =
+      titles[name]
+      ||
+      "لوحة التحكم";
+  }
 
 
   if(name === "products")
@@ -297,10 +312,10 @@ function openPage(name){
     loadOrders();
 
   if(name === "slides")
-    loadSlides();
+    loadSlider();
 
   if(name === "delivery")
-    loadDelivery();
+    loadDeliveryAreas();
 
   if(name === "settings")
     loadSettings();
@@ -317,16 +332,25 @@ async function restoreSession(){
   showLogin();
 
 
-  $("loginEmail").value =
-    ADMIN_EMAIL;
+  const emailInput =
+    $("loginEmail");
+
+  const passwordInput =
+    $("loginPassword");
+
+  const errorBox =
+    $("loginError");
 
 
-  $("loginPassword").value =
-    "";
+  if(emailInput)
+    emailInput.value =
+      ADMIN_EMAIL;
 
+  if(passwordInput)
+    passwordInput.value = "";
 
-  $("loginError").textContent =
-    "";
+  if(errorBox)
+    errorBox.textContent = "";
 
 
   try{
@@ -354,13 +378,17 @@ async function restoreSession(){
 
       showApp();
 
+      await loadAll();
+
     }else{
 
       await sb.auth.signOut();
 
-      $("loginError").textContent =
-        "هذا الحساب لا يملك صلاحية الإدارة.";
+      if(errorBox){
 
+        errorBox.textContent =
+          "هذا الحساب لا يملك صلاحية الإدارة.";
+      }
     }
 
 
@@ -370,9 +398,7 @@ async function restoreSession(){
       "restoreSession:",
       e
     );
-
   }
-
 }
 
 
@@ -390,10 +416,6 @@ if(loginForm){
     "submit",
     async e => {
 
-      /*
-       * مهم جدًا:
-       * منع إعادة تحميل الصفحة.
-       */
       e.preventDefault();
       e.stopPropagation();
 
@@ -409,16 +431,18 @@ if(loginForm){
       const errorBox =
         $("loginError");
 
-
       const emailInput =
         $("loginEmail");
-
 
       const passwordInput =
         $("loginPassword");
 
 
-      if(!btn || !emailInput || !passwordInput)
+      if(
+        !btn ||
+        !emailInput ||
+        !passwordInput
+      )
         return;
 
 
@@ -428,15 +452,14 @@ if(loginForm){
         "جاري الدخول...";
 
 
-      errorBox.textContent =
-        "";
+      if(errorBox)
+        errorBox.textContent = "";
 
 
       try{
 
         const email =
-          emailInput
-            .value
+          emailInput.value
             .trim()
             .toLowerCase();
 
@@ -450,7 +473,6 @@ if(loginForm){
           throw new Error(
             "أدخلي البريد الإلكتروني."
           );
-
         }
 
 
@@ -459,14 +481,8 @@ if(loginForm){
           throw new Error(
             "أدخلي كلمة المرور."
           );
-
         }
 
-
-        /*
-         * تسجيل الدخول الحقيقي
-         * عن طريق Supabase Auth.
-         */
 
         const {
           data,
@@ -489,14 +505,8 @@ if(loginForm){
           throw new Error(
             "تم قبول البيانات لكن لم يتم إنشاء جلسة دخول."
           );
-
         }
 
-
-        /*
-         * بعد نجاح تسجيل الدخول،
-         * نتأكد أن الحساب Admin.
-         */
 
         const admin =
           await isAdmin();
@@ -509,19 +519,18 @@ if(loginForm){
           throw new Error(
             "تم تسجيل الدخول، لكن هذا الحساب لا يملك صلاحية الإدارة."
           );
-
         }
 
 
-        /*
-         * نجاح كامل.
-         */
-
         passwordInput.value = "";
 
-        errorBox.textContent = "";
+        if(errorBox)
+          errorBox.textContent = "";
+
 
         showApp();
+
+        await loadAll();
 
 
       }catch(err){
@@ -532,20 +541,17 @@ if(loginForm){
         );
 
 
-        /*
-         * لا نمسح كلمة السر عند الخطأ،
-         * حتى تعرف إذا كانت المشكلة من Supabase
-         * أو من كلمة المرور.
-         */
+        if(errorBox){
 
-        errorBox.textContent =
-          "تعذر الدخول: "
-          +
-          (
-            err?.message
-            ||
-            "حدث خطأ غير معروف."
-          );
+          errorBox.textContent =
+            "تعذر الدخول: "
+            +
+            (
+              err?.message
+              ||
+              "حدث خطأ غير معروف."
+            );
+        }
 
 
       }finally{
@@ -554,12 +560,10 @@ if(loginForm){
 
         btn.textContent =
           "دخول لوحة التحكم";
-
       }
 
     }
   );
-
 }
 
 
@@ -587,18 +591,20 @@ if(logoutBtn){
           "Logout error:",
           error
         );
-
       }
+
 
       showLogin();
 
-      $("loginPassword").value = "";
 
-      $("loginError").textContent = "";
+      if($("loginPassword"))
+        $("loginPassword").value = "";
+
+      if($("loginError"))
+        $("loginError").textContent = "";
 
     }
   );
-
 }
 
 
@@ -634,17 +640,16 @@ async function loadAll(){
 
     loadOrders(),
 
-    loadSlides(),
+    loadSlider(),
 
     loadSettings(),
 
-    loadDelivery()
+    loadDeliveryAreas()
 
   ]);
 
 
   updateStats();
-
 }
 
 
@@ -654,33 +659,44 @@ async function loadAll(){
 
 function updateStats(){
 
-  $("statProducts")
-    .textContent =
+  const statProducts =
+    $("statProducts");
+
+  const statOffers =
+    $("statOffers");
+
+  const statOrders =
+    $("statOrders");
+
+  const statSlides =
+    $("statSlides");
+
+
+  if(statProducts)
+    statProducts.textContent =
       products.length;
 
 
-  $("statOffers")
-    .textContent =
+  if(statOffers)
+    statOffers.textContent =
       products.filter(
         x => x.is_offer
       ).length;
 
 
-  $("statOrders")
-    .textContent =
+  if(statOrders)
+    statOrders.textContent =
       orders.length;
 
 
-  $("statSlides")
-    .textContent =
+  if(statSlides)
+    statSlides.textContent =
       slides.filter(
         x => x.is_active
       ).length;
-
 }
 
 
-/* PRODUCTS */
 /* ================================
    PRODUCTS
 ================================ */
@@ -701,7 +717,6 @@ async function loadProducts(){
               ascending:false
             }
           )
-
       );
 
 
@@ -723,9 +738,7 @@ async function loadProducts(){
               )
             )
             .order("sort_order")
-
         );
-
     }
 
 
@@ -763,6 +776,7 @@ async function loadProducts(){
       e
     );
 
+
     toast(
       "خطأ تحميل المنتجات: "
       +
@@ -772,9 +786,7 @@ async function loadProducts(){
         "خطأ غير معروف"
       )
     );
-
   }
-
 }
 
 
@@ -784,16 +796,30 @@ async function loadProducts(){
 
 function renderProducts(){
 
+  const grid =
+    $("productsGrid");
+
+  if(!grid)
+    return;
+
+
+  const searchInput =
+    $("productSearch");
+
+  const categoryInput =
+    $("productCategoryFilter");
+
+
   const search =
-    $("productSearch")
-      .value
-      .trim()
-      .toLowerCase();
+    searchInput
+      ? searchInput.value.trim().toLowerCase()
+      : "";
 
 
   const category =
-    $("productCategoryFilter")
-      .value;
+    categoryInput
+      ? categoryInput.value
+      : "all";
 
 
   const list =
@@ -846,7 +872,7 @@ function renderProducts(){
     );
 
 
-  $("productsGrid").innerHTML =
+  grid.innerHTML =
 
     list.length
 
@@ -883,6 +909,7 @@ function renderProducts(){
                   p.old_price
                   ?
                   `
+
                     <br>
 
                     <span class="old">
@@ -890,6 +917,7 @@ function renderProducts(){
                         p.old_price
                       ).toLocaleString()} ₪
                     </span>
+
                   `
                   :
                   ""
@@ -964,7 +992,6 @@ function renderProducts(){
       </div>
 
     `;
-
 }
 
 
@@ -972,18 +999,28 @@ function renderProducts(){
    PRODUCT SEARCH / FILTER
 ================================ */
 
-$("productSearch")
-  .addEventListener(
+const productSearch =
+$("productSearch");
+
+if(productSearch){
+
+  productSearch.addEventListener(
     "input",
     renderProducts
   );
+}
 
 
-$("productCategoryFilter")
-  .addEventListener(
+const productCategoryFilter =
+$("productCategoryFilter");
+
+if(productCategoryFilter){
+
+  productCategoryFilter.addEventListener(
     "change",
     renderProducts
   );
+}
 
 
 /* ================================
@@ -994,19 +1031,24 @@ async function openProductModal(
   id = null
 ){
 
-  $("productForm").reset();
+  const form =
+    $("productForm");
+
+  if(!form)
+    return;
 
 
-  $("productActive").checked =
-    true;
+  form.reset();
 
 
-  $("productAvailable").checked =
-    true;
+  if($("productActive"))
+    $("productActive").checked = true;
 
+  if($("productAvailable"))
+    $("productAvailable").checked = true;
 
-  $("productOffer").checked =
-    false;
+  if($("productOffer"))
+    $("productOffer").checked = false;
 
 
   productImages = [];
@@ -1014,23 +1056,27 @@ async function openProductModal(
   editProduct = null;
 
 
-  $("productId").value = "";
-
-  $("productImagesList")
-    .innerHTML = "";
+  if($("productId"))
+    $("productId").value = "";
 
 
-  $("productModalTitle")
-    .textContent =
+  if($("productImagesList"))
+    $("productImagesList").innerHTML = "";
+
+
+  if($("productModalTitle")){
+
+    $("productModalTitle").textContent =
       id
       ?
       "تعديل المنتج"
       :
       "إضافة منتج";
+  }
 
 
-  $("productModal")
-    .classList.add("open");
+  if($("productModal"))
+    $("productModal").classList.add("open");
 
 
   if(!id)
@@ -1093,67 +1139,74 @@ async function openProductModal(
     editProduct = p;
 
 
-    $("productId").value =
-      p.id;
+    if($("productId"))
+      $("productId").value = p.id;
 
 
-    $("productName").value =
-      p.name || "";
+    if($("productName"))
+      $("productName").value =
+        p.name || "";
 
 
-    $("productSku").value =
-      p.sku || "";
+    if($("productSku"))
+      $("productSku").value =
+        p.sku || "";
 
 
-    $("productCategory").value =
-      p.category || "dresses";
+    if($("productCategory"))
+      $("productCategory").value =
+        p.category || "dresses";
 
 
-    $("productPrice").value =
-      p.price ?? "";
+    if($("productPrice"))
+      $("productPrice").value =
+        p.price ?? "";
 
 
-    $("productOldPrice").value =
-      p.old_price ?? "";
+    if($("productOldPrice"))
+      $("productOldPrice").value =
+        p.old_price ?? "";
 
 
-    $("productDescription").value =
-      p.description || "";
+    if($("productDescription"))
+      $("productDescription").value =
+        p.description || "";
 
 
-    $("productOffer").checked =
-      bool(
-        p.is_offer,
-        false
-      );
+    if($("productOffer"))
+      $("productOffer").checked =
+        bool(
+          p.is_offer,
+          false
+        );
 
 
-    $("productAvailable").checked =
-      bool(
-        p.is_available,
-        true
-      );
+    if($("productAvailable"))
+      $("productAvailable").checked =
+        bool(
+          p.is_available,
+          true
+        );
 
 
-    $("productActive").checked =
-      bool(
-        p.is_active,
-        true
-      );
+    if($("productActive"))
+      $("productActive").checked =
+        bool(
+          p.is_active,
+          true
+        );
 
 
-    $("productSizes").value =
-      sizes
-        .map(
-          x => x.size
-        )
-        .join(",");
+    if($("productSizes")){
 
+      $("productSizes").value =
+        sizes
+          .map(
+            x => x.size
+          )
+          .join(",");
+    }
 
-    /*
-     * نربط كل صورة باللون
-     * الموجود لها في product_colors.
-     */
 
     productImages =
       imgs.map(
@@ -1175,15 +1228,8 @@ async function openProductModal(
           file:null
 
         })
-
       );
 
-
-    /*
-     * توافق مع المنتجات القديمة
-     * التي قد يكون لديها image_url
-     * بدون سجل في product_images.
-     */
 
     if(
       !productImages.length
@@ -1209,7 +1255,6 @@ async function openProductModal(
         }
 
       ];
-
     }
 
 
@@ -1223,6 +1268,7 @@ async function openProductModal(
       e
     );
 
+
     toast(
       "تعذر فتح المنتج: "
       +
@@ -1232,9 +1278,7 @@ async function openProductModal(
         "خطأ غير معروف"
       )
     );
-
   }
-
 }
 
 
@@ -1244,13 +1288,10 @@ async function openProductModal(
 
 function closeProductModal(){
 
-  $("productModal")
-    .classList.remove("open");
+  if($("productModal"))
+    $("productModal")
+      .classList.remove("open");
 
-
-  /*
-   * تحرير روابط الصور المؤقتة.
-   */
 
   productImages.forEach(
     img => {
@@ -1267,9 +1308,7 @@ function closeProductModal(){
           );
 
         }catch{}
-
       }
-
     }
   );
 
@@ -1277,7 +1316,6 @@ function closeProductModal(){
   productImages = [];
 
   editProduct = null;
-
 }
 
 
@@ -1285,8 +1323,13 @@ function closeProductModal(){
    ADD PRODUCT IMAGES
 ================================ */
 
-$("productImagesInput")
-  .addEventListener(
+const productImagesInput =
+$("productImagesInput");
+
+
+if(productImagesInput){
+
+  productImagesInput.addEventListener(
     "change",
     e => {
 
@@ -1307,7 +1350,6 @@ $("productImagesInput")
         ){
 
           continue;
-
         }
 
 
@@ -1327,22 +1369,17 @@ $("productImagesInput")
           file
 
         });
-
       }
 
 
       renderProductImages();
 
 
-      /*
-       * نسمح باختيار نفس الصورة
-       * مرة أخرى إذا احتاج المستخدم.
-       */
-
       e.target.value = "";
 
     }
   );
+}
 
 
 /* ================================
@@ -1351,65 +1388,68 @@ $("productImagesInput")
 
 function renderProductImages(){
 
-  $("productImagesList")
-    .innerHTML =
+  const list =
+    $("productImagesList");
 
-      productImages
-        .map(
+  if(!list)
+    return;
 
-          (img,i) => `
 
-            <div class="image-editor">
+  list.innerHTML =
+    productImages
+      .map(
 
-              <img
-                src="${esc(
-                  img.image_url
+        (img,i) => `
+
+          <div class="image-editor">
+
+            <img
+              src="${esc(
+                img.image_url
+              )}"
+              onerror="
+                this.src='${PLACEHOLDER}'
+              ">
+
+
+            <div>
+
+              <input
+                class="field"
+                placeholder="اسم اللون لهذه الصورة"
+                value="${esc(
+                  img.color || ""
                 )}"
-                onerror="
-                  this.src='${PLACEHOLDER}'
+                oninput="
+                  productImages[${i}].color=this.value
                 ">
 
 
-              <div>
+              <div class="tiny">
 
-                <input
-                  class="field"
-                  placeholder="اسم اللون لهذه الصورة"
-                  value="${esc(
-                    img.color || ""
-                  )}"
-                  oninput="
-                    productImages[${i}].color=this.value
-                  ">
-
-
-                <div class="tiny">
-
-                  الصورة ${i + 1}
-
-                </div>
+                الصورة ${i + 1}
 
               </div>
 
-
-              <button
-                type="button"
-                class="btn btn-danger"
-                onclick="
-                  removeProductImage(${i})
-                ">
-
-                حذف
-
-              </button>
-
             </div>
 
-          `
 
-        )
-        .join("");
+            <button
+              type="button"
+              class="btn btn-danger"
+              onclick="
+                removeProductImage(${i})
+              ">
 
+              حذف
+
+            </button>
+
+          </div>
+
+        `
+      )
+      .join("");
 }
 
 
@@ -1439,7 +1479,6 @@ function removeProductImage(i){
       );
 
     }catch{}
-
   }
 
 
@@ -1450,7 +1489,6 @@ function removeProductImage(i){
 
 
   renderProductImages();
-
 }
 
 
@@ -1458,21 +1496,26 @@ function removeProductImage(i){
    SAVE PRODUCT
 ================================ */
 
-$("productForm")
-  .addEventListener(
+const productForm =
+$("productForm");
+
+
+if(productForm){
+
+  productForm.addEventListener(
     "submit",
     async e => {
 
       e.preventDefault();
+      e.stopPropagation();
 
 
       const btn =
         e.submitter
         ||
-        $("productForm")
-          .querySelector(
-            'button[type="submit"]'
-          );
+        productForm.querySelector(
+          'button[type="submit"]'
+        );
 
 
       if(!btn)
@@ -1487,50 +1530,51 @@ $("productForm")
 
       try{
 
-        /*
-         * ID موجود عند التعديل،
-         * وجديد عند الإضافة.
-         */
-
         const id =
           editProduct?.id
           ||
           crypto.randomUUID();
 
 
-        /* ==========================
-           BASIC PRODUCT DATA
-        ========================== */
+        /* BASIC DATA */
 
         const priceRaw =
           $("productPrice")
-            .value
-            .trim();
+            ?.value
+            .trim()
+            ||
+            "";
 
 
         const oldPriceRaw =
           $("productOldPrice")
-            .value
-            .trim();
+            ?.value
+            .trim()
+            ||
+            "";
 
 
         const payload = {
 
           name:
             $("productName")
-              .value
-              .trim(),
+              ?.value
+              .trim()
+              ||
+              "",
 
           sku:
             $("productSku")
-              .value
+              ?.value
               .trim()
               ||
               null,
 
           category:
             $("productCategory")
-              .value,
+              ?.value
+              ||
+              "dresses",
 
           price:
             Number(priceRaw),
@@ -1544,20 +1588,28 @@ $("productForm")
 
           description:
             $("productDescription")
-              .value
-              .trim(),
+              ?.value
+              .trim()
+              ||
+              "",
 
           is_offer:
             $("productOffer")
-              .checked,
+              ?.checked
+              ||
+              false,
 
           is_available:
             $("productAvailable")
-              .checked,
+              ?.checked
+              ??
+              true,
 
           is_active:
             $("productActive")
-              .checked,
+              ?.checked
+              ??
+              true,
 
           updated_at:
             new Date()
@@ -1566,18 +1618,13 @@ $("productForm")
         };
 
 
-        /* ==========================
-           VALIDATION
-        ========================== */
+        /* VALIDATION */
 
-        if(
-          !payload.name
-        ){
+        if(!payload.name){
 
           throw new Error(
             "أدخلي اسم المنتج."
           );
-
         }
 
 
@@ -1594,7 +1641,6 @@ $("productForm")
           throw new Error(
             "تأكدي من السعر."
           );
-
         }
 
 
@@ -1613,7 +1659,6 @@ $("productForm")
           throw new Error(
             "تأكدي من السعر القديم."
           );
-
         }
 
 
@@ -1626,7 +1671,6 @@ $("productForm")
           throw new Error(
             "السعر القديم يجب أن يكون أكبر من أو يساوي السعر الحالي."
           );
-
         }
 
 
@@ -1643,13 +1687,10 @@ $("productForm")
           throw new Error(
             "اختاري تصنيفًا صحيحًا."
           );
-
         }
 
 
-        /* ==========================
-           SAVE PRODUCT
-        ========================== */
+        /* SAVE PRODUCT */
 
         if(editProduct){
 
@@ -1677,19 +1718,14 @@ $("productForm")
               })
 
           );
-
         }
 
 
-        /* ==========================
-           OLD IMAGES
-        ========================== */
+        /* OLD IMAGES */
 
         const oldImgs =
           editProduct
-
           ?
-
           await q(
 
             sb
@@ -1701,17 +1737,11 @@ $("productForm")
               )
 
           )
-
           :
-
           [];
 
 
-        /*
-         * أولًا نحذف روابط الألوان
-         * والمقاسات والصور المرتبطة
-         * حتى نعيد بناءها بشكل نظيف.
-         */
+        /* DELETE RELATIONS */
 
         await q(
 
@@ -1752,9 +1782,7 @@ $("productForm")
         );
 
 
-        /* ==========================
-           UPLOAD / SAVE IMAGES
-        ========================== */
+        /* UPLOAD / SAVE IMAGES */
 
         const saved = [];
 
@@ -1773,11 +1801,6 @@ $("productForm")
             original;
 
 
-          /*
-           * الصورة الجديدة:
-           * نرفعها إلى Storage.
-           */
-
           if(img.file){
 
             const uploaded =
@@ -1794,14 +1817,8 @@ $("productForm")
               ...uploaded
 
             };
-
           }
 
-
-          /*
-           * إذا لم يوجد رابط للصورة،
-           * نتجاوزها.
-           */
 
           if(!img.image_url)
             continue;
@@ -1844,13 +1861,10 @@ $("productForm")
                 .trim()
 
           });
-
         }
 
 
-        /* ==========================
-           SAVE COLORS
-        ========================== */
+        /* SAVE COLORS */
 
         for(
           let i = 0;
@@ -1883,22 +1897,22 @@ $("productForm")
                 })
 
             );
-
           }
-
         }
 
 
-        /* ==========================
-           SAVE SIZES
-        ========================== */
+        /* SAVE SIZES */
 
         const sizes = [
 
           ...new Set(
 
-            $("productSizes")
-              .value
+            (
+              $("productSizes")
+                ?.value
+              ||
+              ""
+            )
               .split(
                 /[,،\n]/
               )
@@ -1937,13 +1951,10 @@ $("productForm")
               })
 
           );
-
         }
 
 
-        /* ==========================
-           MAIN PRODUCT IMAGE
-        ========================== */
+        /* MAIN IMAGE */
 
         const main =
           saved[0]?.image_url
@@ -1969,9 +1980,7 @@ $("productForm")
         );
 
 
-        /* ==========================
-           DELETE UNUSED STORAGE FILES
-        ========================== */
+        /* STORAGE CLEANUP */
 
         const kept =
           new Set(
@@ -2014,26 +2023,16 @@ $("productForm")
 
             }catch(storageError){
 
-              /*
-               * فشل حذف ملف قديم من Storage
-               * لا يمنع حفظ المنتج.
-               */
-
               console.warn(
                 "Storage cleanup failed:",
                 storageError
               );
-
             }
-
           }
-
         }
 
 
-        /* ==========================
-           SUCCESS
-        ========================== */
+        /* SUCCESS */
 
         toast(
 
@@ -2083,6 +2082,7 @@ $("productForm")
 
     }
   );
+}
 
 
 /* ================================
@@ -2100,16 +2100,13 @@ async function deleteProduct(id){
     );
 
 
-  if(
-    !product
-  ){
+  if(!product){
 
     toast(
       "المنتج غير موجود."
     );
 
     return;
-
   }
 
 
@@ -2120,16 +2117,12 @@ async function deleteProduct(id){
   ){
 
     return;
-
   }
 
 
   try{
 
-    /*
-     * إذا كان المنتج مرتبطًا بطلب،
-     * لا نحذفه فعليًا حتى لا نكسر الطلب.
-     */
+    /* CHECK ORDERS */
 
     const linked =
       await q(
@@ -2179,14 +2172,10 @@ async function deleteProduct(id){
       await loadProducts();
 
       return;
-
     }
 
 
-    /*
-     * نحصل على ملفات الصور قبل حذفها
-     * حتى نستطيع حذفها من Storage.
-     */
+    /* GET IMAGES */
 
     const imgs =
       await q(
@@ -2204,9 +2193,7 @@ async function deleteProduct(id){
       );
 
 
-    /*
-     * حذف البيانات المرتبطة أولًا.
-     */
+    /* DELETE COLORS */
 
     await q(
 
@@ -2221,6 +2208,8 @@ async function deleteProduct(id){
     );
 
 
+    /* DELETE SIZES */
+
     await q(
 
       sb
@@ -2233,6 +2222,8 @@ async function deleteProduct(id){
 
     );
 
+
+    /* DELETE IMAGES */
 
     await q(
 
@@ -2247,9 +2238,7 @@ async function deleteProduct(id){
     );
 
 
-    /*
-     * حذف المنتج نفسه.
-     */
+    /* DELETE PRODUCT */
 
     await q(
 
@@ -2264,9 +2253,7 @@ async function deleteProduct(id){
     );
 
 
-    /*
-     * حذف الصور من Storage.
-     */
+    /* DELETE STORAGE */
 
     const paths =
       imgs
@@ -2296,9 +2283,7 @@ async function deleteProduct(id){
           "Storage delete failed:",
           storageError
         );
-
       }
-
     }
 
 
@@ -2327,312 +2312,514 @@ async function deleteProduct(id){
         "حدث خطأ غير معروف"
       )
     );
-
   }
-
 }
-  /* ORDERS */
+
+
+/* ================================
+   ORDERS
+================================ */
 
 async function loadOrders(){
-  try{
-    const result = await q(
-      sb
-        .from("orders")
-        .select("*")
-        .order("created_at",{ascending:false})
-    );
 
-    orders = result || [];
+  try{
+
+    const result =
+      await q(
+
+        sb
+          .from("orders")
+          .select("*")
+          .order(
+            "created_at",
+            {
+              ascending:false
+            }
+          )
+      );
+
+
+    orders =
+      result || [];
+
 
     renderOrders();
+
     updateStats();
 
+
   }catch(e){
-    console.error("loadOrders error:", e);
-    toast("خطأ تحميل الطلبات: " + (e.message || "خطأ غير معروف"));
+
+    console.error(
+      "loadOrders error:",
+      e
+    );
+
+
+    toast(
+      "خطأ تحميل الطلبات: "
+      +
+      (
+        e.message
+        ||
+        "خطأ غير معروف"
+      )
+    );
   }
 }
 
 
 function renderOrders(){
 
-  const body = $("ordersBody");
+  const body =
+    $("ordersBody");
 
-  if(!body) return;
+  if(!body)
+    return;
 
-  if(!orders || !orders.length){
+
+  if(
+    !orders
+    ||
+    !orders.length
+  ){
+
     body.innerHTML = `
+
       <tr>
-        <td colspan="8" class="empty">
+
+        <td
+          colspan="8"
+          class="empty">
+
           لا توجد طلبات حتى الآن.
+
         </td>
+
       </tr>
+
     `;
+
     return;
   }
 
 
-  body.innerHTML = orders.map(o => {
+  body.innerHTML =
+    orders.map(o => {
 
-    const customerName = esc(o.customer_name || "");
-    const phone = esc(o.phone || "");
-    const productName = esc(o.product_name || "");
-
-    const options = [
-      o.selected_color,
-      o.selected_size
-    ]
-    .filter(Boolean)
-    .map(esc)
-    .join(" / ");
-
-    const total = Number(o.total_price || 0);
-
-    const date = o.created_at
-      ? new Date(o.created_at).toLocaleDateString("ar")
-      : "";
+      const customerName =
+        esc(
+          o.customer_name || ""
+        );
 
 
-    return `
-      <tr>
+      const phone =
+        esc(
+          o.phone || ""
+        );
 
-        <td>${customerName}</td>
 
-        <td>${phone}</td>
+      const productName =
+        esc(
+          o.product_name || ""
+        );
 
-        <td>${productName}</td>
 
-        <td>${options}</td>
+      const options = [
 
-        <td>
-          ${total.toLocaleString("ar")} ₪
-        </td>
+        o.selected_color,
 
-        <td>
+        o.selected_size
 
-          <select
-            class="field"
-            style="min-width:130px;padding:7px"
-            onchange="changeOrderStatus('${o.id}',this.value)"
-          >
+      ]
+        .filter(Boolean)
+        .map(esc)
+        .join(" / ");
 
-            <option
-              value="new"
-              ${o.status === "new" || !o.status ? "selected" : ""}
+
+      const total =
+        Number(
+          o.total_price || 0
+        );
+
+
+      const date =
+        o.created_at
+        ?
+        new Date(
+          o.created_at
+        ).toLocaleDateString("ar")
+        :
+        "";
+
+
+      return `
+
+        <tr>
+
+          <td>
+            ${customerName}
+          </td>
+
+          <td>
+            ${phone}
+          </td>
+
+          <td>
+            ${productName}
+          </td>
+
+          <td>
+            ${options}
+          </td>
+
+          <td>
+            ${total.toLocaleString("ar")} ₪
+          </td>
+
+          <td>
+
+            <select
+              class="field"
+              style="min-width:130px;padding:7px"
+              onchange="changeOrderStatus('${o.id}',this.value)"
             >
-              جديد
-            </option>
 
-            <option
-              value="confirmed"
-              ${o.status === "confirmed" ? "selected" : ""}
+              <option
+                value="new"
+                ${
+                  o.status === "new"
+                  ||
+                  !o.status
+                  ?
+                  "selected"
+                  :
+                  ""
+                }
+              >
+                جديد
+              </option>
+
+              <option
+                value="confirmed"
+                ${
+                  o.status === "confirmed"
+                  ?
+                  "selected"
+                  :
+                  ""
+                }
+              >
+                مؤكد
+              </option>
+
+              <option
+                value="shipped"
+                ${
+                  o.status === "shipped"
+                  ?
+                  "selected"
+                  :
+                  ""
+                }
+              >
+                تم الشحن
+              </option>
+
+              <option
+                value="completed"
+                ${
+                  o.status === "completed"
+                  ?
+                  "selected"
+                  :
+                  ""
+                }
+              >
+                مكتمل
+              </option>
+
+              <option
+                value="cancelled"
+                ${
+                  o.status === "cancelled"
+                  ?
+                  "selected"
+                  :
+                  ""
+                }
+              >
+                ملغي
+              </option>
+
+            </select>
+
+          </td>
+
+          <td>
+            ${date}
+          </td>
+
+          <td>
+
+            <button
+              class="btn btn-danger"
+              type="button"
+              onclick="deleteOrder('${o.id}')"
             >
-              مؤكد
-            </option>
 
-            <option
-              value="shipped"
-              ${o.status === "shipped" ? "selected" : ""}
-            >
-              تم الشحن
-            </option>
+              حذف
 
-            <option
-              value="completed"
-              ${o.status === "completed" ? "selected" : ""}
-            >
-              مكتمل
-            </option>
+            </button>
 
-            <option
-              value="cancelled"
-              ${o.status === "cancelled" ? "selected" : ""}
-            >
-              ملغي
-            </option>
+          </td>
 
-          </select>
+        </tr>
 
-        </td>
+      `;
 
-        <td>${date}</td>
-
-        <td>
-
-          <button
-            class="btn btn-danger"
-            type="button"
-            onclick="deleteOrder('${o.id}')"
-          >
-            حذف
-          </button>
-
-        </td>
-
-      </tr>
-    `;
-
-  }).join("");
+    }).join("");
 }
 
 
+async function changeOrderStatus(
+  id,
+  status
+){
 
-async function changeOrderStatus(id,status){
+  if(!id || !status)
+    return;
 
-  if(!id || !status) return;
 
   try{
 
     await q(
+
       sb
         .from("orders")
         .update({
-          status: status
+          status:status
         })
-        .eq("id",id)
+        .eq(
+          "id",
+          id
+        )
+
     );
 
-    // تحديث الطلب محليًا مباشرة
-    const order = orders.find(o => String(o.id) === String(id));
 
-    if(order){
-      order.status = status;
-    }
+    const order =
+      orders.find(
+        o =>
+          String(o.id)
+          ===
+          String(id)
+      );
 
-    toast("تم تحديث حالة الطلب ✅");
+
+    if(order)
+      order.status =
+        status;
+
+
+    toast(
+      "تم تحديث حالة الطلب ✅"
+    );
+
 
     renderOrders();
+
     updateStats();
+
 
   }catch(e){
 
-    console.error("changeOrderStatus error:",e);
+    console.error(
+      "changeOrderStatus error:",
+      e
+    );
+
 
     toast(
       "تعذر تحديث حالة الطلب: " +
-      (e.message || "خطأ غير معروف")
+      (
+        e.message
+        ||
+        "خطأ غير معروف"
+      )
     );
 
-    // إعادة الرسم في حال فشل التحديث
+
     renderOrders();
   }
 }
-
 
 
 async function deleteOrder(id){
 
-  if(!id) return;
+  if(!id)
+    return;
 
-  const confirmed = confirm("هل أنت متأكد من حذف هذا الطلب؟");
 
-  if(!confirmed) return;
+  const confirmed =
+    confirm(
+      "هل أنت متأكد من حذف هذا الطلب؟"
+    );
+
+
+  if(!confirmed)
+    return;
+
 
   try{
 
     await q(
+
       sb
         .from("orders")
         .delete()
-        .eq("id",id)
+        .eq(
+          "id",
+          id
+        )
+
     );
 
-    // حذف من المصفوفة مباشرة
-    orders = orders.filter(
-      o => String(o.id) !== String(id)
+
+    orders =
+      orders.filter(
+        o =>
+          String(o.id)
+          !==
+          String(id)
+      );
+
+
+    toast(
+      "تم حذف الطلب ✅"
     );
 
-    toast("تم حذف الطلب ✅");
 
     renderOrders();
+
     updateStats();
+
 
   }catch(e){
 
-    console.error("deleteOrder error:",e);
+    console.error(
+      "deleteOrder error:",
+      e
+    );
+
 
     toast(
       "تعذر حذف الطلب: " +
-      (e.message || "خطأ غير معروف")
+      (
+        e.message
+        ||
+        "خطأ غير معروف"
+      )
     );
   }
 }
-  /* SETTINGS */
+
+
+/* ================================
+   SETTINGS
+================================ */
 
 async function loadSettings(){
 
   try{
 
-    const result = await q(
-      sb
-        .from("store_settings")
-        .select("*")
-        .limit(1)
-    );
+    const result =
+      await q(
 
-    const settings = result && result.length
-      ? result[0]
-      : null;
+        sb
+          .from("store_settings")
+          .select("*")
+          .limit(1)
+
+      );
+
+
+    settings =
+      result && result.length
+      ?
+      result[0]
+      :
+      null;
+
 
     if(!settings){
-      console.warn("لا توجد إعدادات محفوظة في store_settings");
+
+      console.warn(
+        "لا توجد إعدادات محفوظة في store_settings"
+      );
+
       return;
     }
 
-    // WhatsApp
-    if($("setWhatsapp")){
+
+    if($("setWhatsapp"))
       $("setWhatsapp").value =
         settings.whatsapp || "";
-    }
 
-    // Delivery
-    if($("setWestBank")){
+
+    if($("setWestBank"))
       $("setWestBank").value =
         settings.west_bank_delivery ?? "";
-    }
 
-    if($("setJerusalem")){
+
+    if($("setJerusalem"))
       $("setJerusalem").value =
         settings.jerusalem_delivery ?? "";
-    }
 
-    if($("setInside")){
+
+    if($("setInside"))
       $("setInside").value =
         settings.inside_delivery ?? "";
-    }
 
-    // Social followers
-    if($("setFacebook")){
+
+    if($("setFacebook"))
       $("setFacebook").value =
         settings.facebook_followers ?? "";
-    }
 
-    if($("setInstagram")){
+
+    if($("setInstagram"))
       $("setInstagram").value =
         settings.instagram_followers ?? "";
-    }
 
-    if($("setTikTok")){
+
+    if($("setTikTok"))
       $("setTikTok").value =
         settings.tiktok_followers ?? "";
-    }
 
-    if($("setSnapchat")){
+
+    if($("setSnapchat"))
       $("setSnapchat").value =
         settings.snapchat_followers ?? "";
-    }
+
 
   }catch(e){
 
-    console.error("loadSettings error:",e);
+    console.error(
+      "loadSettings error:",
+      e
+    );
+
 
     toast(
       "خطأ تحميل الإعدادات: " +
-      (e.message || "خطأ غير معروف")
+      (
+        e.message
+        ||
+        "خطأ غير معروف"
+      )
     );
   }
 }
-
 
 
 async function saveSettings(){
@@ -2640,56 +2827,112 @@ async function saveSettings(){
   try{
 
     const whatsapp =
-      $("setWhatsapp")?.value.trim() || "";
+      $("setWhatsapp")
+        ?.value
+        .trim()
+        ||
+        "";
+
 
     const westBank =
-      Number($("setWestBank")?.value || 0);
+      Number(
+        $("setWestBank")
+          ?.value
+        ||
+        0
+      );
+
 
     const jerusalem =
-      Number($("setJerusalem")?.value || 0);
+      Number(
+        $("setJerusalem")
+          ?.value
+        ||
+        0
+      );
+
 
     const inside =
-      Number($("setInside")?.value || 0);
+      Number(
+        $("setInside")
+          ?.value
+        ||
+        0
+      );
+
 
     const facebook =
-      Number($("setFacebook")?.value || 0);
+      Number(
+        $("setFacebook")
+          ?.value
+        ||
+        0
+      );
+
 
     const instagram =
-      Number($("setInstagram")?.value || 0);
+      Number(
+        $("setInstagram")
+          ?.value
+        ||
+        0
+      );
+
 
     const tikTok =
-      Number($("setTikTok")?.value || 0);
+      Number(
+        $("setTikTok")
+          ?.value
+        ||
+        0
+      );
+
 
     const snapchat =
-      Number($("setSnapchat")?.value || 0);
+      Number(
+        $("setSnapchat")
+          ?.value
+        ||
+        0
+      );
 
 
     const payload = {
 
-      id: 1,
+      id:1,
 
-      whatsapp: whatsapp,
+      whatsapp,
 
-      west_bank_delivery: westBank,
+      west_bank_delivery:
+        westBank,
 
-      jerusalem_delivery: jerusalem,
+      jerusalem_delivery:
+        jerusalem,
 
-      inside_delivery: inside,
+      inside_delivery:
+        inside,
 
-      facebook_followers: facebook,
+      facebook_followers:
+        facebook,
 
-      instagram_followers: instagram,
+      instagram_followers:
+        instagram,
 
-      tiktok_followers: tikTok,
+      tiktok_followers:
+        tikTok,
 
-      snapchat_followers: snapchat,
+      snapchat_followers:
+        snapchat,
 
-      updated_at: new Date().toISOString()
+      updated_at:
+        new Date()
+          .toISOString()
 
     };
 
 
     await q(
+
       sb
         .from("store_settings")
         .upsert(
@@ -2698,28 +2941,41 @@ async function saveSettings(){
             onConflict:"id"
           }
         )
+
     );
 
 
-    toast("تم حفظ إعدادات المتجر ✅");
+    toast(
+      "تم حفظ إعدادات المتجر ✅"
+    );
+
 
     await loadSettings();
 
+
   }catch(e){
 
-    console.error("saveSettings error:",e);
+    console.error(
+      "saveSettings error:",
+      e
+    );
+
 
     toast(
       "تعذر حفظ الإعدادات: " +
-      (e.message || "خطأ غير معروف")
+      (
+        e.message
+        ||
+        "خطأ غير معروف"
+      )
     );
   }
 }
 
 
+const settingsForm =
+$("settingsForm");
 
-// زر حفظ الإعدادات
-const settingsForm = $("settingsForm");
 
 if(settingsForm){
 
@@ -2734,123 +2990,186 @@ if(settingsForm){
 
     }
   );
-
 }
-  /* SLIDER */
+
+
+/* ================================
+   SLIDER
+================================ */
 
 async function loadSlider(){
 
   try{
 
-    const result = await q(
-      sb
-        .from("slider")
-        .select("*")
-        .order("sort_order",{ascending:true})
-    );
+    const result =
+      await q(
 
-    sliderItems = result || [];
+        sb
+          .from("slider")
+          .select("*")
+          .order(
+            "sort_order",
+            {
+              ascending:true
+            }
+          )
+
+      );
+
+
+    slides =
+      result || [];
+
 
     renderSlider();
+
     updateStats();
+
 
   }catch(e){
 
-    console.error("loadSlider error:",e);
+    console.error(
+      "loadSlider error:",
+      e
+    );
+
 
     toast(
       "خطأ تحميل السلايدر: " +
-      (e.message || "خطأ غير معروف")
+      (
+        e.message
+        ||
+        "خطأ غير معروف"
+      )
     );
   }
 }
 
 
-
 function renderSlider(){
 
-  const container = $("sliderList");
+  const container =
+    $("sliderList");
 
-  if(!container) return;
+  if(!container)
+    return;
 
-  if(!sliderItems.length){
+
+  if(!slides.length){
 
     container.innerHTML = `
+
       <div class="empty">
+
         لا توجد شرائح في السلايدر.
+
       </div>
+
     `;
 
     return;
   }
 
 
-  container.innerHTML = sliderItems.map(item => {
+  container.innerHTML =
+    slides.map(item => {
 
-    const title = esc(item.title || "");
-    const subtitle = esc(item.subtitle || "");
-    const image = item.image_url || "";
+      const title =
+        esc(
+          item.title || ""
+        );
 
-    return `
-      <div class="slider-item">
 
-        ${
-          image
-          ?
-          `
-          <img
-            src="${esc(image)}"
-            alt="${title}"
-            class="slider-preview"
-          >
-          `
-          :
-          `
-          <div class="slider-preview empty">
-            لا توجد صورة
-          </div>
-          `
-        }
+      const subtitle =
+        esc(
+          item.subtitle || ""
+        );
 
-        <div class="slider-info">
 
-          <strong>
-            ${title || "بدون عنوان"}
-          </strong>
+      const image =
+        item.image_url || "";
+
+
+      return `
+
+        <div class="slider-item">
 
           ${
-            subtitle
+            image
             ?
-            `<div>${subtitle}</div>`
+            `
+
+              <img
+                src="${esc(image)}"
+                alt="${title}"
+                class="slider-preview"
+              >
+
+            `
             :
-            ""
+            `
+
+              <div
+                class="slider-preview empty">
+
+                لا توجد صورة
+
+              </div>
+
+            `
           }
 
-          <small>
-            الترتيب:
-            ${Number(item.sort_order || 0)}
-          </small>
 
-          <div class="slider-actions">
+          <div class="slider-info">
 
-            <button
-              type="button"
-              class="btn btn-danger"
-              onclick="deleteSlider('${item.id}')"
-            >
-              حذف
-            </button>
+            <strong>
+
+              ${title || "بدون عنوان"}
+
+            </strong>
+
+
+            ${
+              subtitle
+              ?
+              `<div>${subtitle}</div>`
+              :
+              ""
+            }
+
+
+            <small>
+
+              الترتيب:
+              ${Number(
+                item.sort_order || 0
+              )}
+
+            </small>
+
+
+            <div class="slider-actions">
+
+              <button
+                type="button"
+                class="btn btn-danger"
+                onclick="deleteSlider('${item.id}')"
+              >
+
+                حذف
+
+              </button>
+
+            </div>
 
           </div>
 
         </div>
 
-      </div>
-    `;
+      `;
 
-  }).join("");
+    }).join("");
 }
-
 
 
 async function addSlider(){
@@ -2858,13 +3177,29 @@ async function addSlider(){
   try{
 
     const title =
-      $("sliderTitle")?.value.trim() || "";
+      $("sliderTitle")
+        ?.value
+        .trim()
+      ||
+      "";
+
 
     const subtitle =
-      $("sliderSubtitle")?.value.trim() || "";
+      $("sliderSubtitle")
+        ?.value
+        .trim()
+      ||
+      "";
+
 
     const sortOrder =
-      Number($("sliderOrder")?.value || 0);
+      Number(
+        $("sliderOrder")
+          ?.value
+        ||
+        0
+      );
+
 
     const imageInput =
       $("sliderImage");
@@ -2872,15 +3207,23 @@ async function addSlider(){
 
     if(!title){
 
-      toast("اكتب عنوان السلايدر أولًا");
+      toast(
+        "اكتب عنوان السلايدر أولًا"
+      );
 
       return;
     }
 
 
-    if(!imageInput || !imageInput.files.length){
+    if(
+      !imageInput
+      ||
+      !imageInput.files.length
+    ){
 
-      toast("اختر صورة للسلايدر أولًا");
+      toast(
+        "اختر صورة للسلايدر أولًا"
+      );
 
       return;
     }
@@ -2891,7 +3234,12 @@ async function addSlider(){
 
 
     const fileExt =
-      file.name.split(".").pop()?.toLowerCase() || "jpg";
+      file.name
+        .split(".")
+        .pop()
+        ?.toLowerCase()
+      ||
+      "jpg";
 
 
     const id =
@@ -2911,15 +3259,16 @@ async function addSlider(){
           {
             cacheControl:"3600",
             upsert:false,
-            contentType:file.type || "image/jpeg"
+            contentType:
+              file.type
+              ||
+              "image/jpeg"
           }
         );
 
 
-    if(uploadResult.error){
-
+    if(uploadResult.error)
       throw uploadResult.error;
-    }
 
 
     const publicResult =
@@ -2929,75 +3278,109 @@ async function addSlider(){
 
 
     const imageUrl =
-      publicResult?.data?.publicUrl || "";
+      publicResult
+        ?.data
+        ?.publicUrl
+      ||
+      "";
 
 
     await q(
+
       sb
         .from("slider")
         .insert({
+
           id:id,
+
           title:title,
+
           subtitle:subtitle,
+
           image_url:imageUrl,
-          sort_order:sortOrder,
+
+          sort_order:
+            sortOrder,
+
           is_active:true
+
         })
+
     );
 
 
-    toast("تمت إضافة السلايدر ✅");
+    toast(
+      "تمت إضافة السلايدر ✅"
+    );
 
 
-    if($("sliderForm")){
+    if($("sliderForm"))
       $("sliderForm").reset();
-    }
+
 
     await loadSlider();
 
 
   }catch(e){
 
-    console.error("addSlider error:",e);
+    console.error(
+      "addSlider error:",
+      e
+    );
+
 
     toast(
       "تعذر إضافة السلايدر: " +
-      (e.message || "خطأ غير معروف")
+      (
+        e.message
+        ||
+        "خطأ غير معروف"
+      )
     );
   }
 }
 
 
-
 async function deleteSlider(id){
 
-  if(!id) return;
+  if(!id)
+    return;
 
 
   const confirmed =
-    confirm("هل أنت متأكد من حذف هذا السلايدر؟");
+    confirm(
+      "هل أنت متأكد من حذف هذا السلايدر؟"
+    );
 
 
-  if(!confirmed) return;
+  if(!confirmed)
+    return;
 
 
   try{
 
     const item =
-      sliderItems.find(
-        x => String(x.id) === String(id)
+      slides.find(
+        x =>
+          String(x.id)
+          ===
+          String(id)
       );
 
 
     await q(
+
       sb
         .from("slider")
         .delete()
-        .eq("id",id)
+        .eq(
+          "id",
+          id
+        )
+
     );
 
 
-    // محاولة حذف الصورة من التخزين
     if(item?.image_url){
 
       try{
@@ -3005,16 +3388,24 @@ async function deleteSlider(id){
         const marker =
           `/storage/v1/object/public/${BUCKET}/`;
 
+
         const index =
-          item.image_url.indexOf(marker);
+          item.image_url
+            .indexOf(marker);
+
 
         if(index !== -1){
 
           const path =
             decodeURIComponent(
+
               item.image_url
-                .substring(index + marker.length)
+                .substring(
+                  index + marker.length
+                )
+
             );
+
 
           if(path){
 
@@ -3031,38 +3422,52 @@ async function deleteSlider(id){
           "تعذر حذف صورة السلايدر من Storage:",
           storageError
         );
-
       }
     }
 
 
-    sliderItems =
-      sliderItems.filter(
-        x => String(x.id) !== String(id)
+    slides =
+      slides.filter(
+        x =>
+          String(x.id)
+          !==
+          String(id)
       );
 
 
-    toast("تم حذف السلايدر ✅");
+    toast(
+      "تم حذف السلايدر ✅"
+    );
+
 
     renderSlider();
+
     updateStats();
 
 
   }catch(e){
 
-    console.error("deleteSlider error:",e);
+    console.error(
+      "deleteSlider error:",
+      e
+    );
+
 
     toast(
       "تعذر حذف السلايدر: " +
-      (e.message || "خطأ غير معروف")
+      (
+        e.message
+        ||
+        "خطأ غير معروف"
+      )
     );
   }
 }
 
 
+const sliderForm =
+$("sliderForm");
 
-// نموذج إضافة السلايدر
-const sliderForm = $("sliderForm");
 
 if(sliderForm){
 
@@ -3077,51 +3482,79 @@ if(sliderForm){
 
     }
   );
-
 }
-  /* DELIVERY */
+
+
+/* ================================
+   DELIVERY
+================================ */
 
 async function loadDeliveryAreas(){
 
   try{
 
-    const result = await q(
-      sb
-        .from("delivery_areas")
-        .select("*")
-        .order("id",{ascending:true})
-    );
+    const result =
+      await q(
 
-    deliveryAreas = result || [];
+        sb
+          .from("delivery_areas")
+          .select("*")
+          .order(
+            "id",
+            {
+              ascending:true
+            }
+          )
+
+      );
+
+
+    deliveryAreas =
+      result || [];
+
 
     renderDeliveryAreas();
 
+
   }catch(e){
 
-    console.error("loadDeliveryAreas error:",e);
+    console.error(
+      "loadDeliveryAreas error:",
+      e
+    );
+
 
     toast(
       "خطأ تحميل مناطق التوصيل: " +
-      (e.message || "خطأ غير معروف")
+      (
+        e.message
+        ||
+        "خطأ غير معروف"
+      )
     );
   }
 }
 
 
-
 function renderDeliveryAreas(){
 
-  const container = $("deliveryList");
+  const container =
+    $("deliveryList");
 
-  if(!container) return;
+  if(!container)
+    return;
 
 
   if(!deliveryAreas.length){
 
     container.innerHTML = `
+
       <div class="empty">
+
         لا توجد مناطق توصيل.
+
       </div>
+
     `;
 
     return;
@@ -3129,60 +3562,88 @@ function renderDeliveryAreas(){
 
 
   container.innerHTML =
-    deliveryAreas.map(area => {
+    deliveryAreas
+      .map(area => {
 
-      return `
-        <div class="setting-row">
+        return `
 
-          <div>
+          <div class="setting-row">
 
-            <strong>
-              ${esc(area.name || area.area || "")}
-            </strong>
+            <div>
+
+              <strong>
+
+                ${esc(
+                  area.name
+                  ||
+                  area.area
+                  ||
+                  ""
+                )}
+
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <strong>
+
+                ${Number(
+                  area.price || 0
+                ).toLocaleString("ar")} ₪
+
+              </strong>
+
+            </div>
 
           </div>
 
-          <div>
+        `;
 
-            <strong>
-              ${Number(area.price || 0).toLocaleString("ar")} ₪
-            </strong>
-
-          </div>
-
-        </div>
-      `;
-
-    }).join("");
+      })
+      .join("");
 }
 
 
+/* ================================
+   DOCUMENT CLICK
+================================ */
 
-/* DOCUMENT CLICK */
+document.addEventListener(
+  "click",
+  function(e){
 
-document.addEventListener("click",function(e){
+    const pageButton =
+      e.target.closest(
+        "[data-page]"
+      );
 
-  const pageButton =
-    e.target.closest("[data-page]");
 
-  if(pageButton){
+    if(pageButton){
 
-    const page =
-      pageButton.getAttribute("data-page");
+      const page =
+        pageButton.getAttribute(
+          "data-page"
+        );
 
-    if(page){
 
-      openPage(page);
+      if(page){
+
+        openPage(page);
+
+      }
 
     }
 
   }
-
-});
-
+);
 
 
-/* AUTH STATE */
+/* ================================
+   AUTH STATE
+================================ */
 
 sb.auth.onAuthStateChange(
   async function(event,session){
@@ -3193,7 +3654,9 @@ sb.auth.onAuthStateChange(
     );
 
 
-    if(event === "SIGNED_OUT"){
+    if(
+      event === "SIGNED_OUT"
+    ){
 
       showLogin();
 
@@ -3202,8 +3665,8 @@ sb.auth.onAuthStateChange(
 
 
     if(
-      event === "SIGNED_IN" ||
-      event === "INITIAL_SESSION" ||
+      event === "SIGNED_IN"
+      ||
       event === "TOKEN_REFRESHED"
     ){
 
@@ -3225,7 +3688,11 @@ sb.auth.onAuthStateChange(
 
           showApp();
 
-          await loadAll();
+          /*
+           * لا نستدعي loadAll هنا،
+           * لأن login / restoreSession
+           * يتكفلان بذلك.
+           */
 
         }else{
 
@@ -3238,6 +3705,7 @@ sb.auth.onAuthStateChange(
           );
         }
 
+
       }catch(e){
 
         console.error(
@@ -3245,8 +3713,8 @@ sb.auth.onAuthStateChange(
           e
         );
 
-        showLogin();
 
+        showLogin();
       }
 
     }
@@ -3255,11 +3723,14 @@ sb.auth.onAuthStateChange(
 );
 
 
-
-/* START */
+/* ================================
+   START
+================================ */
 
 restoreSession();
-  </script>
+
+</script>
 
 </body>
 </html>
+```
