@@ -1,1474 +1,57 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Espoza Fashion — Admin</title>
-<meta name="theme-color" content="#4b1726">
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-:root{
-  --wine:#641f34;
-  --dark:#431321;
-  --gold:#b9985a;
-  --cream:#faf7f2;
-  --white:#fff;
-  --line:#eadfe1;
-  --muted:#85777c;
-  --green:#198754;
-  --red:#b42318;
-  --shadow:0 10px 30px rgba(67,19,33,.08)
-}
-
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  font-family:Arial,Tahoma,sans-serif;
-  background:var(--cream);
-  color:#29181e
-}
-
-button,input,select,textarea{font:inherit}
-button{cursor:pointer}
-.hidden{display:none!important}
-
-.login{
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  background:linear-gradient(135deg,#fff,#f4e9eb)
-}
-
-.login-card{
-  width:min(430px,100%);
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:24px;
-  padding:32px;
-  box-shadow:0 25px 70px rgba(67,19,33,.14)
-}
-
-.brand{text-align:center;margin-bottom:24px}
-
-.brand h1{
-  margin:0;
-  color:var(--wine);
-  font-family:Georgia,serif;
-  font-size:34px
-}
-
-.brand p{
-  color:var(--muted);
-  margin:7px 0 0
-}
-
-.form-group{margin-bottom:14px}
-
-.form-group label{
-  display:block;
-  font-weight:700;
-  margin-bottom:7px;
-  font-size:14px
-}
-
-.field{
-  width:100%;
-  padding:12px 13px;
-  border:1px solid var(--line);
-  border-radius:11px;
-  background:#fff;
-  outline:none
-}
-
-.field:focus{
-  border-color:var(--gold);
-  box-shadow:0 0 0 3px rgba(185,152,90,.13)
-}
-
-textarea.field{
-  min-height:100px;
-  resize:vertical
-}
-
-.primary{
-  width:100%;
-  border:0;
-  border-radius:11px;
-  padding:13px;
-  background:var(--wine);
-  color:#fff;
-  font-weight:800
-}
-
-.error{
-  color:var(--red);
-  font-size:13px;
-  text-align:center;
-  margin-top:12px;
-  line-height:1.7
-}
-
-.app{min-height:100vh}
-
-.sidebar{
-  position:fixed;
-  right:0;
-  top:0;
-  bottom:0;
-  width:245px;
-  background:var(--dark);
-  padding:18px 14px;
-  color:#fff;
-  z-index:20;
-  overflow:auto
-}
-
-.side-brand{
-  text-align:center;
-  padding:10px 0 20px;
-  border-bottom:1px solid rgba(255,255,255,.1);
-  margin-bottom:16px
-}
-
-.side-brand h2{
-  margin:0;
-  font-family:Georgia,serif;
-  font-size:28px
-}
-
-.side-brand small{opacity:.65}
-
-.nav{
-  width:100%;
-  border:0;
-  background:transparent;
-  color:#eadde1;
-  text-align:right;
-  padding:12px 14px;
-  border-radius:10px;
-  margin:3px 0
-}
-
-.nav:hover,.nav.active{
-  background:rgba(255,255,255,.11);
-  color:#fff
-}
-
-.logout{
-  color:#ffb8b1;
-  margin-top:18px
-}
-
-.main{
-  margin-right:245px;
-  min-height:100vh
-}
-
-.topbar{
-  height:70px;
-  background:#fff;
-  border-bottom:1px solid var(--line);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 25px;
-  position:sticky;
-  top:0;
-  z-index:10
-}
-
-.topbar strong{
-  font-size:20px;
-  color:var(--dark)
-}
-
-.badge{
-  background:#f3e9ec;
-  color:var(--wine);
-  padding:8px 12px;
-  border-radius:30px;
-  font-size:12px
-}
-
-.content{padding:25px}
-
-.page{display:none}
-.page.active{display:block}
-
-.stats{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:14px;
-  margin-bottom:20px
-}
-
-.stat,.card{
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:16px;
-  padding:18px;
-  box-shadow:var(--shadow)
-}
-
-.stat span{
-  color:var(--muted);
-  font-size:13px
-}
-
-.stat b{
-  display:block;
-  color:var(--wine);
-  font-size:27px;
-  margin-top:8px
-}
-
-.card{margin-bottom:18px}
-
-.card-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  margin-bottom:17px
-}
-
-.card h2{
-  margin:0;
-  font-size:19px;
-  color:var(--dark)
-}
-
-.btn{
-  border:0;
-  border-radius:9px;
-  padding:9px 13px;
-  font-weight:700
-}
-
-.btn-main{
-  background:var(--wine);
-  color:#fff
-}
-
-.btn-soft{
-  background:#f2e9ec;
-  color:var(--wine)
-}
-
-.btn-danger{
-  background:#fde9e7;
-  color:var(--red)
-}
-
-.filters{
-  display:flex;
-  gap:9px;
-  flex-wrap:wrap;
-  margin-bottom:15px
-}
-
-.filters .field{
-  width:auto;
-  min-width:190px
-}
-
-.products{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:14px
-}
-
-.product{
-  border:1px solid var(--line);
-  border-radius:14px;
-  overflow:hidden;
-  background:#fff
-}
-
-.product img{
-  width:100%;
-  aspect-ratio:1/1.18;
-  object-fit:cover;
-  background:#f0e8ea
-}
-
-.product-body{padding:13px}
-
-.product-title{
-  font-weight:800;
-  margin-bottom:8px
-}
-
-.row-between{
-  display:flex;
-  justify-content:space-between;
-  gap:8px;
-  align-items:center
-}
-
-.price{
-  color:var(--wine);
-  font-weight:800
-}
-
-.old{
-  color:var(--muted);
-  text-decoration:line-through;
-  font-size:12px
-}
-
-.actions{
-  display:flex;
-  gap:7px;
-  margin-top:12px
-}
-
-.actions .btn{
-  flex:1;
-  font-size:12px
-}
-
-.settings-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:14px
-}
-
-.full{grid-column:1/-1}
-
-.checks{
-  display:flex;
-  gap:15px;
-  flex-wrap:wrap;
-  padding:10px 0
-}
-
-.check{
-  display:flex;
-  align-items:center;
-  gap:7px
-}
-
-.table-wrap{overflow:auto}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  min-width:760px
-}
-
-th,td{
-  padding:11px;
-  border-bottom:1px solid var(--line);
-  text-align:right;
-  font-size:13px
-}
-
-th{
-  background:#fbf7f5;
-  color:var(--dark)
-}
-
-.slides{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:14px
-}
-
-.slide{
-  border:1px solid var(--line);
-  border-radius:14px;
-  overflow:hidden
-}
-
-.slide img{
-  width:100%;
-  aspect-ratio:16/9;
-  object-fit:cover;
-  background:#eee
-}
-
-.slide-body{padding:13px}
-
-.slide-body h3{
-  margin:0 0 6px
-}
-
-.muted{
-  color:var(--muted);
-  font-size:13px
-}
-
-.empty{
-  text-align:center;
-  color:var(--muted);
-  padding:30px
-}
-
-.modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(20,8,12,.58);
-  z-index:100;
-  align-items:center;
-  justify-content:center;
-  padding:18px
-}
-
-.modal.open{display:flex}
-
-.modal-box{
-  background:#fff;
-  border-radius:20px;
-  width:min(820px,100%);
-  max-height:93vh;
-  overflow:auto;
-  padding:22px
-}
-
-.modal-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:17px
-}
-
-.modal-head h2{
-  margin:0;
-  color:var(--dark)
-}
-
-.x{
-  width:38px;
-  height:38px;
-  border:0;
-  border-radius:50%;
-  font-size:20px;
-  background:#f1e8eb;
-  color:var(--wine)
-}
-
-.modal-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:13px
-}
-
-.image-editor{
-  display:grid;
-  grid-template-columns:80px 1fr auto;
-  gap:10px;
-  align-items:center;
-  border:1px solid var(--line);
-  padding:10px;
-  border-radius:12px;
-  margin-bottom:9px
-}
-
-.image-editor img{
-  width:80px;
-  height:90px;
-  object-fit:cover;
-  border-radius:8px;
-  background:#eee
-}
-
-.tiny{
-  font-size:11px;
-  color:var(--muted)
-}
-
-.toast{
-  position:fixed;
-  left:18px;
-  bottom:18px;
-  background:#23161b;
-  color:#fff;
-  padding:12px 16px;
-  border-radius:11px;
-  z-index:200;
-  display:none;
-  max-width:360px
-}
-
-.toast.show{display:block}
-
-@media(max-width:1100px){
-  .products{grid-template-columns:repeat(3,1fr)}
-  .slides{grid-template-columns:repeat(2,1fr)}
-  .stats{grid-template-columns:repeat(2,1fr)}
-}
-
-@media(max-width:760px){
-  .sidebar{
-    position:relative;
-    width:100%
-  }
-
-  .main{margin-right:0}
-
-  .nav{
-    display:inline-block;
-    width:auto
-  }
-
-  .content{padding:14px}
-
-  .products{
-    grid-template-columns:repeat(2,1fr)
-  }
-
-  .settings-grid,.modal-grid{
-    grid-template-columns:1fr
-  }
-
-  .full{grid-column:auto}
-
-  .topbar{padding:0 14px}
-}
-
-@media(max-width:480px){
-  .products{
-    grid-template-columns:1fr 1fr;
-    gap:8px
-  }
-
-  .slides{grid-template-columns:1fr}
-
-  .stats{gap:8px}
-
-  .stat{padding:13px}
-
-  .stat b{font-size:22px}
-
-  .product-body{padding:9px}
-
-  .actions{flex-direction:column}
-}
-</style>
-</head>
-
-<body>
-
-<div id="loginScreen" class="login">
-
-<div class="login-card">
-
-<div class="brand">
-<h1>Espoza Fashion</h1>
-<p>لوحة تحكم المتجر</p>
-</div>
-
-<form id="loginForm">
-
-<div class="form-group">
-<label>البريد الإلكتروني</label>
-<input
-id="loginEmail"
-class="field"
-type="email"
-value="ywsfjrt84@gmail.com"
-required>
-</div>
-
-<div class="form-group">
-<label>كلمة المرور</label>
-<input
-id="loginPassword"
-class="field"
-type="password"
-autocomplete="current-password"
-required>
-</div>
-
-<button class="primary" type="submit">
-دخول لوحة التحكم
-</button>
-
-<div id="loginError" class="error"></div>
-
-</form>
-
-</div>
-</div>
-
-
-<div id="app" class="app hidden">
-
-<aside class="sidebar">
-
-<div class="side-brand">
-<h2>Espoza</h2>
-<small>Fashion Admin</small>
-</div>
-
-<button class="nav active" data-page="dashboard">
-الرئيسية
-</button>
-
-<button class="nav" data-page="products">
-المنتجات
-</button>
-
-<button class="nav" data-page="orders">
-الطلبات
-</button>
-
-<button class="nav" data-page="slides">
-السلايدر
-</button>
-
-<button class="nav" data-page="delivery">
-التوصيل
-</button>
-
-<button class="nav" data-page="settings">
-إعدادات المتجر
-</button>
-
-<button id="logoutBtn" class="nav logout">
-تسجيل الخروج
-</button>
-
-</aside>
-
-
-<main class="main">
-
-<header class="topbar">
-<strong id="pageTitle">الرئيسية</strong>
-<span class="badge">Admin</span>
-</header>
-
-
-<div class="content">
-
-<section id="page-dashboard" class="page active">
-
-<div class="stats">
-
-<div class="stat">
-<span>منتجات Supabase</span>
-<b id="statProducts">0</b>
-</div>
-
-<div class="stat">
-<span>العروض</span>
-<b id="statOffers">0</b>
-</div>
-
-<div class="stat">
-<span>الطلبات</span>
-<b id="statOrders">0</b>
-</div>
-
-<div class="stat">
-<span>السلايدر النشط</span>
-<b id="statSlides">0</b>
-</div>
-
-</div>
-
-<div class="card">
-
-<h2>Espoza Fashion</h2>
-
-<p class="muted" style="line-height:2">
-من هنا تتحكمي بالمنتجات الجديدة والأسعار والصور والمقاسات والألوان
-والسلايدر والطلبات والتوصيل وإعدادات المتجر.
-</p>
-
-</div>
-
-</section>
-
-
-<section id="page-products" class="page">
-
-<div class="card">
-
-<div class="card-head">
-
-<h2>المنتجات</h2>
-
-<button
-class="btn btn-main"
-onclick="openProductModal()">
-+ إضافة منتج
-</button>
-
-</div>
-
-<div class="filters">
-
-<input
-id="productSearch"
-class="field"
-placeholder="بحث...">
-
-<select
-id="productCategoryFilter"
-class="field">
-
-<option value="all">كل التصنيفات</option>
-<option value="dresses">الفساتين</option>
-<option value="sets">الأطقم</option>
-<option value="offers">العروضات</option>
-
-</select>
-
-</div>
-
-<div
-id="productsGrid"
-class="products">
-</div>
-
-</div>
-
-</section>
-
-
-<section id="page-orders" class="page">
-
-<div class="card">
-
-<div class="card-head">
-
-<h2>الطلبات</h2>
-
-<button
-class="btn btn-soft"
-onclick="loadOrders()">
-تحديث
-</button>
-
-</div>
-
-<div class="table-wrap">
-
-<table>
-
-<thead>
-
-<tr>
-<th>الزبون</th>
-<th>الهاتف</th>
-<th>المنتج</th>
-<th>الاختيار</th>
-<th>الإجمالي</th>
-<th>الحالة</th>
-<th>التاريخ</th>
-<th>إجراء</th>
-</tr>
-
-</thead>
-
-<tbody id="ordersBody"></tbody>
-
-</table>
-
-</div>
-
-</div>
-
-</section>
-
-
-<section id="page-slides" class="page">
-
-<div class="card">
-
-<div class="card-head">
-
-<h2>السلايدر</h2>
-
-<button
-class="btn btn-main"
-onclick="openSlideModal()">
-+ إضافة سلايدر
-</button>
-
-</div>
-
-<div
-id="slidesGrid"
-class="slides">
-</div>
-
-</div>
-
-</section>
-
-
-<section id="page-delivery" class="page">
-
-<div class="card">
-
-<div class="card-head">
-
-<h2>مناطق التوصيل</h2>
-
-<button
-class="btn btn-main"
-onclick="openDeliveryModal()">
-+ إضافة منطقة
-</button>
-
-</div>
-
-<div class="table-wrap">
-
-<table>
-
-<thead>
-
-<tr>
-<th>المنطقة</th>
-<th>السعر ₪</th>
-<th>الحالة</th>
-<th>إجراء</th>
-</tr>
-
-</thead>
-
-<tbody id="deliveryBody"></tbody>
-
-</table>
-
-</div>
-
-</div>
-
-</section>
-
-
-<section id="page-settings" class="page">
-
-<div class="card">
-
-<div class="card-head">
-<h2>إعدادات المتجر</h2>
-</div>
-
-<div class="settings-grid">
-
-<div class="form-group">
-<label>اسم المتجر</label>
-<input id="storeName" class="field">
-</div>
-
-<div class="form-group">
-<label>رقم WhatsApp</label>
-<input id="storeWhatsapp" class="field">
-</div>
-
-<div class="form-group">
-<label>Instagram</label>
-<input id="storeInstagram" class="field">
-</div>
-
-<div class="form-group">
-<label>Facebook</label>
-<input id="storeFacebook" class="field">
-</div>
-
-<div class="form-group">
-<label>TikTok</label>
-<input id="storeTiktok" class="field">
-</div>
-
-<div class="form-group">
-<label>Snapchat</label>
-<input id="storeSnapchat" class="field">
-</div>
-
-<div class="form-group">
-<label>توصيل الضفة ₪</label>
-<input
-id="deliveryWestBank"
-class="field"
-type="number">
-</div>
-
-<div class="form-group">
-<label>توصيل القدس ₪</label>
-<input
-id="deliveryJerusalem"
-class="field"
-type="number">
-</div>
-
-<div class="form-group">
-<label>توصيل الداخل ₪</label>
-<input
-id="deliveryInside"
-class="field"
-type="number">
-</div>
-
-<div class="form-group">
-<label>متابعو Facebook</label>
-<input
-id="followersFacebook"
-class="field"
-type="number">
-</div>
-
-<div class="form-group">
-<label>متابعو Instagram</label>
-<input
-id="followersInstagram"
-class="field"
-type="number">
-</div>
-
-<div class="form-group">
-<label>متابعو TikTok</label>
-<input
-id="followersTiktok"
-class="field"
-type="number">
-</div>
-
-<div class="form-group">
-<label>متابعو Snapchat</label>
-<input
-id="followersSnapchat"
-class="field"
-type="number">
-</div>
-
-</div>
-
-<button
-id="saveSettingsBtn"
-class="btn btn-main">
-حفظ الإعدادات
-</button>
-
-</div>
-
-</section>
-
-</div>
-
-</main>
-
-</div>
-
-
-<!-- PRODUCT MODAL -->
-
-<div id="productModal" class="modal">
-
-<div class="modal-box">
-
-<div class="modal-head">
-
-<h2 id="productModalTitle">
-إضافة منتج
-</h2>
-
-<button
-class="x"
-onclick="closeProductModal()">
-×
-</button>
-
-</div>
-
-<form id="productForm">
-
-<input
-id="productId"
-type="hidden">
-
-<div class="modal-grid">
-
-<div class="form-group">
-
-<label>اسم المنتج</label>
-
-<input
-id="productName"
-class="field"
-required>
-
-</div>
-
-
-<div class="form-group">
-
-<label>SKU / كود المنتج</label>
-
-<input
-id="productSku"
-class="field">
-
-</div>
-
-
-<div class="form-group">
-
-<label>التصنيف</label>
-
-<select
-id="productCategory"
-class="field">
-
-<option value="dresses">فساتين</option>
-<option value="sets">أطقم</option>
-<option value="offers">عروضات</option>
-
-</select>
-
-</div>
-
-
-<div class="form-group">
-
-<label>السعر ₪</label>
-
-<input
-id="productPrice"
-class="field"
-type="number"
-step="0.01"
-required>
-
-</div>
-
-
-<div class="form-group">
-
-<label>السعر القديم ₪</label>
-
-<input
-id="productOldPrice"
-class="field"
-type="number"
-step="0.01">
-
-</div>
-
-
-<div class="form-group">
-
-<label>المقاسات — افصلي بفاصلة</label>
-
-<input
-id="productSizes"
-class="field"
-placeholder="44,46,48,50,52,54">
-
-</div>
-
-
-<div class="form-group full">
-
-<label>الوصف</label>
-
-<textarea
-id="productDescription"
-class="field"></textarea>
-
-</div>
-
-
-<div class="full checks">
-
-<label class="check">
-
-<input
-id="productOffer"
-type="checkbox">
-
-عرض
-
-</label>
-
-
-<label class="check">
-
-<input
-id="productAvailable"
-type="checkbox"
-checked>
-
-متوفر
-
-</label>
-
-
-<label class="check">
-
-<input
-id="productActive"
-type="checkbox"
-checked>
-
-ظاهر بالموقع
-
-</label>
-
-</div>
-
-
-<div class="form-group full">
-
-<label>إضافة صور</label>
-
-<input
-id="productImagesInput"
-class="field"
-type="file"
-accept="image/*"
-multiple>
-
-<div class="tiny">
-يمكن اختيار أكثر من صورة، واكتبي لون كل صورة إذا أردتِ.
-</div>
-
-</div>
-
-
-<div class="full">
-
-<div id="productImagesList"></div>
-
-</div>
-
-</div>
-
-
-<div style="display:flex;gap:8px;margin-top:15px">
-
-<button
-class="btn btn-main"
-type="submit"
-style="flex:1">
-
-حفظ المنتج
-
-</button>
-
-<button
-class="btn btn-soft"
-type="button"
-onclick="closeProductModal()">
-
-إلغاء
-
-</button>
-
-</div>
-
-</form>
-
-</div>
-
-</div>
-
-
-<!-- SLIDER MODAL -->
-
-<div id="slideModal" class="modal">
-
-<div class="modal-box">
-
-<div class="modal-head">
-
-<h2 id="slideModalTitle">
-إضافة سلايدر
-</h2>
-
-<button
-class="x"
-onclick="closeSlideModal()">
-×
-</button>
-
-</div>
-
-<form id="slideForm">
-
-<input
-id="slideId"
-type="hidden">
-
-<div class="modal-grid">
-
-<div class="form-group full">
-
-<label>العنوان</label>
-
-<input
-id="slideTitle"
-class="field">
-
-</div>
-
-
-<div class="form-group full">
-
-<label>النص الفرعي</label>
-
-<textarea
-id="slideSubtitle"
-class="field"></textarea>
-
-</div>
-
-
-<div class="form-group">
-
-<label>نص الزر</label>
-
-<input
-id="slideButtonText"
-class="field"
-value="استكشفي">
-
-</div>
-
-
-<div class="form-group">
-
-<label>رابط الزر</label>
-
-<select
-id="slideButtonLink"
-class="field">
-
-<option value="all">الكل</option>
-<option value="dresses">الفساتين</option>
-<option value="sets">الأطقم</option>
-<option value="offers">العروضات</option>
-
-</select>
-
-</div>
-
-
-<div class="form-group">
-
-<label>الترتيب</label>
-
-<input
-id="slideOrder"
-class="field"
-type="number"
-value="0">
-
-</div>
-
-
-<label class="check">
-
-<input
-id="slideActive"
-type="checkbox"
-checked>
-
-نشط
-
-</label>
-
-
-<div class="form-group full">
-
-<label>صورة السلايدر</label>
-
-<input
-id="slideImageInput"
-class="field"
-type="file"
-accept="image/*">
-
-</div>
-
-
-<div
-id="slidePreview"
-class="full">
-</div>
-
-</div>
-
-
-<div style="display:flex;gap:8px;margin-top:15px">
-
-<button
-class="btn btn-main"
-type="submit"
-style="flex:1">
-
-حفظ السلايدر
-
-</button>
-
-<button
-class="btn btn-soft"
-type="button"
-onclick="closeSlideModal()">
-
-إلغاء
-
-</button>
-
-</div>
-
-</form>
-
-</div>
-
-</div>
-
-
-<!-- DELIVERY MODAL -->
-
-<div id="deliveryModal" class="modal">
-
-<div
-class="modal-box"
-style="max-width:520px">
-
-<div class="modal-head">
-
-<h2>منطقة توصيل</h2>
-
-<button
-class="x"
-onclick="closeDeliveryModal()">
-×
-</button>
-
-</div>
-
-<form id="deliveryForm">
-
-<input
-id="deliveryId"
-type="hidden">
-
-
-<div class="form-group">
-
-<label>اسم المنطقة</label>
-
-<input
-id="deliveryAreaName"
-class="field"
-required>
-
-</div>
-
-
-<div class="form-group">
-
-<label>سعر التوصيل ₪</label>
-
-<input
-id="deliveryAreaPrice"
-class="field"
-type="number"
-step="0.01"
-required>
-
-</div>
-
-
-<label class="check">
-
-<input
-id="deliveryAreaActive"
-type="checkbox"
-checked>
-
-نشطة
-
-</label>
-
-
-<div style="display:flex;gap:8px;margin-top:15px">
-
-<button
-class="btn btn-main"
-type="submit"
-style="flex:1">
-
-حفظ
-
-</button>
-
-<button
-class="btn btn-soft"
-type="button"
-onclick="closeDeliveryModal()">
-
-إلغاء
-
-</button>
-
-</div>
-
-</form>
-
-</div>
-
-</div>
-
-
-<div id="toast" class="toast"></div>
-
-
 <script>
 
-const SUPABASE_URL=
+"use strict";
+
+/* ================================
+   ESPoza Fashion — Supabase
+================================ */
+
+const SUPABASE_URL =
 "https://ptwceqbxusgyutrroayz.supabase.co";
 
-const SUPABASE_KEY=
+const SUPABASE_KEY =
 "sb_publishable_Hto6uDekI9TvxTLFs7kYWg_ApV51joa";
 
-const sb=
+const sb =
 window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_KEY
+  SUPABASE_URL,
+  SUPABASE_KEY
 );
 
-const BUCKET=
+const BUCKET =
 "product-images";
 
-const ADMIN_EMAIL=
+const ADMIN_EMAIL =
 "ywsfjrt84@gmail.com";
 
-const PLACEHOLDER=
+const PLACEHOLDER =
 "https://placehold.co/700x850?text=Espoza";
 
 
-let products=[];
-let orders=[];
-let slides=[];
-let deliveryAreas=[];
-let settings=null;
+/* ================================
+   GLOBAL DATA
+================================ */
 
-let editProduct=null;
-let productImages=[];
+let products = [];
+let orders = [];
+let slides = [];
+let deliveryAreas = [];
+let settings = null;
+
+let editProduct = null;
+let productImages = [];
 
 
-const $=
-id=>document.getElementById(id);
+/* ================================
+   HELPERS
+================================ */
+
+const $ =
+id => document.getElementById(id);
 
 
-const esc=s=>
-String(s??"")
+const esc = s =>
+String(s ?? "")
 .replace(/&/g,"&amp;")
 .replace(/</g,"&lt;")
 .replace(/>/g,"&gt;")
@@ -1476,2871 +59,3207 @@ String(s??"")
 .replace(/'/g,"&#039;");
 
 
-const bool=(v,d=true)=>
-v===null||v===undefined
-?d
-:!!v;
+const bool = (v,d=true) =>
+v === null || v === undefined
+  ? d
+  : !!v;
 
+
+/* ================================
+   TOAST
+================================ */
 
 function toast(msg){
 
-const el=$("toast");
+  const el = $("toast");
 
-el.textContent=msg;
+  if(!el) return;
 
-el.classList.add("show");
+  el.textContent = msg;
 
-clearTimeout(el._t);
+  el.classList.add("show");
 
-el._t=setTimeout(
-()=>el.classList.remove("show"),
-2800
-);
+  clearTimeout(el._t);
+
+  el._t = setTimeout(
+    () => el.classList.remove("show"),
+    2800
+  );
 
 }
 
+
+/* ================================
+   SUPABASE QUERY HELPER
+================================ */
 
 async function q(query){
 
-const {data,error}=await query;
+  const { data, error } = await query;
 
-if(error)
-throw error;
+  if(error){
+    console.error("Supabase error:", error);
+    throw error;
+  }
 
-return data;
+  return data;
 
 }
 
+
+/* ================================
+   ADMIN CHECK
+================================ */
 
 async function isAdmin(){
 
-return(
-await q(
-sb.rpc("is_admin")
-)
-)===true;
+  try{
+
+    const result =
+      await q(
+        sb.rpc("is_admin")
+      );
+
+    return result === true;
+
+  }catch(error){
+
+    console.error(
+      "isAdmin error:",
+      error
+    );
+
+    throw error;
+
+  }
 
 }
 
 
+/* ================================
+   LOGIN / APP VISIBILITY
+================================ */
+
 function showLogin(){
 
-$("loginScreen")
-.classList.remove("hidden");
+  $("loginScreen")
+    .classList.remove("hidden");
 
-$("app")
-.classList.add("hidden");
+  $("app")
+    .classList.add("hidden");
 
 }
 
 
 function showApp(){
 
-$("loginScreen")
-.classList.add("hidden");
+  $("loginScreen")
+    .classList.add("hidden");
 
-$("app")
-.classList.remove("hidden");
+  $("app")
+    .classList.remove("hidden");
 
-loadAll();
+  loadAll();
 
 }
 
+
+/* ================================
+   IMAGE UPLOAD
+================================ */
 
 async function uploadImage(
-file,
-folder
+  file,
+  folder
 ){
 
-const ext=
-(
-file.name
-.split(".")
-.pop()
-||
-"jpg"
-)
-.toLowerCase();
+  if(!file){
+    throw new Error(
+      "لم يتم اختيار صورة."
+    );
+  }
 
 
-const path=
-`${folder}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+  const ext =
+    (
+      file.name
+      .split(".")
+      .pop()
+      ||
+      "jpg"
+    )
+    .toLowerCase();
 
 
-await q(
+  const path =
+    `${folder}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
 
-sb
-.storage
-.from(BUCKET)
-.upload(
-path,
-file,
-{
-cacheControl:"3600",
-upsert:false
+
+  await q(
+
+    sb
+      .storage
+      .from(BUCKET)
+      .upload(
+        path,
+        file,
+        {
+          cacheControl:"3600",
+          upsert:false
+        }
+      )
+
+  );
+
+
+  const { data } =
+    sb
+      .storage
+      .from(BUCKET)
+      .getPublicUrl(path);
+
+
+  if(!data?.publicUrl){
+
+    throw new Error(
+      "تعذر الحصول على رابط الصورة."
+    );
+
+  }
+
+
+  return {
+
+    image_url:
+      data.publicUrl,
+
+    storage_path:
+      path
+
+  };
+
 }
-)
-
-);
 
 
-const {data}=
-sb
-.storage
-.from(BUCKET)
-.getPublicUrl(path);
-
-
-return{
-image_url:data.publicUrl,
-storage_path:path
-};
-
-}
-
+/* ================================
+   PAGE NAVIGATION
+================================ */
 
 function openPage(name){
 
-document
-.querySelectorAll(".page")
-.forEach(
-x=>x.classList.remove("active")
-);
+  document
+    .querySelectorAll(".page")
+    .forEach(
+      x =>
+        x.classList.remove("active")
+    );
 
 
-$("page-"+name)
-?.classList.add("active");
+  $("page-" + name)
+    ?.classList.add("active");
 
 
-document
-.querySelectorAll(".nav[data-page]")
-.forEach(
-x=>x.classList.toggle(
-"active",
-x.dataset.page===name
-)
-);
+  document
+    .querySelectorAll(
+      ".nav[data-page]"
+    )
+    .forEach(
+      x =>
+        x.classList.toggle(
+          "active",
+          x.dataset.page === name
+        )
+    );
 
 
-const titles={
+  const titles = {
 
-dashboard:"الرئيسية",
-products:"المنتجات",
-orders:"الطلبات",
-slides:"السلايدر",
-delivery:"التوصيل",
-settings:"إعدادات المتجر"
+    dashboard:"الرئيسية",
+    products:"المنتجات",
+    orders:"الطلبات",
+    slides:"السلايدر",
+    delivery:"التوصيل",
+    settings:"إعدادات المتجر"
 
-};
-
-
-$("pageTitle")
-.textContent=
-titles[name]
-||
-"لوحة التحكم";
+  };
 
 
-if(name==="products")
-loadProducts();
+  $("pageTitle").textContent =
+    titles[name]
+    ||
+    "لوحة التحكم";
 
-if(name==="orders")
-loadOrders();
 
-if(name==="slides")
-loadSlides();
+  if(name === "products")
+    loadProducts();
 
-if(name==="delivery")
-loadDelivery();
+  if(name === "orders")
+    loadOrders();
 
-if(name==="settings")
-loadSettings();
+  if(name === "slides")
+    loadSlides();
+
+  if(name === "delivery")
+    loadDelivery();
+
+  if(name === "settings")
+    loadSettings();
 
 }
 
+
+/* ================================
+   RESTORE SESSION
+================================ */
 
 async function restoreSession(){
 
-showLogin();
-
-$("loginEmail").value=
-ADMIN_EMAIL;
+  showLogin();
 
 
-try{
-
-const {data,error}=
-await sb.auth.getSession();
-
-if(error)
-throw error;
+  $("loginEmail").value =
+    ADMIN_EMAIL;
 
 
-if(
-data.session
-&&
-await isAdmin()
-){
-
-showApp();
-
-}
-
-}catch(e){
-
-console.error(e);
-
-}
-
-}
+  $("loginPassword").value =
+    "";
 
 
-$("loginForm")
-.addEventListener(
-"submit",
-async e=>{
-
-e.preventDefault();
-
-const btn=e.submitter;
-
-btn.disabled=true;
-
-btn.textContent=
-"جاري الدخول...";
-
-$("loginError")
-.textContent="";
+  $("loginError").textContent =
+    "";
 
 
-try{
+  try{
 
-const email=
-$("loginEmail")
-.value
-.trim()
-.toLowerCase();
-
-
-const password=
-$("loginPassword")
-.value;
+    const {
+      data,
+      error
+    } =
+      await sb.auth.getSession();
 
 
-if(
-!email
-||
-!password
-){
+    if(error)
+      throw error;
 
-throw new Error(
-"أدخلي البريد الإلكتروني وكلمة المرور."
-);
+
+    if(!data?.session)
+      return;
+
+
+    const admin =
+      await isAdmin();
+
+
+    if(admin){
+
+      showApp();
+
+    }else{
+
+      await sb.auth.signOut();
+
+      $("loginError").textContent =
+        "هذا الحساب لا يملك صلاحية الإدارة.";
+
+    }
+
+
+  }catch(e){
+
+    console.error(
+      "restoreSession:",
+      e
+    );
+
+  }
 
 }
 
 
-const {error}=
-await sb.auth.signInWithPassword({
-email,
-password
-});
+/* ================================
+   LOGIN FORM
+================================ */
+
+const loginForm =
+$("loginForm");
 
 
-if(error)
-throw error;
+if(loginForm){
+
+  loginForm.addEventListener(
+    "submit",
+    async e => {
+
+      /*
+       * مهم جدًا:
+       * منع إعادة تحميل الصفحة.
+       */
+      e.preventDefault();
+      e.stopPropagation();
 
 
-if(
-!(
-await isAdmin()
-)
-){
+      const btn =
+        e.submitter
+        ||
+        loginForm.querySelector(
+          'button[type="submit"]'
+        );
 
-await sb.auth.signOut();
 
-throw new Error(
-"هذا الحساب لا يملك صلاحية الإدارة."
-);
+      const errorBox =
+        $("loginError");
+
+
+      const emailInput =
+        $("loginEmail");
+
+
+      const passwordInput =
+        $("loginPassword");
+
+
+      if(!btn || !emailInput || !passwordInput)
+        return;
+
+
+      btn.disabled = true;
+
+      btn.textContent =
+        "جاري الدخول...";
+
+
+      errorBox.textContent =
+        "";
+
+
+      try{
+
+        const email =
+          emailInput
+            .value
+            .trim()
+            .toLowerCase();
+
+
+        const password =
+          passwordInput.value;
+
+
+        if(!email){
+
+          throw new Error(
+            "أدخلي البريد الإلكتروني."
+          );
+
+        }
+
+
+        if(!password){
+
+          throw new Error(
+            "أدخلي كلمة المرور."
+          );
+
+        }
+
+
+        /*
+         * تسجيل الدخول الحقيقي
+         * عن طريق Supabase Auth.
+         */
+
+        const {
+          data,
+          error
+        } =
+          await sb.auth.signInWithPassword({
+
+            email,
+            password
+
+          });
+
+
+        if(error)
+          throw error;
+
+
+        if(!data?.session){
+
+          throw new Error(
+            "تم قبول البيانات لكن لم يتم إنشاء جلسة دخول."
+          );
+
+        }
+
+
+        /*
+         * بعد نجاح تسجيل الدخول،
+         * نتأكد أن الحساب Admin.
+         */
+
+        const admin =
+          await isAdmin();
+
+
+        if(!admin){
+
+          await sb.auth.signOut();
+
+          throw new Error(
+            "تم تسجيل الدخول، لكن هذا الحساب لا يملك صلاحية الإدارة."
+          );
+
+        }
+
+
+        /*
+         * نجاح كامل.
+         */
+
+        passwordInput.value = "";
+
+        errorBox.textContent = "";
+
+        showApp();
+
+
+      }catch(err){
+
+        console.error(
+          "LOGIN ERROR:",
+          err
+        );
+
+
+        /*
+         * لا نمسح كلمة السر عند الخطأ،
+         * حتى تعرف إذا كانت المشكلة من Supabase
+         * أو من كلمة المرور.
+         */
+
+        errorBox.textContent =
+          "تعذر الدخول: "
+          +
+          (
+            err?.message
+            ||
+            "حدث خطأ غير معروف."
+          );
+
+
+      }finally{
+
+        btn.disabled = false;
+
+        btn.textContent =
+          "دخول لوحة التحكم";
+
+      }
+
+    }
+  );
 
 }
 
 
-$("loginPassword")
-.value="";
+/* ================================
+   LOGOUT
+================================ */
+
+const logoutBtn =
+$("logoutBtn");
 
 
-showApp();
+if(logoutBtn){
 
+  logoutBtn.addEventListener(
+    "click",
+    async () => {
 
-}catch(err){
+      try{
 
-$("loginError")
-.textContent=
-"تعذر الدخول: "
-+
-err.message;
+        await sb.auth.signOut();
 
-}
+      }catch(error){
 
-finally{
+        console.error(
+          "Logout error:",
+          error
+        );
 
-btn.disabled=false;
+      }
 
-btn.textContent=
-"دخول لوحة التحكم";
+      showLogin();
 
-}
+      $("loginPassword").value = "";
 
-}
-);
+      $("loginError").textContent = "";
 
-
-$("logoutBtn")
-.addEventListener(
-"click",
-async()=>{
-
-await sb.auth.signOut();
-
-showLogin();
+    }
+  );
 
 }
-);
 
+
+/* ================================
+   NAV BUTTONS
+================================ */
 
 document
-.querySelectorAll(".nav[data-page]")
-.forEach(
-b=>
-b.addEventListener(
-"click",
-()=>openPage(
-b.dataset.page
-)
-)
-);
+  .querySelectorAll(
+    ".nav[data-page]"
+  )
+  .forEach(
+    b =>
+      b.addEventListener(
+        "click",
+        () =>
+          openPage(
+            b.dataset.page
+          )
+      )
+  );
 
+
+/* ================================
+   LOAD ALL
+================================ */
 
 async function loadAll(){
 
-await Promise.allSettled([
+  await Promise.allSettled([
 
-loadProducts(),
+    loadProducts(),
 
-loadOrders(),
+    loadOrders(),
 
-loadSlides(),
+    loadSlides(),
 
-loadSettings(),
+    loadSettings(),
 
-loadDelivery()
+    loadDelivery()
 
-]);
+  ]);
 
-updateStats();
+
+  updateStats();
 
 }
 
 
+/* ================================
+   DASHBOARD STATS
+================================ */
+
 function updateStats(){
 
-$("statProducts")
-.textContent=
-products.length;
+  $("statProducts")
+    .textContent =
+      products.length;
 
 
-$("statOffers")
-.textContent=
-products
-.filter(
-x=>x.is_offer
-)
-.length;
+  $("statOffers")
+    .textContent =
+      products.filter(
+        x => x.is_offer
+      ).length;
 
 
-$("statOrders")
-.textContent=
-orders.length;
+  $("statOrders")
+    .textContent =
+      orders.length;
 
 
-$("statSlides")
-.textContent=
-slides
-.filter(
-x=>x.is_active
-)
-.length;
+  $("statSlides")
+    .textContent =
+      slides.filter(
+        x => x.is_active
+      ).length;
 
 }
 
 
 /* PRODUCTS */
+/* ================================
+   PRODUCTS
+================================ */
 
 async function loadProducts(){
 
-try{
+  try{
 
-const rows=
-await q(
+    const rows =
+      await q(
 
-sb
-.from("products")
-.select("*")
-.order(
-"created_at",
-{
-ascending:false
+        sb
+          .from("products")
+          .select("*")
+          .order(
+            "created_at",
+            {
+              ascending:false
+            }
+          )
+
+      );
+
+
+    let imgs = [];
+
+
+    if(rows.length){
+
+      imgs =
+        await q(
+
+          sb
+            .from("product_images")
+            .select("*")
+            .in(
+              "product_id",
+              rows.map(
+                x => x.id
+              )
+            )
+            .order("sort_order")
+
+        );
+
+    }
+
+
+    products =
+      rows.map(
+        p => ({
+
+          ...p,
+
+          _image:
+            p.image_url
+            ||
+            imgs.find(
+              i =>
+                String(i.product_id)
+                ===
+                String(p.id)
+            )?.image_url
+            ||
+            PLACEHOLDER
+
+        })
+      );
+
+
+    renderProducts();
+
+    updateStats();
+
+
+  }catch(e){
+
+    console.error(
+      "loadProducts:",
+      e
+    );
+
+    toast(
+      "خطأ تحميل المنتجات: "
+      +
+      (
+        e?.message
+        ||
+        "خطأ غير معروف"
+      )
+    );
+
+  }
+
 }
-)
-
-);
 
 
-let imgs=[];
-
-
-if(rows.length){
-
-imgs=
-await q(
-
-sb
-.from("product_images")
-.select("*")
-.in(
-"product_id",
-rows.map(x=>x.id)
-)
-.order("sort_order")
-
-);
-
-}
-
-
-products=
-rows.map(
-p=>({
-
-...p,
-
-_image:
-p.image_url
-||
-imgs.find(
-i=>
-String(i.product_id)
-===
-String(p.id)
-)?.image_url
-||
-PLACEHOLDER
-
-})
-);
-
-
-renderProducts();
-
-updateStats();
-
-
-}catch(e){
-
-toast(
-"خطأ تحميل المنتجات: "
-+
-e.message
-);
-
-}
-
-}
-
+/* ================================
+   RENDER PRODUCTS
+================================ */
 
 function renderProducts(){
 
-const search=
+  const search =
+    $("productSearch")
+      .value
+      .trim()
+      .toLowerCase();
+
+
+  const category =
+    $("productCategoryFilter")
+      .value;
+
+
+  const list =
+    products.filter(
+
+      p =>
+
+        (
+
+          !search
+
+          ||
+
+          (p.name || "")
+            .toLowerCase()
+            .includes(search)
+
+          ||
+
+          (p.sku || "")
+            .toLowerCase()
+            .includes(search)
+
+        )
+
+        &&
+
+        (
+
+          category === "all"
+
+          ||
+
+          (
+
+            category === "offers"
+
+            ?
+
+            !!p.is_offer
+
+            :
+
+            p.category === category
+
+          )
+
+        )
+
+    );
+
+
+  $("productsGrid").innerHTML =
+
+    list.length
+
+    ?
+
+    list.map(
+
+      p => `
+
+        <div class="product">
+
+          <img
+            src="${esc(p._image)}"
+            onerror="this.src='${PLACEHOLDER}'">
+
+          <div class="product-body">
+
+            <div class="product-title">
+              ${esc(p.name)}
+            </div>
+
+
+            <div class="row-between">
+
+              <div>
+
+                <span class="price">
+                  ${Number(
+                    p.price || 0
+                  ).toLocaleString()} ₪
+                </span>
+
+                ${
+                  p.old_price
+                  ?
+                  `
+                    <br>
+
+                    <span class="old">
+                      ${Number(
+                        p.old_price
+                      ).toLocaleString()} ₪
+                    </span>
+                  `
+                  :
+                  ""
+                }
+
+              </div>
+
+
+              <small
+                style="color:${
+                  p.is_active
+                  ?
+                  "var(--green)"
+                  :
+                  "var(--red)"
+                }">
+
+                ${
+                  p.is_active
+                  ?
+                  "ظاهر"
+                  :
+                  "مخفي"
+                }
+
+              </small>
+
+            </div>
+
+
+            <div class="actions">
+
+              <button
+                type="button"
+                class="btn btn-soft"
+                onclick="openProductModal('${p.id}')">
+
+                تعديل
+
+              </button>
+
+
+              <button
+                type="button"
+                class="btn btn-danger"
+                onclick="deleteProduct('${p.id}')">
+
+                حذف
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      `
+
+    ).join("")
+
+    :
+
+    `
+
+      <div
+        class="empty"
+        style="grid-column:1/-1">
+
+        لا توجد منتجات في Supabase.
+
+      </div>
+
+    `;
+
+}
+
+
+/* ================================
+   PRODUCT SEARCH / FILTER
+================================ */
+
 $("productSearch")
-.value
-.trim()
-.toLowerCase();
-
-
-const category=
-$("productCategoryFilter")
-.value;
-
-
-const list=
-products.filter(
-p=>
-
-(
-!search
-
-||
-
-(p.name||"")
-.toLowerCase()
-.includes(search)
-
-||
-
-(p.sku||"")
-.toLowerCase()
-.includes(search)
-
-)
-
-&&
-
-(
-category==="all"
-
-||
-
-(
-category==="offers"
-?
-p.is_offer
-:
-p.category===category
-)
-
-)
-
-);
-
-
-$("productsGrid")
-.innerHTML=
-
-list.length
-
-?
-
-list.map(
-
-p=>
-
-`
-<div class="product">
-
-<img
-src="${esc(p._image)}"
-onerror="this.src='${PLACEHOLDER}'">
-
-<div class="product-body">
-
-<div class="product-title">
-${esc(p.name)}
-</div>
-
-<div class="row-between">
-
-<div>
-
-<span class="price">
-${Number(p.price||0).toLocaleString()} ₪
-</span>
-
-${
-p.old_price
-?
-`
-<br>
-<span class="old">
-${Number(p.old_price).toLocaleString()} ₪
-</span>
-`
-:
-""
-}
-
-</div>
-
-<small
-style="color:${
-p.is_active
-?
-'var(--green)'
-:
-'var(--red)'
-}">
-${
-p.is_active
-?
-'ظاهر'
-:
-'مخفي'
-}
-</small>
-
-</div>
-
-
-<div class="actions">
-
-<button
-class="btn btn-soft"
-onclick="openProductModal('${p.id}')">
-
-تعديل
-
-</button>
-
-<button
-class="btn btn-danger"
-onclick="deleteProduct('${p.id}')">
-
-حذف
-
-</button>
-
-</div>
-
-</div>
-
-</div>
-`
-
-).join("")
-
-:
-
-`
-<div
-class="empty"
-style="grid-column:1/-1">
-
-لا توجد منتجات في Supabase.
-
-</div>
-`;
-
-}
-
-
-$("productSearch")
-.addEventListener(
-"input",
-renderProducts
-);
+  .addEventListener(
+    "input",
+    renderProducts
+  );
 
 
 $("productCategoryFilter")
-.addEventListener(
-"change",
-renderProducts
-);
+  .addEventListener(
+    "change",
+    renderProducts
+  );
 
+
+/* ================================
+   OPEN PRODUCT MODAL
+================================ */
 
 async function openProductModal(
-id=null
+  id = null
 ){
 
-$("productForm")
-.reset();
-
-$("productActive")
-.checked=true;
-
-$("productAvailable")
-.checked=true;
-
-productImages=[];
-
-editProduct=null;
-
-$("productImagesList")
-.innerHTML="";
-
-$("productModal")
-.classList.add("open");
-
-$("productModalTitle")
-.textContent=
-id
-?
-"تعديل المنتج"
-:
-"إضافة منتج";
+  $("productForm").reset();
 
 
-if(!id)
-return;
+  $("productActive").checked =
+    true;
 
 
-try{
-
-const[
-p,
-imgs,
-sizes,
-colors
-]=
-await Promise.all([
-
-q(
-sb
-.from("products")
-.select("*")
-.eq("id",id)
-.single()
-),
-
-q(
-sb
-.from("product_images")
-.select("*")
-.eq("product_id",id)
-.order("sort_order")
-),
-
-q(
-sb
-.from("product_sizes")
-.select("*")
-.eq("product_id",id)
-.order("sort_order")
-),
-
-q(
-sb
-.from("product_colors")
-.select("*")
-.eq("product_id",id)
-.order("sort_order")
-)
-
-]);
+  $("productAvailable").checked =
+    true;
 
 
-editProduct=p;
+  $("productOffer").checked =
+    false;
 
 
-$("productId").value=
-p.id;
+  productImages = [];
+
+  editProduct = null;
 
 
-$("productName").value=
-p.name||"";
+  $("productId").value = "";
+
+  $("productImagesList")
+    .innerHTML = "";
 
 
-$("productSku").value=
-p.sku||"";
+  $("productModalTitle")
+    .textContent =
+      id
+      ?
+      "تعديل المنتج"
+      :
+      "إضافة منتج";
 
 
-$("productCategory").value=
-p.category||"dresses";
+  $("productModal")
+    .classList.add("open");
 
 
-$("productPrice").value=
-p.price??"";
+  if(!id)
+    return;
 
 
-$("productOldPrice").value=
-p.old_price??"";
+  try{
+
+    const [
+      p,
+      imgs,
+      sizes,
+      colors
+    ] =
+      await Promise.all([
+
+        q(
+
+          sb
+            .from("products")
+            .select("*")
+            .eq("id",id)
+            .single()
+
+        ),
+
+        q(
+
+          sb
+            .from("product_images")
+            .select("*")
+            .eq("product_id",id)
+            .order("sort_order")
+
+        ),
+
+        q(
+
+          sb
+            .from("product_sizes")
+            .select("*")
+            .eq("product_id",id)
+            .order("sort_order")
+
+        ),
+
+        q(
+
+          sb
+            .from("product_colors")
+            .select("*")
+            .eq("product_id",id)
+            .order("sort_order")
+
+        )
+
+      ]);
 
 
-$("productDescription").value=
-p.description||"";
+    editProduct = p;
 
 
-$("productOffer").checked=
-bool(
-p.is_offer,
-false
-);
+    $("productId").value =
+      p.id;
 
 
-$("productAvailable").checked=
-bool(
-p.is_available,
-true
-);
+    $("productName").value =
+      p.name || "";
 
 
-$("productActive").checked=
-bool(
-p.is_active,
-true
-);
+    $("productSku").value =
+      p.sku || "";
 
 
-$("productSizes").value=
-sizes
-.map(
-x=>x.size
-)
-.join(",");
+    $("productCategory").value =
+      p.category || "dresses";
 
 
-productImages=
-imgs.map(
-
-i=>({
-
-...i,
-
-color:
-colors.find(
-c=>
-String(c.image_id)
-===
-String(i.id)
-)?.color_name
-||
-"",
-
-file:null
-
-})
-
-);
+    $("productPrice").value =
+      p.price ?? "";
 
 
-if(
-!productImages.length
-&&
-p.image_url
-){
+    $("productOldPrice").value =
+      p.old_price ?? "";
 
-productImages=[{
 
-id:null,
+    $("productDescription").value =
+      p.description || "";
 
-image_url:p.image_url,
 
-storage_path:null,
+    $("productOffer").checked =
+      bool(
+        p.is_offer,
+        false
+      );
 
-color:"",
 
-file:null
+    $("productAvailable").checked =
+      bool(
+        p.is_available,
+        true
+      );
 
-}];
+
+    $("productActive").checked =
+      bool(
+        p.is_active,
+        true
+      );
+
+
+    $("productSizes").value =
+      sizes
+        .map(
+          x => x.size
+        )
+        .join(",");
+
+
+    /*
+     * نربط كل صورة باللون
+     * الموجود لها في product_colors.
+     */
+
+    productImages =
+      imgs.map(
+
+        i => ({
+
+          ...i,
+
+          color:
+            colors.find(
+              c =>
+                String(c.image_id)
+                ===
+                String(i.id)
+            )?.color_name
+            ||
+            "",
+
+          file:null
+
+        })
+
+      );
+
+
+    /*
+     * توافق مع المنتجات القديمة
+     * التي قد يكون لديها image_url
+     * بدون سجل في product_images.
+     */
+
+    if(
+      !productImages.length
+      &&
+      p.image_url
+    ){
+
+      productImages = [
+
+        {
+
+          id:null,
+
+          image_url:
+            p.image_url,
+
+          storage_path:null,
+
+          color:"",
+
+          file:null
+
+        }
+
+      ];
+
+    }
+
+
+    renderProductImages();
+
+
+  }catch(e){
+
+    console.error(
+      "openProductModal:",
+      e
+    );
+
+    toast(
+      "تعذر فتح المنتج: "
+      +
+      (
+        e?.message
+        ||
+        "خطأ غير معروف"
+      )
+    );
+
+  }
 
 }
 
 
-renderProductImages();
-
-
-}catch(e){
-
-toast(
-"تعذر فتح المنتج: "
-+
-e.message
-);
-
-}
-
-}
-
+/* ================================
+   CLOSE PRODUCT MODAL
+================================ */
 
 function closeProductModal(){
 
-$("productModal")
-.classList.remove("open");
+  $("productModal")
+    .classList.remove("open");
 
-productImages=[];
 
-editProduct=null;
+  /*
+   * تحرير روابط الصور المؤقتة.
+   */
+
+  productImages.forEach(
+    img => {
+
+      if(
+        img?.image_url
+        ?.startsWith("blob:")
+      ){
+
+        try{
+
+          URL.revokeObjectURL(
+            img.image_url
+          );
+
+        }catch{}
+
+      }
+
+    }
+  );
+
+
+  productImages = [];
+
+  editProduct = null;
 
 }
 
+
+/* ================================
+   ADD PRODUCT IMAGES
+================================ */
 
 $("productImagesInput")
-.addEventListener(
-"change",
-e=>{
+  .addEventListener(
+    "change",
+    e => {
 
-for(
-const file
-of e.target.files||[]
-){
+      const files =
+        Array.from(
+          e.target.files || []
+        );
 
-productImages.push({
 
-id:null,
+      for(
+        const file
+        of files
+      ){
 
-image_url:
-URL.createObjectURL(file),
+        if(
+          !file.type
+            .startsWith("image/")
+        ){
 
-storage_path:null,
+          continue;
 
-color:"",
+        }
 
-file
 
-});
+        productImages.push({
 
-}
+          id:null,
 
-renderProductImages();
+          image_url:
+            URL.createObjectURL(
+              file
+            ),
 
-e.target.value="";
+          storage_path:null,
 
-}
-);
+          color:"",
 
+          file
+
+        });
+
+      }
+
+
+      renderProductImages();
+
+
+      /*
+       * نسمح باختيار نفس الصورة
+       * مرة أخرى إذا احتاج المستخدم.
+       */
+
+      e.target.value = "";
+
+    }
+  );
+
+
+/* ================================
+   RENDER PRODUCT IMAGES
+================================ */
 
 function renderProductImages(){
 
-$("productImagesList")
-.innerHTML=
+  $("productImagesList")
+    .innerHTML =
 
-productImages
-.map(
+      productImages
+        .map(
 
-(img,i)=>
+          (img,i) => `
 
-`
-<div class="image-editor">
+            <div class="image-editor">
 
-<img src="${esc(img.image_url)}">
+              <img
+                src="${esc(
+                  img.image_url
+                )}"
+                onerror="
+                  this.src='${PLACEHOLDER}'
+                ">
 
-<div>
 
-<input
-class="field"
-placeholder="اسم اللون لهذه الصورة"
-value="${esc(img.color||"")}"
-oninput="productImages[${i}].color=this.value">
+              <div>
 
-<div class="tiny">
-الصورة ${i+1}
-</div>
+                <input
+                  class="field"
+                  placeholder="اسم اللون لهذه الصورة"
+                  value="${esc(
+                    img.color || ""
+                  )}"
+                  oninput="
+                    productImages[${i}].color=this.value
+                  ">
 
-</div>
 
-<button
-type="button"
-class="btn btn-danger"
-onclick="removeProductImage(${i})">
+                <div class="tiny">
 
-حذف
+                  الصورة ${i + 1}
 
-</button>
+                </div>
 
-</div>
-`
+              </div>
 
-)
-.join("");
+
+              <button
+                type="button"
+                class="btn btn-danger"
+                onclick="
+                  removeProductImage(${i})
+                ">
+
+                حذف
+
+              </button>
+
+            </div>
+
+          `
+
+        )
+        .join("");
 
 }
 
+
+/* ================================
+   REMOVE PRODUCT IMAGE
+================================ */
 
 function removeProductImage(i){
 
-const image=
-productImages[i];
+  const image =
+    productImages[i];
 
 
-if(
-image?.image_url?.startsWith("blob:")
-){
+  if(
+    image
+    &&
+    image.image_url
+    &&
+    image.image_url
+      .startsWith("blob:")
+  ){
 
-URL.revokeObjectURL(
-image.image_url
-);
+    try{
+
+      URL.revokeObjectURL(
+        image.image_url
+      );
+
+    }catch{}
+
+  }
+
+
+  productImages.splice(
+    i,
+    1
+  );
+
+
+  renderProductImages();
 
 }
 
 
-productImages.splice(
-i,
-1
-);
-
-
-renderProductImages();
-
-}
-
-
-/*
- * SAVE PRODUCT
- * الجزء المصلح: حذف المقاسات القديمة التي لم تعد موجودة.
- */
+/* ================================
+   SAVE PRODUCT
+================================ */
 
 $("productForm")
-.addEventListener(
-"submit",
-async e=>{
+  .addEventListener(
+    "submit",
+    async e => {
 
-e.preventDefault();
-
-const btn=e.submitter;
-
-btn.disabled=true;
-
-btn.textContent=
-"جاري الحفظ...";
+      e.preventDefault();
 
-
-try{
 
-const id=
-editProduct?.id
-||
-crypto.randomUUID();
+      const btn =
+        e.submitter
+        ||
+        $("productForm")
+          .querySelector(
+            'button[type="submit"]'
+          );
 
 
-const payload={
+      if(!btn)
+        return;
 
-name:
-$("productName")
-.value
-.trim(),
 
-sku:
-$("productSku")
-.value
-.trim()
-||
-null,
+      btn.disabled = true;
 
-category:
-$("productCategory")
-.value,
+      btn.textContent =
+        "جاري الحفظ...";
 
-price:
-Number(
-$("productPrice")
-.value
-),
 
-old_price:
-$("productOldPrice")
-.value===""
-?
-null
-:
-Number(
-$("productOldPrice")
-.value
-),
+      try{
 
-description:
-$("productDescription")
-.value
-.trim(),
+        /*
+         * ID موجود عند التعديل،
+         * وجديد عند الإضافة.
+         */
 
-is_offer:
-$("productOffer")
-.checked,
+        const id =
+          editProduct?.id
+          ||
+          crypto.randomUUID();
 
-is_available:
-$("productAvailable")
-.checked,
 
-is_active:
-$("productActive")
-.checked,
+        /* ==========================
+           BASIC PRODUCT DATA
+        ========================== */
 
-updated_at:
-new Date()
-.toISOString()
+        const priceRaw =
+          $("productPrice")
+            .value
+            .trim();
 
-};
 
+        const oldPriceRaw =
+          $("productOldPrice")
+            .value
+            .trim();
 
-if(
-!payload.name
-||
-!Number.isFinite(
-payload.price
-)
-||
-payload.price<0
-){
 
-throw new Error(
-"تأكدي من الاسم والسعر."
-);
+        const payload = {
 
-}
+          name:
+            $("productName")
+              .value
+              .trim(),
 
+          sku:
+            $("productSku")
+              .value
+              .trim()
+              ||
+              null,
 
-if(
-payload.old_price!==null
-&&
-(
-!Number.isFinite(payload.old_price)
-||
-payload.old_price<0
-)
-){
+          category:
+            $("productCategory")
+              .value,
 
-throw new Error(
-"تأكدي من السعر القديم."
-);
+          price:
+            Number(priceRaw),
 
-}
+          old_price:
+            oldPriceRaw === ""
+            ?
+            null
+            :
+            Number(oldPriceRaw),
 
+          description:
+            $("productDescription")
+              .value
+              .trim(),
 
-if(
-payload.old_price!==null
-&&
-payload.old_price<payload.price
-){
+          is_offer:
+            $("productOffer")
+              .checked,
 
-throw new Error(
-"السعر القديم يجب أن يكون أكبر من أو يساوي السعر الحالي."
-);
+          is_available:
+            $("productAvailable")
+              .checked,
 
-}
+          is_active:
+            $("productActive")
+              .checked,
 
+          updated_at:
+            new Date()
+              .toISOString()
 
-if(
-![
-"dresses",
-"sets",
-"offers"
-].includes(
-payload.category
-)
-){
+        };
 
-throw new Error(
-"اختاري تصنيفًا صحيحًا."
-);
 
-}
+        /* ==========================
+           VALIDATION
+        ========================== */
 
+        if(
+          !payload.name
+        ){
 
-if(editProduct){
+          throw new Error(
+            "أدخلي اسم المنتج."
+          );
 
-await q(
+        }
 
-sb
-.from("products")
-.update(payload)
-.eq("id",id)
 
-);
+        if(
+          priceRaw === ""
+          ||
+          !Number.isFinite(
+            payload.price
+          )
+          ||
+          payload.price < 0
+        ){
 
-}else{
+          throw new Error(
+            "تأكدي من السعر."
+          );
 
-await q(
+        }
 
-sb
-.from("products")
-.insert({
-id,
-...payload
-})
 
-);
+        if(
+          payload.old_price !== null
+          &&
+          (
+            !Number.isFinite(
+              payload.old_price
+            )
+            ||
+            payload.old_price < 0
+          )
+        ){
 
-}
+          throw new Error(
+            "تأكدي من السعر القديم."
+          );
 
+        }
 
-const oldImgs=
-editProduct
 
-?
+        if(
+          payload.old_price !== null
+          &&
+          payload.old_price < payload.price
+        ){
 
-await q(
+          throw new Error(
+            "السعر القديم يجب أن يكون أكبر من أو يساوي السعر الحالي."
+          );
 
-sb
-.from("product_images")
-.select("*")
-.eq("product_id",id)
+        }
 
-)
 
-:
+        if(
+          ![
+            "dresses",
+            "sets",
+            "offers"
+          ].includes(
+            payload.category
+          )
+        ){
 
-[];
+          throw new Error(
+            "اختاري تصنيفًا صحيحًا."
+          );
 
+        }
 
-await q(
 
-sb
-.from("product_colors")
-.delete()
-.eq("product_id",id)
+        /* ==========================
+           SAVE PRODUCT
+        ========================== */
 
-);
+        if(editProduct){
 
+          await q(
 
-await q(
+            sb
+              .from("products")
+              .update(payload)
+              .eq("id",id)
 
-sb
-.from("product_sizes")
-.delete()
-.eq("product_id",id)
+          );
 
-);
+        }else{
 
+          await q(
 
-await q(
+            sb
+              .from("products")
+              .insert({
 
-sb
-.from("product_images")
-.delete()
-.eq("product_id",id)
+                id,
 
-);
+                ...payload
 
+              })
 
-const saved=[];
+          );
 
+        }
 
-for(
-let i=0;
-i<productImages.length;
-i++
-){
 
-let img=
-productImages[i];
+        /* ==========================
+           OLD IMAGES
+        ========================== */
 
+        const oldImgs =
+          editProduct
 
-if(img.file){
+          ?
 
-const uploaded=
-await uploadImage(
-img.file,
-`products/${id}`
-);
+          await q(
 
+            sb
+              .from("product_images")
+              .select("*")
+              .eq(
+                "product_id",
+                id
+              )
 
-img={
-...img,
-...uploaded
-};
+          )
 
-}
+          :
 
+          [];
 
-if(!img.image_url)
-continue;
 
+        /*
+         * أولًا نحذف روابط الألوان
+         * والمقاسات والصور المرتبطة
+         * حتى نعيد بناءها بشكل نظيف.
+         */
 
-const row=
-await q(
+        await q(
 
-sb
-.from("product_images")
-.insert({
+          sb
+            .from("product_colors")
+            .delete()
+            .eq(
+              "product_id",
+              id
+            )
 
-product_id:id,
+        );
 
-image_url:
-img.image_url,
 
-storage_path:
-img.storage_path
-||
-null,
+        await q(
 
-sort_order:i
+          sb
+            .from("product_sizes")
+            .delete()
+            .eq(
+              "product_id",
+              id
+            )
 
-})
-.select()
-.single()
+        );
 
-);
 
+        await q(
 
-saved.push({
+          sb
+            .from("product_images")
+            .delete()
+            .eq(
+              "product_id",
+              id
+            )
 
-...row,
+        );
 
-color:
-(img.color||"")
-.trim()
 
-});
+        /* ==========================
+           UPLOAD / SAVE IMAGES
+        ========================== */
 
-}
+        const saved = [];
 
 
-for(
-let i=0;
-i<saved.length;
-i++
-){
+        for(
+          let i = 0;
+          i < productImages.length;
+          i++
+        ){
 
-if(saved[i].color){
+          const original =
+            productImages[i];
 
-await q(
 
-sb
-.from("product_colors")
-.insert({
+          let img =
+            original;
 
-product_id:id,
 
-image_id:
-saved[i].id,
+          /*
+           * الصورة الجديدة:
+           * نرفعها إلى Storage.
+           */
 
-color_name:
-saved[i].color,
+          if(img.file){
 
-sort_order:i
+            const uploaded =
+              await uploadImage(
+                img.file,
+                `products/${id}`
+              );
 
-})
 
-);
+            img = {
 
-}
+              ...img,
 
-}
+              ...uploaded
 
+            };
 
-const sizes=[
-...new Set(
+          }
 
-$("productSizes")
-.value
-.split(/[,،\n]/)
-.map(
-x=>x.trim()
-)
-.filter(Boolean)
 
-)
-];
+          /*
+           * إذا لم يوجد رابط للصورة،
+           * نتجاوزها.
+           */
 
+          if(!img.image_url)
+            continue;
 
-for(
-let i=0;
-i<sizes.length;
-i++
-){
 
-await q(
+          const row =
+            await q(
 
-sb
-.from("product_sizes")
-.insert({
+              sb
+                .from("product_images")
+                .insert({
 
-product_id:id,
+                  product_id:
+                    id,
 
-size:sizes[i],
+                  image_url:
+                    img.image_url,
 
-sort_order:i
+                  storage_path:
+                    img.storage_path
+                    ||
+                    null,
 
-})
+                  sort_order:
+                    i
 
-);
+                })
+                .select()
+                .single()
 
-}
+            );
 
 
-const main=
-saved[0]?.image_url
-||
-null;
+          saved.push({
 
+            ...row,
 
-await q(
+            color:
+              (img.color || "")
+                .trim()
 
-sb
-.from("products")
-.update({
-image_url:main
-})
-.eq("id",id)
+          });
 
-);
+        }
 
 
-const kept=
-new Set(
+        /* ==========================
+           SAVE COLORS
+        ========================== */
 
-saved
-.map(
-x=>x.storage_path
-)
-.filter(Boolean)
+        for(
+          let i = 0;
+          i < saved.length;
+          i++
+        ){
 
-);
+          if(
+            saved[i].color
+          ){
 
+            await q(
 
-for(
-const old
-of oldImgs
-){
+              sb
+                .from("product_colors")
+                .insert({
 
-if(
-old.storage_path
-&&
-!kept.has(
-old.storage_path
-)
-){
+                  product_id:
+                    id,
 
-try{
+                  image_id:
+                    saved[i].id,
 
-await q(
+                  color_name:
+                    saved[i].color,
 
-sb
-.storage
-.from(BUCKET)
-.remove([
-old.storage_path
-])
+                  sort_order:
+                    i
 
-);
+                })
 
-}catch{}
+            );
 
-}
+          }
 
-}
+        }
 
 
-toast(
-editProduct
-?
-"تم تعديل المنتج ✅"
-:
-"تم إضافة المنتج ✅"
-);
+        /* ==========================
+           SAVE SIZES
+        ========================== */
 
+        const sizes = [
 
-closeProductModal();
+          ...new Set(
 
-await loadProducts();
+            $("productSizes")
+              .value
+              .split(
+                /[,،\n]/
+              )
+              .map(
+                x =>
+                  x.trim()
+              )
+              .filter(Boolean)
 
+          )
 
-}catch(err){
+        ];
 
-toast(
-"تعذر حفظ المنتج: "
-+
-err.message
-);
 
-}
+        for(
+          let i = 0;
+          i < sizes.length;
+          i++
+        ){
 
-finally{
+          await q(
 
-btn.disabled=false;
+            sb
+              .from("product_sizes")
+              .insert({
 
-btn.textContent=
-"حفظ المنتج";
+                product_id:
+                  id,
 
-}
+                size:
+                  sizes[i],
 
-}
-);
+                sort_order:
+                  i
 
+              })
 
-/* DELETE PRODUCT */
+          );
+
+        }
+
+
+        /* ==========================
+           MAIN PRODUCT IMAGE
+        ========================== */
+
+        const main =
+          saved[0]?.image_url
+          ||
+          null;
+
+
+        await q(
+
+          sb
+            .from("products")
+            .update({
+
+              image_url:
+                main
+
+            })
+            .eq(
+              "id",
+              id
+            )
+
+        );
+
+
+        /* ==========================
+           DELETE UNUSED STORAGE FILES
+        ========================== */
+
+        const kept =
+          new Set(
+
+            saved
+              .map(
+                x =>
+                  x.storage_path
+              )
+              .filter(Boolean)
+
+          );
+
+
+        for(
+          const old
+          of oldImgs
+        ){
+
+          if(
+            old.storage_path
+            &&
+            !kept.has(
+              old.storage_path
+            )
+          ){
+
+            try{
+
+              await q(
+
+                sb
+                  .storage
+                  .from(BUCKET)
+                  .remove([
+                    old.storage_path
+                  ])
+
+              );
+
+            }catch(storageError){
+
+              /*
+               * فشل حذف ملف قديم من Storage
+               * لا يمنع حفظ المنتج.
+               */
+
+              console.warn(
+                "Storage cleanup failed:",
+                storageError
+              );
+
+            }
+
+          }
+
+        }
+
+
+        /* ==========================
+           SUCCESS
+        ========================== */
+
+        toast(
+
+          editProduct
+          ?
+          "تم تعديل المنتج ✅"
+          :
+          "تم إضافة المنتج ✅"
+
+        );
+
+
+        closeProductModal();
+
+
+        await loadProducts();
+
+
+      }catch(err){
+
+        console.error(
+          "SAVE PRODUCT ERROR:",
+          err
+        );
+
+
+        toast(
+
+          "تعذر حفظ المنتج: "
+          +
+          (
+            err?.message
+            ||
+            "حدث خطأ غير معروف."
+          )
+
+        );
+
+      }finally{
+
+        btn.disabled = false;
+
+        btn.textContent =
+          "حفظ المنتج";
+
+      }
+
+    }
+  );
+
+
+/* ================================
+   DELETE PRODUCT
+================================ */
 
 async function deleteProduct(id){
 
-const product=
-products.find(
-x=>
-String(x.id)
-===
-String(id)
-);
+  const product =
+    products.find(
+      x =>
+        String(x.id)
+        ===
+        String(id)
+    );
 
 
-if(
-!product
-||
-!confirm(
-`حذف المنتج ${product.name}؟`
-)
-)
-return;
+  if(
+    !product
+  ){
+
+    toast(
+      "المنتج غير موجود."
+    );
+
+    return;
+
+  }
 
 
-try{
+  if(
+    !confirm(
+      `حذف المنتج ${product.name}؟`
+    )
+  ){
 
-const linked=
-await q(
+    return;
 
-sb
-.from("orders")
-.select("id")
-.eq("product_id",id)
-.limit(1)
-
-);
+  }
 
 
-if(linked.length){
+  try{
 
-await q(
+    /*
+     * إذا كان المنتج مرتبطًا بطلب،
+     * لا نحذفه فعليًا حتى لا نكسر الطلب.
+     */
 
-sb
-.from("products")
-.update({
+    const linked =
+      await q(
 
-is_active:false,
+        sb
+          .from("orders")
+          .select("id")
+          .eq(
+            "product_id",
+            id
+          )
+          .limit(1)
 
-is_available:false
-
-})
-.eq("id",id)
-
-);
-
-
-toast(
-"المنتج مرتبط بطلبات، تم إخفاؤه بدل حذفه."
-);
+      );
 
 
-return loadProducts();
+    if(
+      linked
+      &&
+      linked.length
+    ){
+
+      await q(
+
+        sb
+          .from("products")
+          .update({
+
+            is_active:false,
+
+            is_available:false
+
+          })
+          .eq(
+            "id",
+            id
+          )
+
+      );
+
+
+      toast(
+        "المنتج مرتبط بطلبات، تم إخفاؤه بدل حذفه."
+      );
+
+
+      await loadProducts();
+
+      return;
+
+    }
+
+
+    /*
+     * نحصل على ملفات الصور قبل حذفها
+     * حتى نستطيع حذفها من Storage.
+     */
+
+    const imgs =
+      await q(
+
+        sb
+          .from("product_images")
+          .select(
+            "storage_path"
+          )
+          .eq(
+            "product_id",
+            id
+          )
+
+      );
+
+
+    /*
+     * حذف البيانات المرتبطة أولًا.
+     */
+
+    await q(
+
+      sb
+        .from("product_colors")
+        .delete()
+        .eq(
+          "product_id",
+          id
+        )
+
+    );
+
+
+    await q(
+
+      sb
+        .from("product_sizes")
+        .delete()
+        .eq(
+          "product_id",
+          id
+        )
+
+    );
+
+
+    await q(
+
+      sb
+        .from("product_images")
+        .delete()
+        .eq(
+          "product_id",
+          id
+        )
+
+    );
+
+
+    /*
+     * حذف المنتج نفسه.
+     */
+
+    await q(
+
+      sb
+        .from("products")
+        .delete()
+        .eq(
+          "id",
+          id
+        )
+
+    );
+
+
+    /*
+     * حذف الصور من Storage.
+     */
+
+    const paths =
+      imgs
+        .map(
+          x =>
+            x.storage_path
+        )
+        .filter(Boolean);
+
+
+    if(paths.length){
+
+      try{
+
+        await q(
+
+          sb
+            .storage
+            .from(BUCKET)
+            .remove(paths)
+
+        );
+
+      }catch(storageError){
+
+        console.warn(
+          "Storage delete failed:",
+          storageError
+        );
+
+      }
+
+    }
+
+
+    toast(
+      "تم حذف المنتج ✅"
+    );
+
+
+    await loadProducts();
+
+
+  }catch(e){
+
+    console.error(
+      "deleteProduct:",
+      e
+    );
+
+
+    toast(
+      "تعذر حذف المنتج: "
+      +
+      (
+        e?.message
+        ||
+        "حدث خطأ غير معروف"
+      )
+    );
+
+  }
 
 }
-
-
-const imgs=
-await q(
-
-sb
-.from("product_images")
-.select("storage_path")
-.eq("product_id",id)
-
-);
-
-
-await q(
-sb
-.from("product_colors")
-.delete()
-.eq("product_id",id)
-);
-
-
-await q(
-sb
-.from("product_sizes")
-.delete()
-.eq("product_id",id)
-);
-
-
-await q(
-sb
-.from("product_images")
-.delete()
-.eq("product_id",id)
-);
-
-
-await q(
-sb
-.from("products")
-.delete()
-.eq("id",id)
-);
-
-
-const paths=
-imgs
-.map(
-x=>x.storage_path
-)
-.filter(Boolean);
-
-
-if(paths.length){
-
-try{
-
-await q(
-
-sb
-.storage
-.from(BUCKET)
-.remove(paths)
-
-);
-
-}catch{}
-
-}
-
-
-toast(
-"تم حذف المنتج ✅"
-);
-
-
-loadProducts();
-
-}
-
-
-/* ORDERS */
+  /* ORDERS */
 
 async function loadOrders(){
+  try{
+    const result = await q(
+      sb
+        .from("orders")
+        .select("*")
+        .order("created_at",{ascending:false})
+    );
 
-try{
+    orders = result || [];
 
-orders=
-await q(
+    renderOrders();
+    updateStats();
 
-sb
-.from("orders")
-.select("*")
-.order(
-"created_at",
-{
-ascending:false
-}
-)
-
-);
-
-
-renderOrders();
-
-updateStats();
-
-
-}catch(e){
-
-toast(
-"خطأ تحميل الطلبات: "
-+
-e.message
-);
-
-}
-
+  }catch(e){
+    console.error("loadOrders error:", e);
+    toast("خطأ تحميل الطلبات: " + (e.message || "خطأ غير معروف"));
+  }
 }
 
 
 function renderOrders(){
 
-$("ordersBody")
-.innerHTML=
+  const body = $("ordersBody");
 
-orders.length
+  if(!body) return;
 
-?
+  if(!orders || !orders.length){
+    body.innerHTML = `
+      <tr>
+        <td colspan="8" class="empty">
+          لا توجد طلبات حتى الآن.
+        </td>
+      </tr>
+    `;
+    return;
+  }
 
-orders.map(
 
-o=>
+  body.innerHTML = orders.map(o => {
 
-`
-<tr>
+    const customerName = esc(o.customer_name || "");
+    const phone = esc(o.phone || "");
+    const productName = esc(o.product_name || "");
 
-<td>
-${esc(o.customer_name)}
-</td>
+    const options = [
+      o.selected_color,
+      o.selected_size
+    ]
+    .filter(Boolean)
+    .map(esc)
+    .join(" / ");
 
-<td>
-${esc(o.phone)}
-</td>
+    const total = Number(o.total_price || 0);
 
-<td>
-${esc(o.product_name)}
-</td>
+    const date = o.created_at
+      ? new Date(o.created_at).toLocaleDateString("ar")
+      : "";
 
-<td>
-${esc(
-[
-o.selected_color,
-o.selected_size
-]
-.filter(Boolean)
-.join(" / ")
-)}
-</td>
 
-<td>
-${Number(o.total_price||0).toLocaleString()} ₪
-</td>
+    return `
+      <tr>
 
-<td>
+        <td>${customerName}</td>
 
-<select
-class="field"
-style="min-width:130px;padding:7px"
-onchange="changeOrderStatus('${o.id}',this.value)">
+        <td>${phone}</td>
 
-<option
-${o.status==='new'?'selected':''}
-value="new">
-جديد
-</option>
+        <td>${productName}</td>
 
-<option
-${o.status==='confirmed'?'selected':''}
-value="confirmed">
-مؤكد
-</option>
+        <td>${options}</td>
 
-<option
-${o.status==='shipped'?'selected':''}
-value="shipped">
-تم الشحن
-</option>
+        <td>
+          ${total.toLocaleString("ar")} ₪
+        </td>
 
-<option
-${o.status==='completed'?'selected':''}
-value="completed">
-مكتمل
-</option>
+        <td>
 
-<option
-${o.status==='cancelled'?'selected':''}
-value="cancelled">
-ملغي
-</option>
+          <select
+            class="field"
+            style="min-width:130px;padding:7px"
+            onchange="changeOrderStatus('${o.id}',this.value)"
+          >
 
-</select>
+            <option
+              value="new"
+              ${o.status === "new" || !o.status ? "selected" : ""}
+            >
+              جديد
+            </option>
 
-</td>
+            <option
+              value="confirmed"
+              ${o.status === "confirmed" ? "selected" : ""}
+            >
+              مؤكد
+            </option>
 
-<td>
-${
-o.created_at
-?
-new Date(
-o.created_at
-)
-.toLocaleDateString('ar')
-:
-''
-}
-</td>
+            <option
+              value="shipped"
+              ${o.status === "shipped" ? "selected" : ""}
+            >
+              تم الشحن
+            </option>
 
-<td>
+            <option
+              value="completed"
+              ${o.status === "completed" ? "selected" : ""}
+            >
+              مكتمل
+            </option>
 
-<button
-class="btn btn-danger"
-onclick="deleteOrder('${o.id}')">
+            <option
+              value="cancelled"
+              ${o.status === "cancelled" ? "selected" : ""}
+            >
+              ملغي
+            </option>
 
-حذف
+          </select>
 
-</button>
+        </td>
 
-</td>
+        <td>${date}</td>
 
-</tr>
-`
+        <td>
 
-).join("")
+          <button
+            class="btn btn-danger"
+            type="button"
+            onclick="deleteOrder('${o.id}')"
+          >
+            حذف
+          </button>
 
-:
+        </td>
 
-`
-<tr>
+      </tr>
+    `;
 
-<td
-colspan="8"
-class="empty">
-
-لا توجد طلبات.
-
-</td>
-
-</tr>
-`;
-
+  }).join("");
 }
 
 
-async function changeOrderStatus(
-id,
-status
-){
 
-try{
+async function changeOrderStatus(id,status){
 
-await q(
+  if(!id || !status) return;
 
-sb
-.from("orders")
-.update({
-status
-})
-.eq("id",id)
+  try{
 
-);
+    await q(
+      sb
+        .from("orders")
+        .update({
+          status: status
+        })
+        .eq("id",id)
+    );
 
+    // تحديث الطلب محليًا مباشرة
+    const order = orders.find(o => String(o.id) === String(id));
 
-toast(
-"تم تحديث حالة الطلب ✅"
-);
+    if(order){
+      order.status = status;
+    }
 
+    toast("تم تحديث حالة الطلب ✅");
 
-loadOrders();
+    renderOrders();
+    updateStats();
 
+  }catch(e){
 
-}catch(e){
+    console.error("changeOrderStatus error:",e);
 
-toast(
-e.message
-);
+    toast(
+      "تعذر تحديث حالة الطلب: " +
+      (e.message || "خطأ غير معروف")
+    );
 
+    // إعادة الرسم في حال فشل التحديث
+    renderOrders();
+  }
 }
 
-}
 
 
 async function deleteOrder(id){
 
-if(
-!confirm(
-"حذف هذا الطلب؟"
-)
-)
-return;
+  if(!id) return;
 
+  const confirmed = confirm("هل أنت متأكد من حذف هذا الطلب؟");
 
-try{
+  if(!confirmed) return;
 
-await q(
+  try{
 
-sb
-.from("orders")
-.delete()
-.eq("id",id)
+    await q(
+      sb
+        .from("orders")
+        .delete()
+        .eq("id",id)
+    );
 
-);
+    // حذف من المصفوفة مباشرة
+    orders = orders.filter(
+      o => String(o.id) !== String(id)
+    );
 
+    toast("تم حذف الطلب ✅");
 
-toast(
-"تم حذف الطلب"
-);
+    renderOrders();
+    updateStats();
 
+  }catch(e){
 
-loadOrders();
+    console.error("deleteOrder error:",e);
 
-
-}catch(e){
-
-toast(
-e.message
-);
-
+    toast(
+      "تعذر حذف الطلب: " +
+      (e.message || "خطأ غير معروف")
+    );
+  }
 }
-
-}
-
-
-/* SETTINGS */
+  /* SETTINGS */
 
 async function loadSettings(){
 
-try{
+  try{
 
-settings=
-await q(
+    const result = await q(
+      sb
+        .from("store_settings")
+        .select("*")
+        .limit(1)
+    );
 
-sb
-.from("store_settings")
-.select("*")
-.limit(1)
-.maybeSingle()
+    const settings = result && result.length
+      ? result[0]
+      : null;
 
-);
+    if(!settings){
+      console.warn("لا توجد إعدادات محفوظة في store_settings");
+      return;
+    }
 
+    // WhatsApp
+    if($("setWhatsapp")){
+      $("setWhatsapp").value =
+        settings.whatsapp || "";
+    }
 
-if(!settings)
-return;
+    // Delivery
+    if($("setWestBank")){
+      $("setWestBank").value =
+        settings.west_bank_delivery ?? "";
+    }
 
+    if($("setJerusalem")){
+      $("setJerusalem").value =
+        settings.jerusalem_delivery ?? "";
+    }
 
-$("storeName").value=
-settings.store_name
-||
-"Espoza Fashion";
+    if($("setInside")){
+      $("setInside").value =
+        settings.inside_delivery ?? "";
+    }
 
+    // Social followers
+    if($("setFacebook")){
+      $("setFacebook").value =
+        settings.facebook_followers ?? "";
+    }
 
-$("storeWhatsapp").value=
-settings.whatsapp
-||
-"";
+    if($("setInstagram")){
+      $("setInstagram").value =
+        settings.instagram_followers ?? "";
+    }
 
+    if($("setTikTok")){
+      $("setTikTok").value =
+        settings.tiktok_followers ?? "";
+    }
 
-$("storeInstagram").value=
-settings.instagram
-||
-"";
+    if($("setSnapchat")){
+      $("setSnapchat").value =
+        settings.snapchat_followers ?? "";
+    }
 
+  }catch(e){
 
-$("storeFacebook").value=
-settings.facebook
-||
-"";
+    console.error("loadSettings error:",e);
 
-
-$("storeTiktok").value=
-settings.tiktok
-||
-"";
-
-
-$("storeSnapchat").value=
-settings.snapchat
-||
-"";
-
-
-$("deliveryWestBank").value=
-settings.west_bank_delivery
-??
-20;
-
-
-$("deliveryJerusalem").value=
-settings.jerusalem_delivery
-??
-30;
-
-
-$("deliveryInside").value=
-settings.inside_delivery
-??
-70;
-
-
-$("followersFacebook").value=
-settings.facebook_followers
-??
-0;
-
-
-$("followersInstagram").value=
-settings.instagram_followers
-??
-0;
-
-
-$("followersTiktok").value=
-settings.tiktok_followers
-??
-0;
-
-
-$("followersSnapchat").value=
-settings.snapchat_followers
-??
-0;
-
-
-}catch(e){
-
-toast(
-"خطأ الإعدادات: "
-+
-e.message
-);
-
-}
-
+    toast(
+      "خطأ تحميل الإعدادات: " +
+      (e.message || "خطأ غير معروف")
+    );
+  }
 }
 
 
-$("saveSettingsBtn")
-.addEventListener(
-"click",
-async()=>{
 
-try{
+async function saveSettings(){
 
-const payload={
+  try{
 
-id:
-settings?.id
-||
-crypto.randomUUID(),
+    const whatsapp =
+      $("setWhatsapp")?.value.trim() || "";
 
-store_name:
-$("storeName")
-.value
-.trim()
-||
-"Espoza Fashion",
+    const westBank =
+      Number($("setWestBank")?.value || 0);
 
-whatsapp:
-$("storeWhatsapp")
-.value
-.trim(),
+    const jerusalem =
+      Number($("setJerusalem")?.value || 0);
 
-instagram:
-$("storeInstagram")
-.value
-.trim(),
+    const inside =
+      Number($("setInside")?.value || 0);
 
-facebook:
-$("storeFacebook")
-.value
-.trim(),
+    const facebook =
+      Number($("setFacebook")?.value || 0);
 
-tiktok:
-$("storeTiktok")
-.value
-.trim(),
+    const instagram =
+      Number($("setInstagram")?.value || 0);
 
-snapchat:
-$("storeSnapchat")
-.value
-.trim(),
+    const tikTok =
+      Number($("setTikTok")?.value || 0);
 
-west_bank_delivery:
-Number(
-$("deliveryWestBank")
-.value
-||
-0
-),
-
-jerusalem_delivery:
-Number(
-$("deliveryJerusalem")
-.value
-||
-0
-),
-
-inside_delivery:
-Number(
-$("deliveryInside")
-.value
-||
-0
-),
-
-facebook_followers:
-Number(
-$("followersFacebook")
-.value
-||
-0
-),
-
-instagram_followers:
-Number(
-$("followersInstagram")
-.value
-||
-0
-),
-
-tiktok_followers:
-Number(
-$("followersTiktok")
-.value
-||
-0
-),
-
-snapchat_followers:
-Number(
-$("followersSnapchat")
-.value
-||
-0
-),
-
-updated_at:
-new Date()
-.toISOString()
-
-};
+    const snapchat =
+      Number($("setSnapchat")?.value || 0);
 
 
-settings=
-await q(
+    const payload = {
 
-sb
-.from("store_settings")
-.upsert(
-payload,
-{
-onConflict:"id"
-}
-)
-.select()
-.single()
+      id: 1,
 
-);
+      whatsapp: whatsapp,
 
+      west_bank_delivery: westBank,
 
-toast(
-"تم حفظ إعدادات المتجر ✅"
-);
+      jerusalem_delivery: jerusalem,
 
+      inside_delivery: inside,
 
-}catch(e){
+      facebook_followers: facebook,
 
-toast(
-"تعذر الحفظ: "
-+
-e.message
-);
+      instagram_followers: instagram,
 
-}
+      tiktok_followers: tikTok,
 
-}
-);
+      snapchat_followers: snapchat,
+
+      updated_at: new Date().toISOString()
+
+    };
 
 
-/* SLIDER */
-
-async function loadSlides(){
-
-try{
-
-slides=
-await q(
-
-sb
-.from("slider")
-.select("*")
-.order("sort_order")
-.order("created_at")
-
-);
+    await q(
+      sb
+        .from("store_settings")
+        .upsert(
+          payload,
+          {
+            onConflict:"id"
+          }
+        )
+    );
 
 
-renderSlides();
+    toast("تم حفظ إعدادات المتجر ✅");
 
-updateStats();
+    await loadSettings();
 
+  }catch(e){
 
-}catch(e){
+    console.error("saveSettings error:",e);
 
-toast(
-"خطأ السلايدر: "
-+
-e.message
-);
-
-}
-
+    toast(
+      "تعذر حفظ الإعدادات: " +
+      (e.message || "خطأ غير معروف")
+    );
+  }
 }
 
 
-function renderSlides(){
 
-$("slidesGrid")
-.innerHTML=
+// زر حفظ الإعدادات
+const settingsForm = $("settingsForm");
 
-slides.length
+if(settingsForm){
 
-?
+  settingsForm.addEventListener(
+    "submit",
+    async function(e){
 
-slides.map(
+      e.preventDefault();
+      e.stopPropagation();
 
-s=>
+      await saveSettings();
 
-`
-<div class="slide">
+    }
+  );
 
-<img
-src="${esc(s.image_url||PLACEHOLDER)}"
-onerror="this.src='${PLACEHOLDER}'">
+}
+  /* SLIDER */
 
-<div class="slide-body">
+async function loadSlider(){
 
-<h3>
-${esc(s.title||"بدون عنوان")}
-</h3>
+  try{
 
-<div class="muted">
-${esc(s.subtitle||"")}
-</div>
+    const result = await q(
+      sb
+        .from("slider")
+        .select("*")
+        .order("sort_order",{ascending:true})
+    );
 
-<div class="actions">
+    sliderItems = result || [];
 
-<button
-class="btn btn-soft"
-onclick="openSlideModal('${s.id}')">
+    renderSlider();
+    updateStats();
 
-تعديل
+  }catch(e){
 
-</button>
+    console.error("loadSlider error:",e);
 
-<button
-class="btn btn-danger"
-onclick="deleteSlide('${s.id}')">
-
-حذف
-
-</button>
-
-</div>
-
-</div>
-
-</div>
-`
-
-).join("")
-
-:
-
-`
-<div
-class="empty"
-style="grid-column:1/-1">
-
-لا توجد سلايدرات.
-
-</div>
-`;
-
+    toast(
+      "خطأ تحميل السلايدر: " +
+      (e.message || "خطأ غير معروف")
+    );
+  }
 }
 
 
-function openSlideModal(id=null){
 
-const slide=
-id
-?
-slides.find(
-x=>
-String(x.id)
-===
-String(id)
-)
-:
-null;
+function renderSlider(){
 
+  const container = $("sliderList");
 
-$("slideForm")
-.reset();
+  if(!container) return;
 
+  if(!sliderItems.length){
 
-$("slideId").value=
-slide?.id
-||
-"";
+    container.innerHTML = `
+      <div class="empty">
+        لا توجد شرائح في السلايدر.
+      </div>
+    `;
+
+    return;
+  }
 
 
-$("slideTitle").value=
-slide?.title
-||
-"";
+  container.innerHTML = sliderItems.map(item => {
 
+    const title = esc(item.title || "");
+    const subtitle = esc(item.subtitle || "");
+    const image = item.image_url || "";
 
-$("slideSubtitle").value=
-slide?.subtitle
-||
-"";
+    return `
+      <div class="slider-item">
 
+        ${
+          image
+          ?
+          `
+          <img
+            src="${esc(image)}"
+            alt="${title}"
+            class="slider-preview"
+          >
+          `
+          :
+          `
+          <div class="slider-preview empty">
+            لا توجد صورة
+          </div>
+          `
+        }
 
-$("slideButtonText").value=
-slide?.button_text
-||
-"استكشفي";
+        <div class="slider-info">
 
+          <strong>
+            ${title || "بدون عنوان"}
+          </strong>
 
-$("slideButtonLink").value=
-slide?.button_link
-||
-"all";
+          ${
+            subtitle
+            ?
+            `<div>${subtitle}</div>`
+            :
+            ""
+          }
 
+          <small>
+            الترتيب:
+            ${Number(item.sort_order || 0)}
+          </small>
 
-$("slideOrder").value=
-slide?.sort_order
-??
-0;
+          <div class="slider-actions">
 
+            <button
+              type="button"
+              class="btn btn-danger"
+              onclick="deleteSlider('${item.id}')"
+            >
+              حذف
+            </button>
 
-$("slideActive").checked=
-slide
-?
-bool(
-slide.is_active,
-true
-)
-:
-true;
+          </div>
 
+        </div>
 
-$("slidePreview")
-.innerHTML=
+      </div>
+    `;
 
-slide?.image_url
-
-?
-
-`
-<img
-src="${esc(slide.image_url)}"
-style="width:100%;max-height:280px;object-fit:cover;border-radius:12px">
-`
-
-:
-
-"";
-
-
-$("slideModalTitle")
-.textContent=
-slide
-?
-"تعديل السلايدر"
-:
-"إضافة سلايدر";
-
-
-$("slideModal")
-.classList.add("open");
-
+  }).join("");
 }
 
 
-function closeSlideModal(){
 
-$("slideModal")
-.classList.remove("open");
+async function addSlider(){
 
+  try{
+
+    const title =
+      $("sliderTitle")?.value.trim() || "";
+
+    const subtitle =
+      $("sliderSubtitle")?.value.trim() || "";
+
+    const sortOrder =
+      Number($("sliderOrder")?.value || 0);
+
+    const imageInput =
+      $("sliderImage");
+
+
+    if(!title){
+
+      toast("اكتب عنوان السلايدر أولًا");
+
+      return;
+    }
+
+
+    if(!imageInput || !imageInput.files.length){
+
+      toast("اختر صورة للسلايدر أولًا");
+
+      return;
+    }
+
+
+    const file =
+      imageInput.files[0];
+
+
+    const fileExt =
+      file.name.split(".").pop()?.toLowerCase() || "jpg";
+
+
+    const id =
+      crypto.randomUUID();
+
+
+    const path =
+      `hero/${id}.${fileExt}`;
+
+
+    const uploadResult =
+      await sb.storage
+        .from(BUCKET)
+        .upload(
+          path,
+          file,
+          {
+            cacheControl:"3600",
+            upsert:false,
+            contentType:file.type || "image/jpeg"
+          }
+        );
+
+
+    if(uploadResult.error){
+
+      throw uploadResult.error;
+    }
+
+
+    const publicResult =
+      sb.storage
+        .from(BUCKET)
+        .getPublicUrl(path);
+
+
+    const imageUrl =
+      publicResult?.data?.publicUrl || "";
+
+
+    await q(
+      sb
+        .from("slider")
+        .insert({
+          id:id,
+          title:title,
+          subtitle:subtitle,
+          image_url:imageUrl,
+          sort_order:sortOrder,
+          is_active:true
+        })
+    );
+
+
+    toast("تمت إضافة السلايدر ✅");
+
+
+    if($("sliderForm")){
+      $("sliderForm").reset();
+    }
+
+    await loadSlider();
+
+
+  }catch(e){
+
+    console.error("addSlider error:",e);
+
+    toast(
+      "تعذر إضافة السلايدر: " +
+      (e.message || "خطأ غير معروف")
+    );
+  }
 }
 
 
-$("slideForm")
-.addEventListener(
-"submit",
-async e=>{
 
-e.preventDefault();
+async function deleteSlider(id){
 
-const btn=e.submitter;
-
-btn.disabled=true;
+  if(!id) return;
 
 
-try{
-
-const id=
-$("slideId").value
-||
-crypto.randomUUID();
+  const confirmed =
+    confirm("هل أنت متأكد من حذف هذا السلايدر؟");
 
 
-const old=
-slides.find(
-x=>
-String(x.id)
-===
-String(id)
+  if(!confirmed) return;
+
+
+  try{
+
+    const item =
+      sliderItems.find(
+        x => String(x.id) === String(id)
+      );
+
+
+    await q(
+      sb
+        .from("slider")
+        .delete()
+        .eq("id",id)
+    );
+
+
+    // محاولة حذف الصورة من التخزين
+    if(item?.image_url){
+
+      try{
+
+        const marker =
+          `/storage/v1/object/public/${BUCKET}/`;
+
+        const index =
+          item.image_url.indexOf(marker);
+
+        if(index !== -1){
+
+          const path =
+            decodeURIComponent(
+              item.image_url
+                .substring(index + marker.length)
+            );
+
+          if(path){
+
+            await sb.storage
+              .from(BUCKET)
+              .remove([path]);
+
+          }
+        }
+
+      }catch(storageError){
+
+        console.warn(
+          "تعذر حذف صورة السلايدر من Storage:",
+          storageError
+        );
+
+      }
+    }
+
+
+    sliderItems =
+      sliderItems.filter(
+        x => String(x.id) !== String(id)
+      );
+
+
+    toast("تم حذف السلايدر ✅");
+
+    renderSlider();
+    updateStats();
+
+
+  }catch(e){
+
+    console.error("deleteSlider error:",e);
+
+    toast(
+      "تعذر حذف السلايدر: " +
+      (e.message || "خطأ غير معروف")
+    );
+  }
+}
+
+
+
+// نموذج إضافة السلايدر
+const sliderForm = $("sliderForm");
+
+if(sliderForm){
+
+  sliderForm.addEventListener(
+    "submit",
+    async function(e){
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      await addSlider();
+
+    }
+  );
+
+}
+  /* DELIVERY */
+
+async function loadDeliveryAreas(){
+
+  try{
+
+    const result = await q(
+      sb
+        .from("delivery_areas")
+        .select("*")
+        .order("id",{ascending:true})
+    );
+
+    deliveryAreas = result || [];
+
+    renderDeliveryAreas();
+
+  }catch(e){
+
+    console.error("loadDeliveryAreas error:",e);
+
+    toast(
+      "خطأ تحميل مناطق التوصيل: " +
+      (e.message || "خطأ غير معروف")
+    );
+  }
+}
+
+
+
+function renderDeliveryAreas(){
+
+  const container = $("deliveryList");
+
+  if(!container) return;
+
+
+  if(!deliveryAreas.length){
+
+    container.innerHTML = `
+      <div class="empty">
+        لا توجد مناطق توصيل.
+      </div>
+    `;
+
+    return;
+  }
+
+
+  container.innerHTML =
+    deliveryAreas.map(area => {
+
+      return `
+        <div class="setting-row">
+
+          <div>
+
+            <strong>
+              ${esc(area.name || area.area || "")}
+            </strong>
+
+          </div>
+
+          <div>
+
+            <strong>
+              ${Number(area.price || 0).toLocaleString("ar")} ₪
+            </strong>
+
+          </div>
+
+        </div>
+      `;
+
+    }).join("");
+}
+
+
+
+/* DOCUMENT CLICK */
+
+document.addEventListener("click",function(e){
+
+  const pageButton =
+    e.target.closest("[data-page]");
+
+  if(pageButton){
+
+    const page =
+      pageButton.getAttribute("data-page");
+
+    if(page){
+
+      openPage(page);
+
+    }
+
+  }
+
+});
+
+
+
+/* AUTH STATE */
+
+sb.auth.onAuthStateChange(
+  async function(event,session){
+
+    console.log(
+      "Auth event:",
+      event
+    );
+
+
+    if(event === "SIGNED_OUT"){
+
+      showLogin();
+
+      return;
+    }
+
+
+    if(
+      event === "SIGNED_IN" ||
+      event === "INITIAL_SESSION" ||
+      event === "TOKEN_REFRESHED"
+    ){
+
+      if(!session){
+
+        showLogin();
+
+        return;
+      }
+
+
+      try{
+
+        const admin =
+          await isAdmin();
+
+
+        if(admin){
+
+          showApp();
+
+          await loadAll();
+
+        }else{
+
+          await sb.auth.signOut();
+
+          showLogin();
+
+          toast(
+            "هذا الحساب ليس لديه صلاحية دخول لوحة التحكم"
+          );
+        }
+
+      }catch(e){
+
+        console.error(
+          "Auth state admin check error:",
+          e
+        );
+
+        showLogin();
+
+      }
+
+    }
+
+  }
 );
 
 
-let image=
-old?.image_url
-||
-null;
 
-
-const file=
-$("slideImageInput")
-.files?.[0];
-
-
-if(file){
-
-image=
-(
-await uploadImage(
-file,
-`hero/${id}`
-)
-)
-.image_url;
-
-}
-
-
-if(!image){
-
-throw new Error(
-"اختاري صورة للسلايدر."
-);
-
-}
-
-
-const payload={
-
-title:
-$("slideTitle")
-.value
-.trim(),
-
-subtitle:
-$("slideSubtitle")
-.value
-.trim(),
-
-button_text:
-$("slideButtonText")
-.value
-.trim()
-||
-"استكشفي",
-
-button_link:
-$("slideButtonLink")
-.value,
-
-sort_order:
-Number(
-$("slideOrder")
-.value
-||
-0
-),
-
-is_active:
-$("slideActive")
-.checked,
-
-image_url:
-image
-
-};
-
-
-if(old){
-
-await q(
-
-sb
-.from("slider")
-.update(payload)
-.eq("id",id)
-
-);
-
-}else{
-
-await q(
-
-sb
-.from("slider")
-.insert({
-id,
-...payload
-})
-
-);
-
-}
-
-
-toast(
-"تم حفظ السلايدر ✅"
-);
-
-
-closeSlideModal();
-
-loadSlides();
-
-
-}catch(error){
-
-toast(
-error.message
-);
-
-}
-
-
-finally{
-
-btn.disabled=false;
-
-}
-
-}
-);
-
-
-async function deleteSlide(id){
-
-if(
-!confirm(
-"حذف السلايدر؟"
-)
-)
-return;
-
-
-try{
-
-await q(
-
-sb
-.from("slider")
-.delete()
-.eq("id",id)
-
-);
-
-
-toast(
-"تم حذف السلايدر"
-);
-
-
-loadSlides();
-
-
-}catch(e){
-
-toast(
-e.message
-);
-
-}
-
-}
-
-
-/* DELIVERY */
-
-async function loadDelivery(){
-
-try{
-
-deliveryAreas=
-await q(
-
-sb
-.from("delivery_areas")
-.select("*")
-.order("id")
-
-);
-
-
-renderDelivery();
-
-
-}catch(e){
-
-toast(
-"خطأ التوصيل: "
-+
-e.message
-);
-
-}
-
-}
-
-
-function renderDelivery(){
-
-$("deliveryBody")
-.innerHTML=
-
-deliveryAreas.length
-
-?
-
-deliveryAreas.map(
-
-d=>
-
-`
-<tr>
-
-<td>
-${esc(d.area_name)}
-</td>
-
-<td>
-${Number(d.price||0).toLocaleString()}
-</td>
-
-<td>
-${d.is_active?'نشطة':'موقوفة'}
-</td>
-
-<td>
-
-<button
-class="btn btn-soft"
-onclick="openDeliveryModal(${d.id})">
-
-تعديل
-
-</button>
-
-<button
-class="btn btn-danger"
-onclick="deleteDelivery(${d.id})">
-
-حذف
-
-</button>
-
-</td>
-
-</tr>
-`
-
-).join("")
-
-:
-
-`
-<tr>
-
-<td
-colspan="4"
-class="empty">
-
-لا توجد مناطق.
-
-</td>
-
-</tr>
-`;
-
-}
-
-
-function openDeliveryModal(id=null){
-
-const delivery=
-id
-?
-deliveryAreas.find(
-x=>
-Number(x.id)
-===
-Number(id)
-)
-:
-null;
-
-
-$("deliveryForm")
-.reset();
-
-
-$("deliveryId").value=
-delivery?.id
-||
-"";
-
-
-$("deliveryAreaName").value=
-delivery?.area_name
-||
-"";
-
-
-$("deliveryAreaPrice").value=
-delivery?.price
-??
-"";
-
-
-$("deliveryAreaActive").checked=
-delivery
-?
-bool(
-delivery.is_active,
-true
-)
-:
-true;
-
-
-$("deliveryModal")
-.classList.add("open");
-
-}
-
-
-function closeDeliveryModal(){
-
-$("deliveryModal")
-.classList.remove("open");
-
-}
-
-
-$("deliveryForm")
-.addEventListener(
-"submit",
-async e=>{
-
-e.preventDefault();
-
-
-try{
-
-const id=
-$("deliveryId")
-.value;
-
-
-const payload={
-
-area_name:
-$("deliveryAreaName")
-.value
-.trim(),
-
-price:
-Number(
-$("deliveryAreaPrice")
-.value
-),
-
-is_active:
-$("deliveryAreaActive")
-.checked
-
-};
-
-
-if(
-!payload.area_name
-||
-!Number.isFinite(
-payload.price
-)
-||
-payload.price<0
-){
-
-throw new Error(
-"تأكدي من اسم المنطقة وسعر التوصيل."
-);
-
-}
-
-
-if(id){
-
-await q(
-
-sb
-.from("delivery_areas")
-.update(payload)
-.eq("id",id)
-
-);
-
-}else{
-
-await q(
-
-sb
-.from("delivery_areas")
-.insert(payload)
-
-);
-
-}
-
-
-toast(
-"تم حفظ منطقة التوصيل ✅"
-);
-
-
-closeDeliveryModal();
-
-loadDelivery();
-
-
-}catch(err){
-
-toast(
-err.message
-);
-
-}
-
-}
-);
-
-
-async function deleteDelivery(id){
-
-if(
-!confirm(
-"حذف منطقة التوصيل؟"
-)
-)
-return;
-
-
-try{
-
-await q(
-
-sb
-.from("delivery_areas")
-.delete()
-.eq("id",id)
-
-);
-
-
-toast(
-"تم الحذف"
-);
-
-
-loadDelivery();
-
-
-}catch(e){
-
-toast(
-e.message
-);
-
-}
-
-}
-
-
-document
-.addEventListener(
-"click",
-e=>{
-
-if(
-e.target===$("productModal")
-)
-closeProductModal();
-
-
-if(
-e.target===$("slideModal")
-)
-closeSlideModal();
-
-
-if(
-e.target===$("deliveryModal")
-)
-closeDeliveryModal();
-
-}
-);
-
+/* START */
 
 restoreSession();
-
-</script>
+  </script>
 
 </body>
 </html>
