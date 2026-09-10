@@ -196,6 +196,7 @@ textarea.field{
 }
 
 .content{padding:25px}
+
 .page{display:none}
 .page.active{display:block}
 
@@ -1076,8 +1077,7 @@ placeholder="44,46,48,50,52,54">
 
 <textarea
 id="productDescription"
-class="field">
-</textarea>
+class="field"></textarea>
 
 </div>
 
@@ -1222,8 +1222,7 @@ class="field">
 
 <textarea
 id="slideSubtitle"
-class="field">
-</textarea>
+class="field"></textarea>
 
 </div>
 
@@ -2464,6 +2463,11 @@ renderProductImages();
 }
 
 
+/*
+ * SAVE PRODUCT
+ * الجزء المصلح: حذف المقاسات القديمة التي لم تعد موجودة.
+ */
+
 $("productForm")
 .addEventListener(
 "submit",
@@ -2558,6 +2562,53 @@ payload.price<0
 
 throw new Error(
 "تأكدي من الاسم والسعر."
+);
+
+}
+
+
+if(
+payload.old_price!==null
+&&
+(
+!Number.isFinite(payload.old_price)
+||
+payload.old_price<0
+)
+){
+
+throw new Error(
+"تأكدي من السعر القديم."
+);
+
+}
+
+
+if(
+payload.old_price!==null
+&&
+payload.old_price<payload.price
+){
+
+throw new Error(
+"السعر القديم يجب أن يكون أكبر من أو يساوي السعر الحالي."
+);
+
+}
+
+
+if(
+![
+"dresses",
+"sets",
+"offers"
+].includes(
+payload.category
+)
+){
+
+throw new Error(
+"اختاري تصنيفًا صحيحًا."
 );
 
 }
@@ -2750,7 +2801,7 @@ const sizes=[
 
 $("productSizes")
 .value
-.split(/[,،]/)
+.split(/[,،\n]/)
 .map(
 x=>x.trim()
 )
@@ -3025,17 +3076,6 @@ toast(
 
 
 loadProducts();
-
-
-}catch(e){
-
-toast(
-"تعذر الحذف: "
-+
-e.message
-);
-
-}
 
 }
 
@@ -3913,6 +3953,7 @@ error.message
 );
 
 }
+
 
 finally{
 
