@@ -26,14 +26,14 @@
 
 body{
   margin:0;
-  font-family:Arial,"Tahoma",sans-serif;
+  font-family:Arial,Tahoma,sans-serif;
   background:var(--cream);
   color:#29181e
 }
 
 button,input,select,textarea{font:inherit}
-.hidden{display:none!important}
 button{cursor:pointer}
+.hidden{display:none!important}
 
 .login{
   min-height:100vh;
@@ -206,7 +206,7 @@ textarea.field{
   margin-bottom:20px
 }
 
-.stat{
+.stat,.card{
   background:#fff;
   border:1px solid var(--line);
   border-radius:16px;
@@ -226,14 +226,7 @@ textarea.field{
   margin-top:8px
 }
 
-.card{
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:17px;
-  padding:20px;
-  box-shadow:var(--shadow);
-  margin-bottom:18px
-}
+.card{margin-bottom:18px}
 
 .card-head{
   display:flex;
@@ -514,8 +507,7 @@ th{
 @media(max-width:760px){
   .sidebar{
     position:relative;
-    width:100%;
-    bottom:auto
+    width:100%
   }
 
   .main{margin-right:0}
@@ -527,7 +519,9 @@ th{
 
   .content{padding:14px}
 
-  .products{grid-template-columns:repeat(2,1fr)}
+  .products{
+    grid-template-columns:repeat(2,1fr)
+  }
 
   .settings-grid,.modal-grid{
     grid-template-columns:1fr
@@ -588,6 +582,7 @@ required>
 id="loginPassword"
 class="field"
 type="password"
+autocomplete="current-password"
 required>
 </div>
 
@@ -650,15 +645,15 @@ required>
 <span class="badge">Admin</span>
 </header>
 
-<div class="content">
 
+<div class="content">
 
 <section id="page-dashboard" class="page active">
 
 <div class="stats">
 
 <div class="stat">
-<span>المنتجات</span>
+<span>منتجات Supabase</span>
 <b id="statProducts">0</b>
 </div>
 
@@ -681,11 +676,11 @@ required>
 
 <div class="card">
 
-<h2>أهلًا بك في Espoza Fashion</h2>
+<h2>Espoza Fashion</h2>
 
 <p class="muted" style="line-height:2">
-من هنا تتحكمي بالمنتجات والأسعار والصور والمقاسات والعروض
-والسلايدر والطلبات ورقم الواتساب وأسعار التوصيل.
+من هنا تتحكمي بالمنتجات الجديدة والأسعار والصور والمقاسات والألوان
+والسلايدر والطلبات والتوصيل وإعدادات المتجر.
 </p>
 
 </div>
@@ -720,21 +715,10 @@ placeholder="بحث...">
 id="productCategoryFilter"
 class="field">
 
-<option value="all">
-كل التصنيفات
-</option>
-
-<option value="dresses">
-الفساتين
-</option>
-
-<option value="sets">
-الأطقم
-</option>
-
-<option value="offers">
-العروضات
-</option>
+<option value="all">كل التصنيفات</option>
+<option value="dresses">الفساتين</option>
+<option value="sets">الأطقم</option>
+<option value="offers">العروضات</option>
 
 </select>
 
@@ -843,12 +827,14 @@ onclick="openDeliveryModal()">
 <table>
 
 <thead>
+
 <tr>
 <th>المنطقة</th>
 <th>السعر ₪</th>
 <th>الحالة</th>
 <th>إجراء</th>
 </tr>
+
 </thead>
 
 <tbody id="deliveryBody"></tbody>
@@ -1005,12 +991,9 @@ type="hidden">
 
 <div class="modal-grid">
 
-
 <div class="form-group">
 
-<label>
-اسم المنتج
-</label>
+<label>اسم المنتج</label>
 
 <input
 id="productName"
@@ -1022,9 +1005,7 @@ required>
 
 <div class="form-group">
 
-<label>
-SKU / كود المنتج
-</label>
+<label>SKU / كود المنتج</label>
 
 <input
 id="productSku"
@@ -1035,25 +1016,15 @@ class="field">
 
 <div class="form-group">
 
-<label>
-التصنيف
-</label>
+<label>التصنيف</label>
 
 <select
 id="productCategory"
 class="field">
 
-<option value="dresses">
-فساتين
-</option>
-
-<option value="sets">
-أطقم
-</option>
-
-<option value="offers">
-عروضات
-</option>
+<option value="dresses">فساتين</option>
+<option value="sets">أطقم</option>
+<option value="offers">عروضات</option>
 
 </select>
 
@@ -1062,9 +1033,7 @@ class="field">
 
 <div class="form-group">
 
-<label>
-السعر ₪
-</label>
+<label>السعر ₪</label>
 
 <input
 id="productPrice"
@@ -1078,9 +1047,7 @@ required>
 
 <div class="form-group">
 
-<label>
-السعر القديم ₪
-</label>
+<label>السعر القديم ₪</label>
 
 <input
 id="productOldPrice"
@@ -1093,9 +1060,7 @@ step="0.01">
 
 <div class="form-group">
 
-<label>
-المقاسات — افصلي بفاصلة
-</label>
+<label>المقاسات — افصلي بفاصلة</label>
 
 <input
 id="productSizes"
@@ -1107,9 +1072,7 @@ placeholder="44,46,48,50,52,54">
 
 <div class="form-group full">
 
-<label>
-الوصف
-</label>
+<label>الوصف</label>
 
 <textarea
 id="productDescription"
@@ -1160,9 +1123,7 @@ checked>
 
 <div class="form-group full">
 
-<label>
-إضافة صور
-</label>
+<label>إضافة صور</label>
 
 <input
 id="productImagesInput"
@@ -1172,7 +1133,7 @@ accept="image/*"
 multiple>
 
 <div class="tiny">
-يمكنك اختيار عدة صور دفعة واحدة.
+يمكن اختيار أكثر من صورة، واكتبي لون كل صورة إذا أردتِ.
 </div>
 
 </div>
@@ -1198,7 +1159,6 @@ style="flex:1">
 
 </button>
 
-
 <button
 class="btn btn-soft"
 type="button"
@@ -1217,8 +1177,7 @@ onclick="closeProductModal()">
 </div>
 
 
-
-<!-- SLIDE MODAL -->
+<!-- SLIDER MODAL -->
 
 <div id="slideModal" class="modal">
 
@@ -1233,13 +1192,10 @@ onclick="closeProductModal()">
 <button
 class="x"
 onclick="closeSlideModal()">
-
 ×
-
 </button>
 
 </div>
-
 
 <form id="slideForm">
 
@@ -1249,12 +1205,9 @@ type="hidden">
 
 <div class="modal-grid">
 
-
 <div class="form-group full">
 
-<label>
-العنوان
-</label>
+<label>العنوان</label>
 
 <input
 id="slideTitle"
@@ -1265,9 +1218,7 @@ class="field">
 
 <div class="form-group full">
 
-<label>
-النص الفرعي
-</label>
+<label>النص الفرعي</label>
 
 <textarea
 id="slideSubtitle"
@@ -1279,9 +1230,7 @@ class="field">
 
 <div class="form-group">
 
-<label>
-نص الزر
-</label>
+<label>نص الزر</label>
 
 <input
 id="slideButtonText"
@@ -1293,29 +1242,16 @@ value="استكشفي">
 
 <div class="form-group">
 
-<label>
-رابط الزر
-</label>
+<label>رابط الزر</label>
 
 <select
 id="slideButtonLink"
 class="field">
 
-<option value="all">
-الكل
-</option>
-
-<option value="dresses">
-الفساتين
-</option>
-
-<option value="sets">
-الأطقم
-</option>
-
-<option value="offers">
-العروضات
-</option>
+<option value="all">الكل</option>
+<option value="dresses">الفساتين</option>
+<option value="sets">الأطقم</option>
+<option value="offers">العروضات</option>
 
 </select>
 
@@ -1324,9 +1260,7 @@ class="field">
 
 <div class="form-group">
 
-<label>
-الترتيب
-</label>
+<label>الترتيب</label>
 
 <input
 id="slideOrder"
@@ -1351,9 +1285,7 @@ checked>
 
 <div class="form-group full">
 
-<label>
-صورة السلايدر
-</label>
+<label>صورة السلايدر</label>
 
 <input
 id="slideImageInput"
@@ -1383,7 +1315,6 @@ style="flex:1">
 
 </button>
 
-
 <button
 class="btn btn-soft"
 type="button"
@@ -1412,20 +1343,15 @@ style="max-width:520px">
 
 <div class="modal-head">
 
-<h2 id="deliveryModalTitle">
-منطقة توصيل
-</h2>
+<h2>منطقة توصيل</h2>
 
 <button
 class="x"
 onclick="closeDeliveryModal()">
-
 ×
-
 </button>
 
 </div>
-
 
 <form id="deliveryForm">
 
@@ -1436,9 +1362,7 @@ type="hidden">
 
 <div class="form-group">
 
-<label>
-اسم المنطقة
-</label>
+<label>اسم المنطقة</label>
 
 <input
 id="deliveryAreaName"
@@ -1450,9 +1374,7 @@ required>
 
 <div class="form-group">
 
-<label>
-سعر التوصيل ₪
-</label>
+<label>سعر التوصيل ₪</label>
 
 <input
 id="deliveryAreaPrice"
@@ -1486,7 +1408,6 @@ style="flex:1">
 حفظ
 
 </button>
-
 
 <button
 class="btn btn-soft"
@@ -1570,10 +1491,35 @@ el.textContent=msg;
 
 el.classList.add("show");
 
-setTimeout(
+clearTimeout(el._t);
+
+el._t=setTimeout(
 ()=>el.classList.remove("show"),
-2600
+2800
 );
+
+}
+
+
+async function q(query){
+
+const {data,error}=await query;
+
+if(error)
+throw error;
+
+return data;
+
+}
+
+
+async function isAdmin(){
+
+return(
+await q(
+sb.rpc("is_admin")
+)
+)===true;
 
 }
 
@@ -1598,30 +1544,6 @@ $("app")
 .classList.remove("hidden");
 
 loadAll();
-
-}
-
-
-async function q(query){
-
-const {data,error}=
-await query;
-
-if(error)
-throw error;
-
-return data;
-
-}
-
-
-async function isAdmin(){
-
-return(
-await q(
-sb.rpc("is_admin")
-)
-)===true;
 
 }
 
@@ -1688,7 +1610,7 @@ x=>x.classList.remove("active")
 
 
 $("page-"+name)
-.classList.add("active");
+?.classList.add("active");
 
 
 document
@@ -1704,15 +1626,10 @@ x.dataset.page===name
 const titles={
 
 dashboard:"الرئيسية",
-
 products:"المنتجات",
-
 orders:"الطلبات",
-
 slides:"السلايدر",
-
 delivery:"التوصيل",
-
 settings:"إعدادات المتجر"
 
 };
@@ -1811,6 +1728,19 @@ $("loginPassword")
 .value;
 
 
+if(
+!email
+||
+!password
+){
+
+throw new Error(
+"أدخلي البريد الإلكتروني وكلمة المرور."
+);
+
+}
+
+
 const {error}=
 await sb.auth.signInWithPassword({
 email,
@@ -1831,7 +1761,7 @@ await isAdmin()
 await sb.auth.signOut();
 
 throw new Error(
-"هذا الحساب ليس أدمن."
+"هذا الحساب لا يملك صلاحية الإدارة."
 );
 
 }
@@ -1946,8 +1876,7 @@ x=>x.is_active
 }
 
 
-// PRODUCTS
-
+/* PRODUCTS */
 
 async function loadProducts(){
 
@@ -1982,13 +1911,9 @@ sb
 .select("*")
 .in(
 "product_id",
-rows.map(
-x=>x.id
+rows.map(x=>x.id)
 )
-)
-.order(
-"sort_order"
-)
+.order("sort_order")
 
 );
 
@@ -2005,7 +1930,10 @@ _image:
 p.image_url
 ||
 imgs.find(
-i=>i.product_id===p.id
+i=>
+String(i.product_id)
+===
+String(p.id)
 )?.image_url
 ||
 PLACEHOLDER
@@ -2153,6 +2081,7 @@ p.is_active
 
 </div>
 
+
 <div class="actions">
 
 <button
@@ -2187,7 +2116,7 @@ onclick="deleteProduct('${p.id}')">
 class="empty"
 style="grid-column:1/-1">
 
-لا توجد منتجات.
+لا توجد منتجات في Supabase.
 
 </div>
 `;
@@ -2390,9 +2319,7 @@ storage_path:null,
 
 color:"",
 
-file:null,
-
-legacy:true
+file:null
 
 }];
 
@@ -2625,6 +2552,8 @@ if(
 !Number.isFinite(
 payload.price
 )
+||
+payload.price<0
 ){
 
 throw new Error(
@@ -2956,11 +2885,16 @@ btn.textContent=
 );
 
 
+/* DELETE PRODUCT */
+
 async function deleteProduct(id){
 
 const product=
 products.find(
-x=>x.id===id
+x=>
+String(x.id)
+===
+String(id)
 );
 
 
@@ -2995,8 +2929,11 @@ await q(
 sb
 .from("products")
 .update({
+
 is_active:false,
+
 is_available:false
+
 })
 .eq("id",id)
 
@@ -3103,8 +3040,7 @@ e.message
 }
 
 
-// ORDERS
-
+/* ORDERS */
 
 async function loadOrders(){
 
@@ -3173,16 +3109,14 @@ ${esc(o.product_name)}
 </td>
 
 <td>
-${
-esc(
+${esc(
 [
 o.selected_color,
 o.selected_size
 ]
 .filter(Boolean)
 .join(" / ")
-)
-}
+)}
 </td>
 
 <td>
@@ -3258,8 +3192,7 @@ onclick="deleteOrder('${o.id}')">
 </tr>
 `
 
-)
-.join("")
+).join("")
 
 :
 
@@ -3359,8 +3292,7 @@ e.message
 }
 
 
-// SETTINGS
-
+/* SETTINGS */
 
 async function loadSettings(){
 
@@ -3618,8 +3550,7 @@ e.message
 );
 
 
-// SLIDER
-
+/* SLIDER */
 
 async function loadSlides(){
 
@@ -3672,7 +3603,8 @@ s=>
 <div class="slide">
 
 <img
-src="${esc(s.image_url||PLACEHOLDER)}">
+src="${esc(s.image_url||PLACEHOLDER)}"
+onerror="this.src='${PLACEHOLDER}'">
 
 <div class="slide-body">
 
@@ -3709,8 +3641,7 @@ onclick="deleteSlide('${s.id}')">
 </div>
 `
 
-)
-.join("")
+).join("")
 
 :
 
@@ -3733,7 +3664,10 @@ const slide=
 id
 ?
 slides.find(
-x=>x.id===id
+x=>
+String(x.id)
+===
+String(id)
 )
 :
 null;
@@ -3853,7 +3787,10 @@ crypto.randomUUID();
 
 const old=
 slides.find(
-x=>x.id===id
+x=>
+String(x.id)
+===
+String(id)
 );
 
 
@@ -4028,8 +3965,7 @@ e.message
 }
 
 
-// DELIVERY
-
+/* DELIVERY */
 
 async function loadDelivery(){
 
@@ -4113,8 +4049,7 @@ onclick="deleteDelivery(${d.id})">
 </tr>
 `
 
-)
-.join("")
+).join("")
 
 :
 
@@ -4230,6 +4165,23 @@ $("deliveryAreaActive")
 .checked
 
 };
+
+
+if(
+!payload.area_name
+||
+!Number.isFinite(
+payload.price
+)
+||
+payload.price<0
+){
+
+throw new Error(
+"تأكدي من اسم المنطقة وسعر التوصيل."
+);
+
+}
 
 
 if(id){
@@ -4351,4 +4303,3 @@ restoreSession();
 
 </body>
 </html>
-
