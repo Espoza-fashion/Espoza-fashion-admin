@@ -1,33 +1,53 @@
-```html
-<script>
-
 "use strict";
 
 /* ================================
    ESPoza Fashion — Supabase
+   (نسخة معدّلة — راجع تعليقات "⭐ تصليح")
 ================================ */
 
-const SUPABASE_URL =
-"https://ptwceqbxusgyutrroayz.supabase.co";
+/* ⭐ تصليح 1: التقاط أي خطأ عام في الصفحة وعرضه بدل الشاشة البيضاء الصامتة */
+window.addEventListener("error", function (e) {
+  showFatalError(e.message || "خطأ غير معروف");
+});
 
-const SUPABASE_KEY =
-"sb_publishable_Hto6uDekI9TvxTLFs7kYWg_ApV51joa";
+window.addEventListener("unhandledrejection", function (e) {
+  const reason = e.reason;
+  showFatalError((reason && reason.message) || String(reason));
+});
 
-const sb =
-window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+function showFatalError(msg) {
+  let el = document.getElementById("fatalError");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "fatalError";
+    el.style.cssText =
+      "position:fixed;top:0;left:0;right:0;background:#c0392b;color:#fff;" +
+      "padding:12px 16px;font-family:sans-serif;font-size:14px;z-index:99999;" +
+      "direction:rtl;text-align:right;line-height:1.6;box-shadow:0 2px 8px rgba(0,0,0,.3)";
+    document.body.appendChild(el);
+  }
+  el.textContent = "حدث خطأ في لوحة التحكم: " + msg;
+}
 
-const BUCKET =
-"product-images";
+/* ⭐ تصليح 2: تأكد إن مكتبة Supabase محملة قبل استخدامها.
+   لو الصفحة كانت تطلع بيضاء بدون أي رسالة، الاحتمال الأكبر إن هذا الشرط
+   كان يفشل بصمت. الحين بيظهر شريط أحمر يوضح السبب بالضبط. */
+if (!window.supabase) {
+  showFatalError(
+    "لم يتم تحميل مكتبة Supabase (supabase-js). تأكد أن سكربت المكتبة " +
+      "(CDN) موجود في ملف الـ HTML قبل هذا الملف مباشرة، وبدون defer/async."
+  );
+  throw new Error("window.supabase غير موجود — تحقق من ترتيب السكربتات في HTML.");
+}
 
-const ADMIN_EMAIL =
-"ywsfjrt84@gmail.com";
+const SUPABASE_URL = "https://ptwceqbxusgyutrroayz.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Hto6uDekI9TvxTLFs7kYWg_ApV51joa";
 
-const PLACEHOLDER =
-"https://placehold.co/700x850?text=Espoza";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+const BUCKET = "product-images";
+const ADMIN_EMAIL = "ywsfjrt84@gmail.com";
+const PLACEHOLDER = "https://placehold.co/700x850?text=Espoza";
 
 /* ================================
    GLOBAL DATA
@@ -42,3695 +62,1213 @@ let settings = null;
 let editProduct = null;
 let productImages = [];
 
-
 /* ================================
    HELPERS
 ================================ */
 
-const $ = id =>
-  document.getElementById(id);
+const $ = (id) => document.getElementById(id);
 
-
-const esc = s =>
+const esc = (s) =>
   String(s ?? "")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 
-
-const bool = (v,d=true) =>
-  v === null || v === undefined
-    ? d
-    : !!v;
-
+const bool = (v, d = true) => (v === null || v === undefined ? d : !!v);
 
 /* ================================
    TOAST
 ================================ */
 
-function toast(msg){
-
+function toast(msg) {
   const el = $("toast");
-
-  if(!el) return;
-
+  if (!el) return;
   el.textContent = msg;
-
   el.classList.add("show");
-
   clearTimeout(el._t);
-
-  el._t = setTimeout(
-    () => el.classList.remove("show"),
-    2800
-  );
-
+  el._t = setTimeout(() => el.classList.remove("show"), 2800);
 }
-
 
 /* ================================
    SUPABASE QUERY HELPER
 ================================ */
 
-async function q(query){
-
-  const { data, error } =
-    await query;
-
-  if(error){
-
-    console.error(
-      "Supabase error:",
-      error
-    );
-
+async function q(query) {
+  const { data, error } = await query;
+  if (error) {
+    console.error("Supabase error:", error);
     throw error;
   }
-
   return data;
 }
-
 
 /* ================================
    ADMIN CHECK
 ================================ */
 
-async function isAdmin(){
-
-  try{
-
-    const result =
-      await q(
-        sb.rpc("is_admin")
-      );
-
+async function isAdmin() {
+  try {
+    const result = await q(sb.rpc("is_admin"));
     return result === true;
-
-  }catch(error){
-
-    console.error(
-      "isAdmin error:",
-      error
-    );
-
+  } catch (error) {
+    console.error("isAdmin error:", error);
     throw error;
   }
 }
-
 
 /* ================================
    LOGIN / APP VISIBILITY
 ================================ */
 
-function showLogin(){
-
-  const login =
-    $("loginScreen");
-
-  const app =
-    $("app");
-
-  if(login)
-    login.classList.remove("hidden");
-
-  if(app)
-    app.classList.add("hidden");
+function showLogin() {
+  $("loginScreen")?.classList.remove("hidden");
+  $("app")?.classList.add("hidden");
 }
 
-
-function showApp(){
-
-  const login =
-    $("loginScreen");
-
-  const app =
-    $("app");
-
-  if(login)
-    login.classList.add("hidden");
-
-  if(app)
-    app.classList.remove("hidden");
+function showApp() {
+  $("loginScreen")?.classList.add("hidden");
+  $("app")?.classList.remove("hidden");
 }
-
 
 /* ================================
    IMAGE UPLOAD
 ================================ */
 
-async function uploadImage(
-  file,
-  folder
-){
+async function uploadImage(file, folder) {
+  if (!file) {
+    throw new Error("لم يتم اختيار صورة.");
+  }
 
-  if(!file){
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+  const path = `${folder}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
 
+  const upload = await sb.storage.from(BUCKET).upload(path, file, {
+    cacheControl: "3600",
+    upsert: false,
+  });
+
+  if (upload.error) {
+    /* ⭐ تصليح: رسالة أوضح — أغلب حالات فشل الرفع سببها Storage Policies */
+    const original = upload.error.message || "";
     throw new Error(
-      "لم يتم اختيار صورة."
+      "فشل رفع الصورة إلى Storage (" +
+        original +
+        "). تأكد من وجود Policy تسمح بالـ INSERT على bucket \"" +
+        BUCKET +
+        "\" في Supabase → Storage → Policies."
     );
   }
 
+  const { data } = sb.storage.from(BUCKET).getPublicUrl(path);
 
-  const ext =
-    (
-      file.name
-        .split(".")
-        .pop()
-      ||
-      "jpg"
-    ).toLowerCase();
-
-
-  const path =
-    `${folder}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
-
-
-  const upload =
-    await sb.storage
-      .from(BUCKET)
-      .upload(
-        path,
-        file,
-        {
-          cacheControl:"3600",
-          upsert:false
-        }
-      );
-
-
-  if(upload.error)
-    throw upload.error;
-
-
-  const { data } =
-    sb.storage
-      .from(BUCKET)
-      .getPublicUrl(path);
-
-
-  if(!data?.publicUrl){
-
-    throw new Error(
-      "تعذر الحصول على رابط الصورة."
-    );
+  if (!data?.publicUrl) {
+    throw new Error("تعذر الحصول على رابط الصورة.");
   }
 
-
-  return {
-
-    image_url:
-      data.publicUrl,
-
-    storage_path:
-      path
-
-  };
+  return { image_url: data.publicUrl, storage_path: path };
 }
-
 
 /* ================================
    PAGE NAVIGATION
 ================================ */
 
-function openPage(name){
+function openPage(name) {
+  document.querySelectorAll(".page").forEach((x) => x.classList.remove("active"));
+  $("page-" + name)?.classList.add("active");
 
-  document
-    .querySelectorAll(".page")
-    .forEach(
-      x =>
-        x.classList.remove("active")
-    );
-
-
-  $("page-" + name)
-    ?.classList.add("active");
-
-
-  document
-    .querySelectorAll(
-      ".nav[data-page]"
-    )
-    .forEach(
-      x =>
-        x.classList.toggle(
-          "active",
-          x.dataset.page === name
-        )
-    );
-
+  document.querySelectorAll(".nav[data-page]").forEach((x) =>
+    x.classList.toggle("active", x.dataset.page === name)
+  );
 
   const titles = {
-
-    dashboard:"الرئيسية",
-    products:"المنتجات",
-    orders:"الطلبات",
-    slides:"السلايدر",
-    delivery:"التوصيل",
-    settings:"إعدادات المتجر"
-
+    dashboard: "الرئيسية",
+    products: "المنتجات",
+    orders: "الطلبات",
+    slides: "السلايدر",
+    delivery: "التوصيل",
+    settings: "إعدادات المتجر",
   };
 
+  const title = $("pageTitle");
+  if (title) title.textContent = titles[name] || "لوحة التحكم";
 
-  const title =
-    $("pageTitle");
-
-  if(title){
-
-    title.textContent =
-      titles[name]
-      ||
-      "لوحة التحكم";
-  }
-
-
-  if(name === "products")
-    loadProducts();
-
-  if(name === "orders")
-    loadOrders();
-
-  if(name === "slides")
-    loadSlider();
-
-  if(name === "delivery")
-    loadDeliveryAreas();
-
-  if(name === "settings")
-    loadSettings();
-
+  if (name === "products") loadProducts();
+  if (name === "orders") loadOrders();
+  if (name === "slides") loadSlider();
+  if (name === "delivery") loadDeliveryAreas();
+  if (name === "settings") loadSettings();
 }
-
 
 /* ================================
    RESTORE SESSION
 ================================ */
 
-async function restoreSession(){
-
+async function restoreSession() {
   showLogin();
 
+  const emailInput = $("loginEmail");
+  const passwordInput = $("loginPassword");
+  const errorBox = $("loginError");
 
-  const emailInput =
-    $("loginEmail");
+  if (emailInput) emailInput.value = ADMIN_EMAIL;
+  if (passwordInput) passwordInput.value = "";
+  if (errorBox) errorBox.textContent = "";
 
-  const passwordInput =
-    $("loginPassword");
+  try {
+    const { data, error } = await sb.auth.getSession();
+    if (error) throw error;
+    if (!data?.session) return;
 
-  const errorBox =
-    $("loginError");
+    const admin = await isAdmin();
 
-
-  if(emailInput)
-    emailInput.value =
-      ADMIN_EMAIL;
-
-  if(passwordInput)
-    passwordInput.value = "";
-
-  if(errorBox)
-    errorBox.textContent = "";
-
-
-  try{
-
-    const {
-      data,
-      error
-    } =
-      await sb.auth.getSession();
-
-
-    if(error)
-      throw error;
-
-
-    if(!data?.session)
-      return;
-
-
-    const admin =
-      await isAdmin();
-
-
-    if(admin){
-
+    if (admin) {
       showApp();
-
       await loadAll();
-
-    }else{
-
+    } else {
       await sb.auth.signOut();
-
-      if(errorBox){
-
-        errorBox.textContent =
-          "هذا الحساب لا يملك صلاحية الإدارة.";
-      }
+      if (errorBox) errorBox.textContent = "هذا الحساب لا يملك صلاحية الإدارة.";
     }
-
-
-  }catch(e){
-
-    console.error(
-      "restoreSession:",
-      e
-    );
+  } catch (e) {
+    console.error("restoreSession:", e);
   }
 }
-
 
 /* ================================
    LOGIN FORM
 ================================ */
 
-const loginForm =
-$("loginForm");
+const loginForm = $("loginForm");
 
+if (loginForm) {
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-if(loginForm){
+    const btn = e.submitter || loginForm.querySelector('button[type="submit"]');
+    const errorBox = $("loginError");
+    const emailInput = $("loginEmail");
+    const passwordInput = $("loginPassword");
 
-  loginForm.addEventListener(
-    "submit",
-    async e => {
+    if (!btn || !emailInput || !passwordInput) return;
 
-      e.preventDefault();
-      e.stopPropagation();
+    btn.disabled = true;
+    btn.textContent = "جاري الدخول...";
+    if (errorBox) errorBox.textContent = "";
 
+    try {
+      const email = emailInput.value.trim().toLowerCase();
+      const password = passwordInput.value;
 
-      const btn =
-        e.submitter
-        ||
-        loginForm.querySelector(
-          'button[type="submit"]'
-        );
+      if (!email) throw new Error("أدخلي البريد الإلكتروني.");
+      if (!password) throw new Error("أدخلي كلمة المرور.");
 
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      if (!data?.session) throw new Error("تم قبول البيانات لكن لم يتم إنشاء جلسة دخول.");
 
-      const errorBox =
-        $("loginError");
+      const admin = await isAdmin();
 
-      const emailInput =
-        $("loginEmail");
-
-      const passwordInput =
-        $("loginPassword");
-
-
-      if(
-        !btn ||
-        !emailInput ||
-        !passwordInput
-      )
-        return;
-
-
-      btn.disabled = true;
-
-      btn.textContent =
-        "جاري الدخول...";
-
-
-      if(errorBox)
-        errorBox.textContent = "";
-
-
-      try{
-
-        const email =
-          emailInput.value
-            .trim()
-            .toLowerCase();
-
-
-        const password =
-          passwordInput.value;
-
-
-        if(!email){
-
-          throw new Error(
-            "أدخلي البريد الإلكتروني."
-          );
-        }
-
-
-        if(!password){
-
-          throw new Error(
-            "أدخلي كلمة المرور."
-          );
-        }
-
-
-        const {
-          data,
-          error
-        } =
-          await sb.auth.signInWithPassword({
-
-            email,
-            password
-
-          });
-
-
-        if(error)
-          throw error;
-
-
-        if(!data?.session){
-
-          throw new Error(
-            "تم قبول البيانات لكن لم يتم إنشاء جلسة دخول."
-          );
-        }
-
-
-        const admin =
-          await isAdmin();
-
-
-        if(!admin){
-
-          await sb.auth.signOut();
-
-          throw new Error(
-            "تم تسجيل الدخول، لكن هذا الحساب لا يملك صلاحية الإدارة."
-          );
-        }
-
-
-        passwordInput.value = "";
-
-        if(errorBox)
-          errorBox.textContent = "";
-
-
-        showApp();
-
-        await loadAll();
-
-
-      }catch(err){
-
-        console.error(
-          "LOGIN ERROR:",
-          err
-        );
-
-
-        if(errorBox){
-
-          errorBox.textContent =
-            "تعذر الدخول: "
-            +
-            (
-              err?.message
-              ||
-              "حدث خطأ غير معروف."
-            );
-        }
-
-
-      }finally{
-
-        btn.disabled = false;
-
-        btn.textContent =
-          "دخول لوحة التحكم";
+      if (!admin) {
+        await sb.auth.signOut();
+        throw new Error("تم تسجيل الدخول، لكن هذا الحساب لا يملك صلاحية الإدارة.");
       }
 
-    }
-  );
-}
+      passwordInput.value = "";
+      if (errorBox) errorBox.textContent = "";
 
+      showApp();
+      await loadAll();
+    } catch (err) {
+      console.error("LOGIN ERROR:", err);
+      if (errorBox) {
+        errorBox.textContent = "تعذر الدخول: " + (err?.message || "حدث خطأ غير معروف.");
+      }
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "دخول لوحة التحكم";
+    }
+  });
+}
 
 /* ================================
    LOGOUT
 ================================ */
 
-const logoutBtn =
-$("logoutBtn");
+const logoutBtn = $("logoutBtn");
 
-
-if(logoutBtn){
-
-  logoutBtn.addEventListener(
-    "click",
-    async () => {
-
-      try{
-
-        await sb.auth.signOut();
-
-      }catch(error){
-
-        console.error(
-          "Logout error:",
-          error
-        );
-      }
-
-
-      showLogin();
-
-
-      if($("loginPassword"))
-        $("loginPassword").value = "";
-
-      if($("loginError"))
-        $("loginError").textContent = "";
-
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", async () => {
+    try {
+      await sb.auth.signOut();
+    } catch (error) {
+      console.error("Logout error:", error);
     }
-  );
+    showLogin();
+    if ($("loginPassword")) $("loginPassword").value = "";
+    if ($("loginError")) $("loginError").textContent = "";
+  });
 }
-
 
 /* ================================
    NAV BUTTONS
 ================================ */
 
-document
-  .querySelectorAll(
-    ".nav[data-page]"
-  )
-  .forEach(
-    b =>
-      b.addEventListener(
-        "click",
-        () =>
-          openPage(
-            b.dataset.page
-          )
-      )
-  );
-
+document.querySelectorAll(".nav[data-page]").forEach((b) =>
+  b.addEventListener("click", () => openPage(b.dataset.page))
+);
 
 /* ================================
    LOAD ALL
 ================================ */
 
-async function loadAll(){
-
+async function loadAll() {
   await Promise.allSettled([
-
     loadProducts(),
-
     loadOrders(),
-
     loadSlider(),
-
     loadSettings(),
-
-    loadDeliveryAreas()
-
+    loadDeliveryAreas(),
   ]);
-
-
   updateStats();
 }
-
 
 /* ================================
    DASHBOARD STATS
 ================================ */
 
-function updateStats(){
+function updateStats() {
+  const statProducts = $("statProducts");
+  const statOffers = $("statOffers");
+  const statOrders = $("statOrders");
+  const statSlides = $("statSlides");
 
-  const statProducts =
-    $("statProducts");
-
-  const statOffers =
-    $("statOffers");
-
-  const statOrders =
-    $("statOrders");
-
-  const statSlides =
-    $("statSlides");
-
-
-  if(statProducts)
-    statProducts.textContent =
-      products.length;
-
-
-  if(statOffers)
-    statOffers.textContent =
-      products.filter(
-        x => x.is_offer
-      ).length;
-
-
-  if(statOrders)
-    statOrders.textContent =
-      orders.length;
-
-
-  if(statSlides)
-    statSlides.textContent =
-      slides.filter(
-        x => x.is_active
-      ).length;
+  if (statProducts) statProducts.textContent = products.length;
+  if (statOffers) statOffers.textContent = products.filter((x) => x.is_offer).length;
+  if (statOrders) statOrders.textContent = orders.length;
+  if (statSlides) statSlides.textContent = slides.filter((x) => x.is_active).length;
 }
-
 
 /* ================================
    PRODUCTS
 ================================ */
 
-async function loadProducts(){
-
-  try{
-
-    const rows =
-      await q(
-
-        sb
-          .from("products")
-          .select("*")
-          .order(
-            "created_at",
-            {
-              ascending:false
-            }
-          )
-      );
-
+async function loadProducts() {
+  try {
+    const rows = await q(
+      sb.from("products").select("*").order("created_at", { ascending: false })
+    );
 
     let imgs = [];
 
-
-    if(rows.length){
-
-      imgs =
-        await q(
-
-          sb
-            .from("product_images")
-            .select("*")
-            .in(
-              "product_id",
-              rows.map(
-                x => x.id
-              )
-            )
-            .order("sort_order")
-        );
+    if (rows.length) {
+      imgs = await q(
+        sb
+          .from("product_images")
+          .select("*")
+          .in("product_id", rows.map((x) => x.id))
+          .order("sort_order")
+      );
     }
 
-
-    products =
-      rows.map(
-        p => ({
-
-          ...p,
-
-          _image:
-            p.image_url
-            ||
-            imgs.find(
-              i =>
-                String(i.product_id)
-                ===
-                String(p.id)
-            )?.image_url
-            ||
-            PLACEHOLDER
-
-        })
-      );
-
+    products = rows.map((p) => ({
+      ...p,
+      _image:
+        p.image_url ||
+        imgs.find((i) => String(i.product_id) === String(p.id))?.image_url ||
+        PLACEHOLDER,
+    }));
 
     renderProducts();
-
     updateStats();
-
-
-  }catch(e){
-
-    console.error(
-      "loadProducts:",
-      e
-    );
-
-
-    toast(
-      "خطأ تحميل المنتجات: "
-      +
-      (
-        e?.message
-        ||
-        "خطأ غير معروف"
-      )
-    );
+  } catch (e) {
+    console.error("loadProducts:", e);
+    toast("خطأ تحميل المنتجات: " + (e?.message || "خطأ غير معروف"));
   }
 }
-
 
 /* ================================
    RENDER PRODUCTS
 ================================ */
 
-function renderProducts(){
+function renderProducts() {
+  const grid = $("productsGrid");
+  if (!grid) return;
 
-  const grid =
-    $("productsGrid");
+  const searchInput = $("productSearch");
+  const categoryInput = $("productCategoryFilter");
 
-  if(!grid)
-    return;
+  const search = searchInput ? searchInput.value.trim().toLowerCase() : "";
+  const category = categoryInput ? categoryInput.value : "all";
 
+  const list = products.filter((p) => {
+    const matchesSearch =
+      !search ||
+      (p.name || "").toLowerCase().includes(search) ||
+      (p.sku || "").toLowerCase().includes(search);
 
-  const searchInput =
-    $("productSearch");
+    const matchesCategory =
+      category === "all" ||
+      (category === "offers" ? !!p.is_offer : p.category === category);
 
-  const categoryInput =
-    $("productCategoryFilter");
+    return matchesSearch && matchesCategory;
+  });
 
-
-  const search =
-    searchInput
-      ? searchInput.value.trim().toLowerCase()
-      : "";
-
-
-  const category =
-    categoryInput
-      ? categoryInput.value
-      : "all";
-
-
-  const list =
-    products.filter(
-
-      p =>
-
-        (
-
-          !search
-
-          ||
-
-          (p.name || "")
-            .toLowerCase()
-            .includes(search)
-
-          ||
-
-          (p.sku || "")
-            .toLowerCase()
-            .includes(search)
-
-        )
-
-        &&
-
-        (
-
-          category === "all"
-
-          ||
-
-          (
-
-            category === "offers"
-
-            ?
-
-            !!p.is_offer
-
-            :
-
-            p.category === category
-
-          )
-
-        )
-
-    );
-
-
-  grid.innerHTML =
-
-    list.length
-
-    ?
-
-    list.map(
-
-      p => `
-
+  grid.innerHTML = list.length
+    ? list
+        .map(
+          (p) => `
         <div class="product">
-
-          <img
-            src="${esc(p._image)}"
-            onerror="this.src='${PLACEHOLDER}'">
-
+          <img src="${esc(p._image)}" onerror="this.src='${PLACEHOLDER}'">
           <div class="product-body">
-
-            <div class="product-title">
-              ${esc(p.name)}
-            </div>
-
-
+            <div class="product-title">${esc(p.name)}</div>
             <div class="row-between">
-
               <div>
-
-                <span class="price">
-                  ${Number(
-                    p.price || 0
-                  ).toLocaleString()} ₪
-                </span>
-
+                <span class="price">${Number(p.price || 0).toLocaleString()} ₪</span>
                 ${
                   p.old_price
-                  ?
-                  `
-
-                    <br>
-
-                    <span class="old">
-                      ${Number(
-                        p.old_price
-                      ).toLocaleString()} ₪
-                    </span>
-
-                  `
-                  :
-                  ""
+                    ? `<br><span class="old">${Number(p.old_price).toLocaleString()} ₪</span>`
+                    : ""
                 }
-
               </div>
-
-
-              <small
-                style="color:${
-                  p.is_active
-                  ?
-                  "var(--green)"
-                  :
-                  "var(--red)"
-                }">
-
-                ${
-                  p.is_active
-                  ?
-                  "ظاهر"
-                  :
-                  "مخفي"
-                }
-
+              <small style="color:${p.is_active ? "var(--green)" : "var(--red)"}">
+                ${p.is_active ? "ظاهر" : "مخفي"}
               </small>
-
             </div>
-
-
             <div class="actions">
-
-              <button
-                type="button"
-                class="btn btn-soft"
-                onclick="openProductModal('${p.id}')">
-
-                تعديل
-
-              </button>
-
-
-              <button
-                type="button"
-                class="btn btn-danger"
-                onclick="deleteProduct('${p.id}')">
-
-                حذف
-
-              </button>
-
+              <button type="button" class="btn btn-soft" onclick="openProductModal('${p.id}')">تعديل</button>
+              <button type="button" class="btn btn-danger" onclick="deleteProduct('${p.id}')">حذف</button>
             </div>
-
           </div>
-
         </div>
-
       `
-
-    ).join("")
-
-    :
-
-    `
-
-      <div
-        class="empty"
-        style="grid-column:1/-1">
-
-        لا توجد منتجات في Supabase.
-
-      </div>
-
-    `;
+        )
+        .join("")
+    : `<div class="empty" style="grid-column:1/-1">لا توجد منتجات في Supabase.</div>`;
 }
-
 
 /* ================================
    PRODUCT SEARCH / FILTER
 ================================ */
 
-const productSearch =
-$("productSearch");
-
-if(productSearch){
-
-  productSearch.addEventListener(
-    "input",
-    renderProducts
-  );
-}
-
-
-const productCategoryFilter =
-$("productCategoryFilter");
-
-if(productCategoryFilter){
-
-  productCategoryFilter.addEventListener(
-    "change",
-    renderProducts
-  );
-}
-
+$("productSearch")?.addEventListener("input", renderProducts);
+$("productCategoryFilter")?.addEventListener("change", renderProducts);
 
 /* ================================
    OPEN PRODUCT MODAL
 ================================ */
 
-async function openProductModal(
-  id = null
-){
-
-  const form =
-    $("productForm");
-
-  if(!form)
-    return;
-
+async function openProductModal(id = null) {
+  const form = $("productForm");
+  if (!form) return;
 
   form.reset();
 
-
-  if($("productActive"))
-    $("productActive").checked = true;
-
-  if($("productAvailable"))
-    $("productAvailable").checked = true;
-
-  if($("productOffer"))
-    $("productOffer").checked = false;
-
+  if ($("productActive")) $("productActive").checked = true;
+  if ($("productAvailable")) $("productAvailable").checked = true;
+  if ($("productOffer")) $("productOffer").checked = false;
 
   productImages = [];
-
   editProduct = null;
 
+  if ($("productId")) $("productId").value = "";
+  if ($("productImagesList")) $("productImagesList").innerHTML = "";
 
-  if($("productId"))
-    $("productId").value = "";
-
-
-  if($("productImagesList"))
-    $("productImagesList").innerHTML = "";
-
-
-  if($("productModalTitle")){
-
-    $("productModalTitle").textContent =
-      id
-      ?
-      "تعديل المنتج"
-      :
-      "إضافة منتج";
+  if ($("productModalTitle")) {
+    $("productModalTitle").textContent = id ? "تعديل المنتج" : "إضافة منتج";
   }
 
+  if ($("productModal")) $("productModal").classList.add("open");
 
-  if($("productModal"))
-    $("productModal").classList.add("open");
+  if (!id) return;
 
-
-  if(!id)
-    return;
-
-
-  try{
-
-    const [
-      p,
-      imgs,
-      sizes,
-      colors
-    ] =
-      await Promise.all([
-
-        q(
-
-          sb
-            .from("products")
-            .select("*")
-            .eq("id",id)
-            .single()
-
-        ),
-
-        q(
-
-          sb
-            .from("product_images")
-            .select("*")
-            .eq("product_id",id)
-            .order("sort_order")
-
-        ),
-
-        q(
-
-          sb
-            .from("product_sizes")
-            .select("*")
-            .eq("product_id",id)
-            .order("sort_order")
-
-        ),
-
-        q(
-
-          sb
-            .from("product_colors")
-            .select("*")
-            .eq("product_id",id)
-            .order("sort_order")
-
-        )
-
-      ]);
-
+  try {
+    const [p, imgs, sizes, colors] = await Promise.all([
+      q(sb.from("products").select("*").eq("id", id).single()),
+      q(sb.from("product_images").select("*").eq("product_id", id).order("sort_order")),
+      q(sb.from("product_sizes").select("*").eq("product_id", id).order("sort_order")),
+      q(sb.from("product_colors").select("*").eq("product_id", id).order("sort_order")),
+    ]);
 
     editProduct = p;
 
+    if ($("productId")) $("productId").value = p.id;
+    if ($("productName")) $("productName").value = p.name || "";
+    if ($("productSku")) $("productSku").value = p.sku || "";
+    if ($("productCategory")) $("productCategory").value = p.category || "dresses";
+    if ($("productPrice")) $("productPrice").value = p.price ?? "";
+    if ($("productOldPrice")) $("productOldPrice").value = p.old_price ?? "";
+    if ($("productDescription")) $("productDescription").value = p.description || "";
+    if ($("productOffer")) $("productOffer").checked = bool(p.is_offer, false);
+    if ($("productAvailable")) $("productAvailable").checked = bool(p.is_available, true);
+    if ($("productActive")) $("productActive").checked = bool(p.is_active, true);
 
-    if($("productId"))
-      $("productId").value = p.id;
-
-
-    if($("productName"))
-      $("productName").value =
-        p.name || "";
-
-
-    if($("productSku"))
-      $("productSku").value =
-        p.sku || "";
-
-
-    if($("productCategory"))
-      $("productCategory").value =
-        p.category || "dresses";
-
-
-    if($("productPrice"))
-      $("productPrice").value =
-        p.price ?? "";
-
-
-    if($("productOldPrice"))
-      $("productOldPrice").value =
-        p.old_price ?? "";
-
-
-    if($("productDescription"))
-      $("productDescription").value =
-        p.description || "";
-
-
-    if($("productOffer"))
-      $("productOffer").checked =
-        bool(
-          p.is_offer,
-          false
-        );
-
-
-    if($("productAvailable"))
-      $("productAvailable").checked =
-        bool(
-          p.is_available,
-          true
-        );
-
-
-    if($("productActive"))
-      $("productActive").checked =
-        bool(
-          p.is_active,
-          true
-        );
-
-
-    if($("productSizes")){
-
-      $("productSizes").value =
-        sizes
-          .map(
-            x => x.size
-          )
-          .join(",");
+    if ($("productSizes")) {
+      $("productSizes").value = sizes.map((x) => x.size).join(",");
     }
 
+    productImages = imgs.map((i) => ({
+      ...i,
+      color: colors.find((c) => String(c.image_id) === String(i.id))?.color_name || "",
+      file: null,
+    }));
 
-    productImages =
-      imgs.map(
-
-        i => ({
-
-          ...i,
-
-          color:
-            colors.find(
-              c =>
-                String(c.image_id)
-                ===
-                String(i.id)
-            )?.color_name
-            ||
-            "",
-
-          file:null
-
-        })
-      );
-
-
-    if(
-      !productImages.length
-      &&
-      p.image_url
-    ){
-
+    if (!productImages.length && p.image_url) {
       productImages = [
-
-        {
-
-          id:null,
-
-          image_url:
-            p.image_url,
-
-          storage_path:null,
-
-          color:"",
-
-          file:null
-
-        }
-
+        { id: null, image_url: p.image_url, storage_path: null, color: "", file: null },
       ];
     }
 
-
     renderProductImages();
-
-
-  }catch(e){
-
-    console.error(
-      "openProductModal:",
-      e
-    );
-
-
-    toast(
-      "تعذر فتح المنتج: "
-      +
-      (
-        e?.message
-        ||
-        "خطأ غير معروف"
-      )
-    );
+  } catch (e) {
+    console.error("openProductModal:", e);
+    toast("تعذر فتح المنتج: " + (e?.message || "خطأ غير معروف"));
   }
 }
-
 
 /* ================================
    CLOSE PRODUCT MODAL
 ================================ */
 
-function closeProductModal(){
+function closeProductModal() {
+  if ($("productModal")) $("productModal").classList.remove("open");
 
-  if($("productModal"))
-    $("productModal")
-      .classList.remove("open");
-
-
-  productImages.forEach(
-    img => {
-
-      if(
-        img?.image_url
-        ?.startsWith("blob:")
-      ){
-
-        try{
-
-          URL.revokeObjectURL(
-            img.image_url
-          );
-
-        }catch{}
-      }
+  productImages.forEach((img) => {
+    if (img?.image_url?.startsWith("blob:")) {
+      try {
+        URL.revokeObjectURL(img.image_url);
+      } catch {}
     }
-  );
-
+  });
 
   productImages = [];
-
   editProduct = null;
 }
-
 
 /* ================================
    ADD PRODUCT IMAGES
 ================================ */
 
-const productImagesInput =
-$("productImagesInput");
+const productImagesInput = $("productImagesInput");
 
+if (productImagesInput) {
+  productImagesInput.addEventListener("change", (e) => {
+    const files = Array.from(e.target.files || []);
 
-if(productImagesInput){
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) continue;
 
-  productImagesInput.addEventListener(
-    "change",
-    e => {
-
-      const files =
-        Array.from(
-          e.target.files || []
-        );
-
-
-      for(
-        const file
-        of files
-      ){
-
-        if(
-          !file.type
-            .startsWith("image/")
-        ){
-
-          continue;
-        }
-
-
-        productImages.push({
-
-          id:null,
-
-          image_url:
-            URL.createObjectURL(
-              file
-            ),
-
-          storage_path:null,
-
-          color:"",
-
-          file
-
-        });
-      }
-
-
-      renderProductImages();
-
-
-      e.target.value = "";
-
+      productImages.push({
+        id: null,
+        image_url: URL.createObjectURL(file),
+        storage_path: null,
+        color: "",
+        file,
+      });
     }
-  );
-}
 
+    renderProductImages();
+    e.target.value = "";
+  });
+}
 
 /* ================================
    RENDER PRODUCT IMAGES
 ================================ */
 
-function renderProductImages(){
+function renderProductImages() {
+  const list = $("productImagesList");
+  if (!list) return;
 
-  const list =
-    $("productImagesList");
-
-  if(!list)
-    return;
-
-
-  list.innerHTML =
-    productImages
-      .map(
-
-        (img,i) => `
-
-          <div class="image-editor">
-
-            <img
-              src="${esc(
-                img.image_url
-              )}"
-              onerror="
-                this.src='${PLACEHOLDER}'
-              ">
-
-
-            <div>
-
-              <input
-                class="field"
-                placeholder="اسم اللون لهذه الصورة"
-                value="${esc(
-                  img.color || ""
-                )}"
-                oninput="
-                  productImages[${i}].color=this.value
-                ">
-
-
-              <div class="tiny">
-
-                الصورة ${i + 1}
-
-              </div>
-
-            </div>
-
-
-            <button
-              type="button"
-              class="btn btn-danger"
-              onclick="
-                removeProductImage(${i})
-              ">
-
-              حذف
-
-            </button>
-
+  list.innerHTML = productImages
+    .map(
+      (img, i) => `
+        <div class="image-editor">
+          <img src="${esc(img.image_url)}" onerror="this.src='${PLACEHOLDER}'">
+          <div>
+            <input class="field" placeholder="اسم اللون لهذه الصورة"
+              value="${esc(img.color || "")}"
+              oninput="productImages[${i}].color=this.value">
+            <div class="tiny">الصورة ${i + 1}</div>
           </div>
-
-        `
-      )
-      .join("");
+          <button type="button" class="btn btn-danger" onclick="removeProductImage(${i})">حذف</button>
+        </div>
+      `
+    )
+    .join("");
 }
-
 
 /* ================================
    REMOVE PRODUCT IMAGE
 ================================ */
 
-function removeProductImage(i){
+function removeProductImage(i) {
+  const image = productImages[i];
 
-  const image =
-    productImages[i];
-
-
-  if(
-    image
-    &&
-    image.image_url
-    &&
-    image.image_url
-      .startsWith("blob:")
-  ){
-
-    try{
-
-      URL.revokeObjectURL(
-        image.image_url
-      );
-
-    }catch{}
+  if (image?.image_url?.startsWith("blob:")) {
+    try {
+      URL.revokeObjectURL(image.image_url);
+    } catch {}
   }
 
-
-  productImages.splice(
-    i,
-    1
-  );
-
-
+  productImages.splice(i, 1);
   renderProductImages();
 }
 
-
 /* ================================
    SAVE PRODUCT
+   ⭐ تصليح رئيسي: نرفع الصور أولًا، وفقط إذا نجح الرفع بالكامل
+   نروح نكتب على قاعدة البيانات. كذا لو فشل رفع صورة، ما ينحفظ أي
+   شي جزئي (منتج بدون صورة).
 ================================ */
 
-const productForm =
-$("productForm");
-
-
-if(productForm){
-
-  productForm.addEventListener(
-    "submit",
-    async e => {
-
-      e.preventDefault();
-      e.stopPropagation();
-
-
-      const btn =
-        e.submitter
-        ||
-        productForm.querySelector(
-          'button[type="submit"]'
-        );
-
-
-      if(!btn)
-        return;
-
-
-      btn.disabled = true;
-
-      btn.textContent =
-        "جاري الحفظ...";
-
-
-      try{
-
-        const id =
-          editProduct?.id
-          ||
-          crypto.randomUUID();
-
-
-        /* BASIC DATA */
-
-        const priceRaw =
-          $("productPrice")
-            ?.value
-            .trim()
-            ||
-            "";
-
-
-        const oldPriceRaw =
-          $("productOldPrice")
-            ?.value
-            .trim()
-            ||
-            "";
-
-
-        const payload = {
-
-          name:
-            $("productName")
-              ?.value
-              .trim()
-              ||
-              "",
-
-          sku:
-            $("productSku")
-              ?.value
-              .trim()
-              ||
-              null,
-
-          category:
-            $("productCategory")
-              ?.value
-              ||
-              "dresses",
-
-          price:
-            Number(priceRaw),
-
-          old_price:
-            oldPriceRaw === ""
-            ?
-            null
-            :
-            Number(oldPriceRaw),
-
-          description:
-            $("productDescription")
-              ?.value
-              .trim()
-              ||
-              "",
-
-          is_offer:
-            $("productOffer")
-              ?.checked
-              ||
-              false,
-
-          is_available:
-            $("productAvailable")
-              ?.checked
-              ??
-              true,
-
-          is_active:
-            $("productActive")
-              ?.checked
-              ??
-              true,
-
-          updated_at:
-            new Date()
-              .toISOString()
-
-        };
-
-
-        /* VALIDATION */
-
-        if(!payload.name){
-
-          throw new Error(
-            "أدخلي اسم المنتج."
-          );
-        }
-
-
-        if(
-          priceRaw === ""
-          ||
-          !Number.isFinite(
-            payload.price
-          )
-          ||
-          payload.price < 0
-        ){
-
-          throw new Error(
-            "تأكدي من السعر."
-          );
-        }
-
-
-        if(
-          payload.old_price !== null
-          &&
-          (
-            !Number.isFinite(
-              payload.old_price
-            )
-            ||
-            payload.old_price < 0
-          )
-        ){
-
-          throw new Error(
-            "تأكدي من السعر القديم."
-          );
-        }
-
-
-        if(
-          payload.old_price !== null
-          &&
-          payload.old_price < payload.price
-        ){
-
-          throw new Error(
-            "السعر القديم يجب أن يكون أكبر من أو يساوي السعر الحالي."
-          );
-        }
-
-
-        if(
-          ![
-            "dresses",
-            "sets",
-            "offers"
-          ].includes(
-            payload.category
-          )
-        ){
-
-          throw new Error(
-            "اختاري تصنيفًا صحيحًا."
-          );
-        }
-
-
-        /* SAVE PRODUCT */
-
-        if(editProduct){
-
-          await q(
-
-            sb
-              .from("products")
-              .update(payload)
-              .eq("id",id)
-
-          );
-
-        }else{
-
-          await q(
-
-            sb
-              .from("products")
-              .insert({
-
-                id,
-
-                ...payload
-
-              })
-
-          );
-        }
-
-
-        /* OLD IMAGES */
-
-        const oldImgs =
-          editProduct
-          ?
-          await q(
-
-            sb
-              .from("product_images")
-              .select("*")
-              .eq(
-                "product_id",
-                id
-              )
-
-          )
-          :
-          [];
-
-
-        /* DELETE RELATIONS */
-
-        await q(
-
-          sb
-            .from("product_colors")
-            .delete()
-            .eq(
-              "product_id",
-              id
-            )
-
-        );
-
-
-        await q(
-
-          sb
-            .from("product_sizes")
-            .delete()
-            .eq(
-              "product_id",
-              id
-            )
-
-        );
-
-
-        await q(
-
-          sb
-            .from("product_images")
-            .delete()
-            .eq(
-              "product_id",
-              id
-            )
-
-        );
-
-
-        /* UPLOAD / SAVE IMAGES */
-
-        const saved = [];
-
-
-        for(
-          let i = 0;
-          i < productImages.length;
-          i++
-        ){
-
-          const original =
-            productImages[i];
-
-
-          let img =
-            original;
-
-
-          if(img.file){
-
-            const uploaded =
-              await uploadImage(
-                img.file,
-                `products/${id}`
-              );
-
-
-            img = {
-
-              ...img,
-
-              ...uploaded
-
-            };
-          }
-
-
-          if(!img.image_url)
-            continue;
-
-
-          const row =
-            await q(
-
-              sb
-                .from("product_images")
-                .insert({
-
-                  product_id:
-                    id,
-
-                  image_url:
-                    img.image_url,
-
-                  storage_path:
-                    img.storage_path
-                    ||
-                    null,
-
-                  sort_order:
-                    i
-
-                })
-                .select()
-                .single()
-
-            );
-
-
-          saved.push({
-
-            ...row,
-
-            color:
-              (img.color || "")
-                .trim()
-
-          });
-        }
-
-
-        /* SAVE COLORS */
-
-        for(
-          let i = 0;
-          i < saved.length;
-          i++
-        ){
-
-          if(
-            saved[i].color
-          ){
-
-            await q(
-
-              sb
-                .from("product_colors")
-                .insert({
-
-                  product_id:
-                    id,
-
-                  image_id:
-                    saved[i].id,
-
-                  color_name:
-                    saved[i].color,
-
-                  sort_order:
-                    i
-
-                })
-
-            );
-          }
-        }
-
-
-        /* SAVE SIZES */
-
-        const sizes = [
-
-          ...new Set(
-
-            (
-              $("productSizes")
-                ?.value
-              ||
-              ""
-            )
-              .split(
-                /[,،\n]/
-              )
-              .map(
-                x =>
-                  x.trim()
-              )
-              .filter(Boolean)
-
-          )
-
-        ];
-
-
-        for(
-          let i = 0;
-          i < sizes.length;
-          i++
-        ){
-
-          await q(
-
-            sb
-              .from("product_sizes")
-              .insert({
-
-                product_id:
-                  id,
-
-                size:
-                  sizes[i],
-
-                sort_order:
-                  i
-
-              })
-
-          );
-        }
-
-
-        /* MAIN IMAGE */
-
-        const main =
-          saved[0]?.image_url
-          ||
-          null;
-
-
-        await q(
-
-          sb
-            .from("products")
-            .update({
-
-              image_url:
-                main
-
-            })
-            .eq(
-              "id",
-              id
-            )
-
-        );
-
-
-        /* STORAGE CLEANUP */
-
-        const kept =
-          new Set(
-
-            saved
-              .map(
-                x =>
-                  x.storage_path
-              )
-              .filter(Boolean)
-
-          );
-
-
-        for(
-          const old
-          of oldImgs
-        ){
-
-          if(
-            old.storage_path
-            &&
-            !kept.has(
-              old.storage_path
-            )
-          ){
-
-            try{
-
-              await q(
-
-                sb
-                  .storage
-                  .from(BUCKET)
-                  .remove([
-                    old.storage_path
-                  ])
-
-              );
-
-            }catch(storageError){
-
-              console.warn(
-                "Storage cleanup failed:",
-                storageError
-              );
-            }
-          }
-        }
-
-
-        /* SUCCESS */
-
-        toast(
-
-          editProduct
-          ?
-          "تم تعديل المنتج ✅"
-          :
-          "تم إضافة المنتج ✅"
-
-        );
-
-
-        closeProductModal();
-
-
-        await loadProducts();
-
-
-      }catch(err){
-
-        console.error(
-          "SAVE PRODUCT ERROR:",
-          err
-        );
-
-
-        toast(
-
-          "تعذر حفظ المنتج: "
-          +
-          (
-            err?.message
-            ||
-            "حدث خطأ غير معروف."
-          )
-
-        );
-
-      }finally{
-
-        btn.disabled = false;
-
-        btn.textContent =
-          "حفظ المنتج";
-
+const productForm = $("productForm");
+
+if (productForm) {
+  productForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const btn = e.submitter || productForm.querySelector('button[type="submit"]');
+    if (!btn) return;
+
+    btn.disabled = true;
+    btn.textContent = "جاري الحفظ...";
+
+    try {
+      const id = editProduct?.id || crypto.randomUUID();
+
+      /* BASIC DATA */
+      const priceRaw = $("productPrice")?.value.trim() || "";
+      const oldPriceRaw = $("productOldPrice")?.value.trim() || "";
+
+      const payload = {
+        name: $("productName")?.value.trim() || "",
+        sku: $("productSku")?.value.trim() || null,
+        category: $("productCategory")?.value || "dresses",
+        price: Number(priceRaw),
+        old_price: oldPriceRaw === "" ? null : Number(oldPriceRaw),
+        description: $("productDescription")?.value.trim() || "",
+        is_offer: $("productOffer")?.checked || false,
+        is_available: $("productAvailable")?.checked ?? true,
+        is_active: $("productActive")?.checked ?? true,
+        updated_at: new Date().toISOString(),
+      };
+
+      /* VALIDATION */
+      if (!payload.name) throw new Error("أدخلي اسم المنتج.");
+
+      if (priceRaw === "" || !Number.isFinite(payload.price) || payload.price < 0) {
+        throw new Error("تأكدي من السعر.");
       }
 
-    }
-  );
-}
+      if (
+        payload.old_price !== null &&
+        (!Number.isFinite(payload.old_price) || payload.old_price < 0)
+      ) {
+        throw new Error("تأكدي من السعر القديم.");
+      }
 
+      if (payload.old_price !== null && payload.old_price < payload.price) {
+        throw new Error("السعر القديم يجب أن يكون أكبر من أو يساوي السعر الحالي.");
+      }
+
+      if (!["dresses", "sets", "offers"].includes(payload.category)) {
+        throw new Error("اختاري تصنيفًا صحيحًا.");
+      }
+
+      /* ⭐ الخطوة الجديدة: ارفعي كل الصور الجديدة أولًا، قبل أي كتابة
+         على قاعدة البيانات. لو فشل رفع أي صورة، الكود يتوقف هنا
+         ولا يتغير أي شي في قاعدة البيانات (لا يُنشأ منتج بدون صورة). */
+      const uploadedImages = [];
+
+      for (const img of productImages) {
+        if (img.file) {
+          const uploaded = await uploadImage(img.file, `products/${id}`);
+          uploadedImages.push({
+            image_url: uploaded.image_url,
+            storage_path: uploaded.storage_path,
+            color: (img.color || "").trim(),
+          });
+        } else if (img.image_url) {
+          uploadedImages.push({
+            image_url: img.image_url,
+            storage_path: img.storage_path || null,
+            color: (img.color || "").trim(),
+          });
+        }
+      }
+
+      /* من هنا وطالع: كل الصور رفعت بنجاح، آمن نكتب على قاعدة البيانات */
+
+      /* SAVE PRODUCT */
+      if (editProduct) {
+        await q(sb.from("products").update(payload).eq("id", id));
+      } else {
+        await q(sb.from("products").insert({ id, ...payload }));
+      }
+
+      /* OLD IMAGES (لتنظيف Storage لاحقًا) */
+      const oldImgs = editProduct
+        ? await q(sb.from("product_images").select("*").eq("product_id", id))
+        : [];
+
+      /* DELETE OLD RELATIONS */
+      await q(sb.from("product_colors").delete().eq("product_id", id));
+      await q(sb.from("product_sizes").delete().eq("product_id", id));
+      await q(sb.from("product_images").delete().eq("product_id", id));
+
+      /* INSERT NEW IMAGES */
+      const saved = [];
+
+      for (let i = 0; i < uploadedImages.length; i++) {
+        const img = uploadedImages[i];
+
+        const row = await q(
+          sb
+            .from("product_images")
+            .insert({
+              product_id: id,
+              image_url: img.image_url,
+              storage_path: img.storage_path || null,
+              sort_order: i,
+            })
+            .select()
+            .single()
+        );
+
+        saved.push({ ...row, color: img.color });
+      }
+
+      /* SAVE COLORS */
+      for (let i = 0; i < saved.length; i++) {
+        if (saved[i].color) {
+          await q(
+            sb.from("product_colors").insert({
+              product_id: id,
+              image_id: saved[i].id,
+              color_name: saved[i].color,
+              sort_order: i,
+            })
+          );
+        }
+      }
+
+      /* SAVE SIZES */
+      const sizes = [
+        ...new Set(
+          ($("productSizes")?.value || "")
+            .split(/[,،\n]/)
+            .map((x) => x.trim())
+            .filter(Boolean)
+        ),
+      ];
+
+      for (let i = 0; i < sizes.length; i++) {
+        await q(
+          sb.from("product_sizes").insert({ product_id: id, size: sizes[i], sort_order: i })
+        );
+      }
+
+      /* MAIN IMAGE */
+      const main = saved[0]?.image_url || null;
+      await q(sb.from("products").update({ image_url: main }).eq("id", id));
+
+      /* STORAGE CLEANUP */
+      const kept = new Set(saved.map((x) => x.storage_path).filter(Boolean));
+
+      for (const old of oldImgs) {
+        if (old.storage_path && !kept.has(old.storage_path)) {
+          try {
+            await q(sb.storage.from(BUCKET).remove([old.storage_path]));
+          } catch (storageError) {
+            console.warn("Storage cleanup failed:", storageError);
+          }
+        }
+      }
+
+      /* SUCCESS */
+      toast(editProduct ? "تم تعديل المنتج ✅" : "تم إضافة المنتج ✅");
+      closeProductModal();
+      await loadProducts();
+    } catch (err) {
+      console.error("SAVE PRODUCT ERROR:", err);
+      toast("تعذر حفظ المنتج: " + (err?.message || "حدث خطأ غير معروف."));
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "حفظ المنتج";
+    }
+  });
+}
 
 /* ================================
    DELETE PRODUCT
 ================================ */
 
-async function deleteProduct(id){
+async function deleteProduct(id) {
+  const product = products.find((x) => String(x.id) === String(id));
 
-  const product =
-    products.find(
-      x =>
-        String(x.id)
-        ===
-        String(id)
-    );
-
-
-  if(!product){
-
-    toast(
-      "المنتج غير موجود."
-    );
-
+  if (!product) {
+    toast("المنتج غير موجود.");
     return;
   }
 
+  if (!confirm(`حذف المنتج ${product.name}؟`)) return;
 
-  if(
-    !confirm(
-      `حذف المنتج ${product.name}؟`
-    )
-  ){
+  try {
+    const linked = await q(
+      sb.from("orders").select("id").eq("product_id", id).limit(1)
+    );
 
-    return;
-  }
-
-
-  try{
-
-    /* CHECK ORDERS */
-
-    const linked =
-      await q(
-
-        sb
-          .from("orders")
-          .select("id")
-          .eq(
-            "product_id",
-            id
-          )
-          .limit(1)
-
-      );
-
-
-    if(
-      linked
-      &&
-      linked.length
-    ){
-
-      await q(
-
-        sb
-          .from("products")
-          .update({
-
-            is_active:false,
-
-            is_available:false
-
-          })
-          .eq(
-            "id",
-            id
-          )
-
-      );
-
-
-      toast(
-        "المنتج مرتبط بطلبات، تم إخفاؤه بدل حذفه."
-      );
-
-
+    if (linked && linked.length) {
+      await q(sb.from("products").update({ is_active: false, is_available: false }).eq("id", id));
+      toast("المنتج مرتبط بطلبات، تم إخفاؤه بدل حذفه.");
       await loadProducts();
-
       return;
     }
 
-
-    /* GET IMAGES */
-
-    const imgs =
-      await q(
-
-        sb
-          .from("product_images")
-          .select(
-            "storage_path"
-          )
-          .eq(
-            "product_id",
-            id
-          )
-
-      );
-
-
-    /* DELETE COLORS */
-
-    await q(
-
-      sb
-        .from("product_colors")
-        .delete()
-        .eq(
-          "product_id",
-          id
-        )
-
+    const imgs = await q(
+      sb.from("product_images").select("storage_path").eq("product_id", id)
     );
 
+    await q(sb.from("product_colors").delete().eq("product_id", id));
+    await q(sb.from("product_sizes").delete().eq("product_id", id));
+    await q(sb.from("product_images").delete().eq("product_id", id));
+    await q(sb.from("products").delete().eq("id", id));
 
-    /* DELETE SIZES */
+    const paths = imgs.map((x) => x.storage_path).filter(Boolean);
 
-    await q(
-
-      sb
-        .from("product_sizes")
-        .delete()
-        .eq(
-          "product_id",
-          id
-        )
-
-    );
-
-
-    /* DELETE IMAGES */
-
-    await q(
-
-      sb
-        .from("product_images")
-        .delete()
-        .eq(
-          "product_id",
-          id
-        )
-
-    );
-
-
-    /* DELETE PRODUCT */
-
-    await q(
-
-      sb
-        .from("products")
-        .delete()
-        .eq(
-          "id",
-          id
-        )
-
-    );
-
-
-    /* DELETE STORAGE */
-
-    const paths =
-      imgs
-        .map(
-          x =>
-            x.storage_path
-        )
-        .filter(Boolean);
-
-
-    if(paths.length){
-
-      try{
-
-        await q(
-
-          sb
-            .storage
-            .from(BUCKET)
-            .remove(paths)
-
-        );
-
-      }catch(storageError){
-
-        console.warn(
-          "Storage delete failed:",
-          storageError
-        );
+    if (paths.length) {
+      try {
+        await q(sb.storage.from(BUCKET).remove(paths));
+      } catch (storageError) {
+        console.warn("Storage delete failed:", storageError);
       }
     }
 
-
-    toast(
-      "تم حذف المنتج ✅"
-    );
-
-
+    toast("تم حذف المنتج ✅");
     await loadProducts();
-
-
-  }catch(e){
-
-    console.error(
-      "deleteProduct:",
-      e
-    );
-
-
-    toast(
-      "تعذر حذف المنتج: "
-      +
-      (
-        e?.message
-        ||
-        "حدث خطأ غير معروف"
-      )
-    );
+  } catch (e) {
+    console.error("deleteProduct:", e);
+    toast("تعذر حذف المنتج: " + (e?.message || "حدث خطأ غير معروف"));
   }
 }
-
 
 /* ================================
    ORDERS
 ================================ */
 
-async function loadOrders(){
+async function loadOrders() {
+  try {
+    const result = await q(
+      sb.from("orders").select("*").order("created_at", { ascending: false })
+    );
 
-  try{
-
-    const result =
-      await q(
-
-        sb
-          .from("orders")
-          .select("*")
-          .order(
-            "created_at",
-            {
-              ascending:false
-            }
-          )
-      );
-
-
-    orders =
-      result || [];
-
-
+    orders = result || [];
     renderOrders();
-
     updateStats();
-
-
-  }catch(e){
-
-    console.error(
-      "loadOrders error:",
-      e
-    );
-
-
-    toast(
-      "خطأ تحميل الطلبات: "
-      +
-      (
-        e.message
-        ||
-        "خطأ غير معروف"
-      )
-    );
+  } catch (e) {
+    console.error("loadOrders error:", e);
+    toast("خطأ تحميل الطلبات: " + (e.message || "خطأ غير معروف"));
   }
 }
 
+function renderOrders() {
+  const body = $("ordersBody");
+  if (!body) return;
 
-function renderOrders(){
-
-  const body =
-    $("ordersBody");
-
-  if(!body)
-    return;
-
-
-  if(
-    !orders
-    ||
-    !orders.length
-  ){
-
-    body.innerHTML = `
-
-      <tr>
-
-        <td
-          colspan="8"
-          class="empty">
-
-          لا توجد طلبات حتى الآن.
-
-        </td>
-
-      </tr>
-
-    `;
-
+  if (!orders || !orders.length) {
+    body.innerHTML = `<tr><td colspan="8" class="empty">لا توجد طلبات حتى الآن.</td></tr>`;
     return;
   }
 
+  body.innerHTML = orders
+    .map((o) => {
+      const customerName = esc(o.customer_name || "");
+      const phone = esc(o.phone || "");
+      const productName = esc(o.product_name || "");
+      const options = [o.selected_color, o.selected_size].filter(Boolean).map(esc).join(" / ");
+      const total = Number(o.total_price || 0);
+      const date = o.created_at ? new Date(o.created_at).toLocaleDateString("ar") : "";
 
-  body.innerHTML =
-    orders.map(o => {
-
-      const customerName =
-        esc(
-          o.customer_name || ""
-        );
-
-
-      const phone =
-        esc(
-          o.phone || ""
-        );
-
-
-      const productName =
-        esc(
-          o.product_name || ""
-        );
-
-
-      const options = [
-
-        o.selected_color,
-
-        o.selected_size
-
+      const statusOptions = [
+        ["new", "جديد"],
+        ["confirmed", "مؤكد"],
+        ["shipped", "تم الشحن"],
+        ["completed", "مكتمل"],
+        ["cancelled", "ملغي"],
       ]
-        .filter(Boolean)
-        .map(esc)
-        .join(" / ");
-
-
-      const total =
-        Number(
-          o.total_price || 0
-        );
-
-
-      const date =
-        o.created_at
-        ?
-        new Date(
-          o.created_at
-        ).toLocaleDateString("ar")
-        :
-        "";
-
+        .map(
+          ([value, label]) =>
+            `<option value="${value}" ${
+              o.status === value || (value === "new" && !o.status) ? "selected" : ""
+            }>${label}</option>`
+        )
+        .join("");
 
       return `
-
         <tr>
-
+          <td>${customerName}</td>
+          <td>${phone}</td>
+          <td>${productName}</td>
+          <td>${options}</td>
+          <td>${total.toLocaleString("ar")} ₪</td>
           <td>
-            ${customerName}
-          </td>
-
-          <td>
-            ${phone}
-          </td>
-
-          <td>
-            ${productName}
-          </td>
-
-          <td>
-            ${options}
-          </td>
-
-          <td>
-            ${total.toLocaleString("ar")} ₪
-          </td>
-
-          <td>
-
-            <select
-              class="field"
-              style="min-width:130px;padding:7px"
-              onchange="changeOrderStatus('${o.id}',this.value)"
-            >
-
-              <option
-                value="new"
-                ${
-                  o.status === "new"
-                  ||
-                  !o.status
-                  ?
-                  "selected"
-                  :
-                  ""
-                }
-              >
-                جديد
-              </option>
-
-              <option
-                value="confirmed"
-                ${
-                  o.status === "confirmed"
-                  ?
-                  "selected"
-                  :
-                  ""
-                }
-              >
-                مؤكد
-              </option>
-
-              <option
-                value="shipped"
-                ${
-                  o.status === "shipped"
-                  ?
-                  "selected"
-                  :
-                  ""
-                }
-              >
-                تم الشحن
-              </option>
-
-              <option
-                value="completed"
-                ${
-                  o.status === "completed"
-                  ?
-                  "selected"
-                  :
-                  ""
-                }
-              >
-                مكتمل
-              </option>
-
-              <option
-                value="cancelled"
-                ${
-                  o.status === "cancelled"
-                  ?
-                  "selected"
-                  :
-                  ""
-                }
-              >
-                ملغي
-              </option>
-
+            <select class="field" style="min-width:130px;padding:7px"
+              onchange="changeOrderStatus('${o.id}',this.value)">
+              ${statusOptions}
             </select>
-
           </td>
-
-          <td>
-            ${date}
-          </td>
-
-          <td>
-
-            <button
-              class="btn btn-danger"
-              type="button"
-              onclick="deleteOrder('${o.id}')"
-            >
-
-              حذف
-
-            </button>
-
-          </td>
-
+          <td>${date}</td>
+          <td><button class="btn btn-danger" type="button" onclick="deleteOrder('${o.id}')">حذف</button></td>
         </tr>
-
       `;
-
-    }).join("");
+    })
+    .join("");
 }
 
+async function changeOrderStatus(id, status) {
+  if (!id || !status) return;
 
-async function changeOrderStatus(
-  id,
-  status
-){
+  try {
+    await q(sb.from("orders").update({ status }).eq("id", id));
 
-  if(!id || !status)
-    return;
+    const order = orders.find((o) => String(o.id) === String(id));
+    if (order) order.status = status;
 
-
-  try{
-
-    await q(
-
-      sb
-        .from("orders")
-        .update({
-          status:status
-        })
-        .eq(
-          "id",
-          id
-        )
-
-    );
-
-
-    const order =
-      orders.find(
-        o =>
-          String(o.id)
-          ===
-          String(id)
-      );
-
-
-    if(order)
-      order.status =
-        status;
-
-
-    toast(
-      "تم تحديث حالة الطلب ✅"
-    );
-
-
+    toast("تم تحديث حالة الطلب ✅");
     renderOrders();
-
     updateStats();
-
-
-  }catch(e){
-
-    console.error(
-      "changeOrderStatus error:",
-      e
-    );
-
-
-    toast(
-      "تعذر تحديث حالة الطلب: " +
-      (
-        e.message
-        ||
-        "خطأ غير معروف"
-      )
-    );
-
-
+  } catch (e) {
+    console.error("changeOrderStatus error:", e);
+    toast("تعذر تحديث حالة الطلب: " + (e.message || "خطأ غير معروف"));
     renderOrders();
   }
 }
 
+async function deleteOrder(id) {
+  if (!id) return;
+  if (!confirm("هل أنت متأكد من حذف هذا الطلب؟")) return;
 
-async function deleteOrder(id){
-
-  if(!id)
-    return;
-
-
-  const confirmed =
-    confirm(
-      "هل أنت متأكد من حذف هذا الطلب؟"
-    );
-
-
-  if(!confirmed)
-    return;
-
-
-  try{
-
-    await q(
-
-      sb
-        .from("orders")
-        .delete()
-        .eq(
-          "id",
-          id
-        )
-
-    );
-
-
-    orders =
-      orders.filter(
-        o =>
-          String(o.id)
-          !==
-          String(id)
-      );
-
-
-    toast(
-      "تم حذف الطلب ✅"
-    );
-
-
+  try {
+    await q(sb.from("orders").delete().eq("id", id));
+    orders = orders.filter((o) => String(o.id) !== String(id));
+    toast("تم حذف الطلب ✅");
     renderOrders();
-
     updateStats();
-
-
-  }catch(e){
-
-    console.error(
-      "deleteOrder error:",
-      e
-    );
-
-
-    toast(
-      "تعذر حذف الطلب: " +
-      (
-        e.message
-        ||
-        "خطأ غير معروف"
-      )
-    );
+  } catch (e) {
+    console.error("deleteOrder error:", e);
+    toast("تعذر حذف الطلب: " + (e.message || "خطأ غير معروف"));
   }
 }
-
 
 /* ================================
    SETTINGS
 ================================ */
 
-async function loadSettings(){
+async function loadSettings() {
+  try {
+    const result = await q(sb.from("store_settings").select("*").limit(1));
+    settings = result && result.length ? result[0] : null;
 
-  try{
-
-    const result =
-      await q(
-
-        sb
-          .from("store_settings")
-          .select("*")
-          .limit(1)
-
-      );
-
-
-    settings =
-      result && result.length
-      ?
-      result[0]
-      :
-      null;
-
-
-    if(!settings){
-
-      console.warn(
-        "لا توجد إعدادات محفوظة في store_settings"
-      );
-
+    if (!settings) {
+      console.warn("لا توجد إعدادات محفوظة في store_settings");
       return;
     }
 
-
-    if($("setWhatsapp"))
-      $("setWhatsapp").value =
-        settings.whatsapp || "";
-
-
-    if($("setWestBank"))
-      $("setWestBank").value =
-        settings.west_bank_delivery ?? "";
-
-
-    if($("setJerusalem"))
-      $("setJerusalem").value =
-        settings.jerusalem_delivery ?? "";
-
-
-    if($("setInside"))
-      $("setInside").value =
-        settings.inside_delivery ?? "";
-
-
-    if($("setFacebook"))
-      $("setFacebook").value =
-        settings.facebook_followers ?? "";
-
-
-    if($("setInstagram"))
-      $("setInstagram").value =
-        settings.instagram_followers ?? "";
-
-
-    if($("setTikTok"))
-      $("setTikTok").value =
-        settings.tiktok_followers ?? "";
-
-
-    if($("setSnapchat"))
-      $("setSnapchat").value =
-        settings.snapchat_followers ?? "";
-
-
-  }catch(e){
-
-    console.error(
-      "loadSettings error:",
-      e
-    );
-
-
-    toast(
-      "خطأ تحميل الإعدادات: " +
-      (
-        e.message
-        ||
-        "خطأ غير معروف"
-      )
-    );
+    if ($("setWhatsapp")) $("setWhatsapp").value = settings.whatsapp || "";
+    if ($("setWestBank")) $("setWestBank").value = settings.west_bank_delivery ?? "";
+    if ($("setJerusalem")) $("setJerusalem").value = settings.jerusalem_delivery ?? "";
+    if ($("setInside")) $("setInside").value = settings.inside_delivery ?? "";
+    if ($("setFacebook")) $("setFacebook").value = settings.facebook_followers ?? "";
+    if ($("setInstagram")) $("setInstagram").value = settings.instagram_followers ?? "";
+    if ($("setTikTok")) $("setTikTok").value = settings.tiktok_followers ?? "";
+    if ($("setSnapchat")) $("setSnapchat").value = settings.snapchat_followers ?? "";
+  } catch (e) {
+    console.error("loadSettings error:", e);
+    toast("خطأ تحميل الإعدادات: " + (e.message || "خطأ غير معروف"));
   }
 }
 
-
-async function saveSettings(){
-
-  try{
-
-    const whatsapp =
-      $("setWhatsapp")
-        ?.value
-        .trim()
-        ||
-        "";
-
-
-    const westBank =
-      Number(
-        $("setWestBank")
-          ?.value
-        ||
-        0
-      );
-
-
-    const jerusalem =
-      Number(
-        $("setJerusalem")
-          ?.value
-        ||
-        0
-      );
-
-
-    const inside =
-      Number(
-        $("setInside")
-          ?.value
-        ||
-        0
-      );
-
-
-    const facebook =
-      Number(
-        $("setFacebook")
-          ?.value
-        ||
-        0
-      );
-
-
-    const instagram =
-      Number(
-        $("setInstagram")
-          ?.value
-        ||
-        0
-      );
-
-
-    const tikTok =
-      Number(
-        $("setTikTok")
-          ?.value
-        ||
-        0
-      );
-
-
-    const snapchat =
-      Number(
-        $("setSnapchat")
-          ?.value
-        ||
-        0
-      );
-
-
+async function saveSettings() {
+  try {
     const payload = {
-
-      id:1,
-
-      whatsapp,
-
-      west_bank_delivery:
-        westBank,
-
-      jerusalem_delivery:
-        jerusalem,
-
-      inside_delivery:
-        inside,
-
-      facebook_followers:
-        facebook,
-
-      instagram_followers:
-        instagram,
-
-      tiktok_followers:
-        tikTok,
-
-      snapchat_followers:
-        snapchat,
-
-      updated_at:
-        new Date()
-          .toISOString()
-
+      id: 1,
+      whatsapp: $("setWhatsapp")?.value.trim() || "",
+      west_bank_delivery: Number($("setWestBank")?.value || 0),
+      jerusalem_delivery: Number($("setJerusalem")?.value || 0),
+      inside_delivery: Number($("setInside")?.value || 0),
+      facebook_followers: Number($("setFacebook")?.value || 0),
+      instagram_followers: Number($("setInstagram")?.value || 0),
+      tiktok_followers: Number($("setTikTok")?.value || 0),
+      snapchat_followers: Number($("setSnapchat")?.value || 0),
+      updated_at: new Date().toISOString(),
     };
 
+    await q(sb.from("store_settings").upsert(payload, { onConflict: "id" }));
 
-    await q(
-
-      sb
-        .from("store_settings")
-        .upsert(
-          payload,
-          {
-            onConflict:"id"
-          }
-        )
-
-    );
-
-
-    toast(
-      "تم حفظ إعدادات المتجر ✅"
-    );
-
-
+    toast("تم حفظ إعدادات المتجر ✅");
     await loadSettings();
-
-
-  }catch(e){
-
-    console.error(
-      "saveSettings error:",
-      e
-    );
-
-
-    toast(
-      "تعذر حفظ الإعدادات: " +
-      (
-        e.message
-        ||
-        "خطأ غير معروف"
-      )
-    );
+  } catch (e) {
+    console.error("saveSettings error:", e);
+    toast("تعذر حفظ الإعدادات: " + (e.message || "خطأ غير معروف"));
   }
 }
 
+const settingsForm = $("settingsForm");
 
-const settingsForm =
-$("settingsForm");
-
-
-if(settingsForm){
-
-  settingsForm.addEventListener(
-    "submit",
-    async function(e){
-
-      e.preventDefault();
-      e.stopPropagation();
-
-      await saveSettings();
-
-    }
-  );
+if (settingsForm) {
+  settingsForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    await saveSettings();
+  });
 }
-
 
 /* ================================
    SLIDER
 ================================ */
 
-async function loadSlider(){
+async function loadSlider() {
+  try {
+    const result = await q(
+      sb.from("slider").select("*").order("sort_order", { ascending: true })
+    );
 
-  try{
-
-    const result =
-      await q(
-
-        sb
-          .from("slider")
-          .select("*")
-          .order(
-            "sort_order",
-            {
-              ascending:true
-            }
-          )
-
-      );
-
-
-    slides =
-      result || [];
-
-
+    slides = result || [];
     renderSlider();
-
     updateStats();
-
-
-  }catch(e){
-
-    console.error(
-      "loadSlider error:",
-      e
-    );
-
-
-    toast(
-      "خطأ تحميل السلايدر: " +
-      (
-        e.message
-        ||
-        "خطأ غير معروف"
-      )
-    );
+  } catch (e) {
+    console.error("loadSlider error:", e);
+    toast("خطأ تحميل السلايدر: " + (e.message || "خطأ غير معروف"));
   }
 }
 
+function renderSlider() {
+  const container = $("sliderList");
+  if (!container) return;
 
-function renderSlider(){
-
-  const container =
-    $("sliderList");
-
-  if(!container)
-    return;
-
-
-  if(!slides.length){
-
-    container.innerHTML = `
-
-      <div class="empty">
-
-        لا توجد شرائح في السلايدر.
-
-      </div>
-
-    `;
-
+  if (!slides.length) {
+    container.innerHTML = `<div class="empty">لا توجد شرائح في السلايدر.</div>`;
     return;
   }
 
-
-  container.innerHTML =
-    slides.map(item => {
-
-      const title =
-        esc(
-          item.title || ""
-        );
-
-
-      const subtitle =
-        esc(
-          item.subtitle || ""
-        );
-
-
-      const image =
-        item.image_url || "";
-
+  container.innerHTML = slides
+    .map((item) => {
+      const title = esc(item.title || "");
+      const subtitle = esc(item.subtitle || "");
+      const image = item.image_url || "";
 
       return `
-
         <div class="slider-item">
-
           ${
             image
-            ?
-            `
-
-              <img
-                src="${esc(image)}"
-                alt="${title}"
-                class="slider-preview"
-              >
-
-            `
-            :
-            `
-
-              <div
-                class="slider-preview empty">
-
-                لا توجد صورة
-
-              </div>
-
-            `
+              ? `<img src="${esc(image)}" alt="${title}" class="slider-preview">`
+              : `<div class="slider-preview empty">لا توجد صورة</div>`
           }
-
-
           <div class="slider-info">
-
-            <strong>
-
-              ${title || "بدون عنوان"}
-
-            </strong>
-
-
-            ${
-              subtitle
-              ?
-              `<div>${subtitle}</div>`
-              :
-              ""
-            }
-
-
-            <small>
-
-              الترتيب:
-              ${Number(
-                item.sort_order || 0
-              )}
-
-            </small>
-
-
+            <strong>${title || "بدون عنوان"}</strong>
+            ${subtitle ? `<div>${subtitle}</div>` : ""}
+            <small>الترتيب: ${Number(item.sort_order || 0)}</small>
             <div class="slider-actions">
-
-              <button
-                type="button"
-                class="btn btn-danger"
-                onclick="deleteSlider('${item.id}')"
-              >
-
-                حذف
-
-              </button>
-
+              <button type="button" class="btn btn-danger" onclick="deleteSlider('${item.id}')">حذف</button>
             </div>
-
           </div>
-
         </div>
-
       `;
-
-    }).join("");
+    })
+    .join("");
 }
 
+async function addSlider() {
+  try {
+    const title = $("sliderTitle")?.value.trim() || "";
+    const subtitle = $("sliderSubtitle")?.value.trim() || "";
+    const sortOrder = Number($("sliderOrder")?.value || 0);
+    const imageInput = $("sliderImage");
 
-async function addSlider(){
-
-  try{
-
-    const title =
-      $("sliderTitle")
-        ?.value
-        .trim()
-      ||
-      "";
-
-
-    const subtitle =
-      $("sliderSubtitle")
-        ?.value
-        .trim()
-      ||
-      "";
-
-
-    const sortOrder =
-      Number(
-        $("sliderOrder")
-          ?.value
-        ||
-        0
-      );
-
-
-    const imageInput =
-      $("sliderImage");
-
-
-    if(!title){
-
-      toast(
-        "اكتب عنوان السلايدر أولًا"
-      );
-
+    if (!title) {
+      toast("اكتب عنوان السلايدر أولًا");
       return;
     }
 
-
-    if(
-      !imageInput
-      ||
-      !imageInput.files.length
-    ){
-
-      toast(
-        "اختر صورة للسلايدر أولًا"
-      );
-
+    if (!imageInput || !imageInput.files.length) {
+      toast("اختر صورة للسلايدر أولًا");
       return;
     }
 
+    const file = imageInput.files[0];
+    const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const id = crypto.randomUUID();
+    const path = `hero/${id}.${fileExt}`;
 
-    const file =
-      imageInput.files[0];
+    const uploadResult = await sb.storage.from(BUCKET).upload(path, file, {
+      cacheControl: "3600",
+      upsert: false,
+      contentType: file.type || "image/jpeg",
+    });
 
+    if (uploadResult.error) {
+      throw new Error(
+        "فشل رفع صورة السلايدر (" +
+          uploadResult.error.message +
+          "). تحقق من Storage Policies."
+      );
+    }
 
-    const fileExt =
-      file.name
-        .split(".")
-        .pop()
-        ?.toLowerCase()
-      ||
-      "jpg";
-
-
-    const id =
-      crypto.randomUUID();
-
-
-    const path =
-      `hero/${id}.${fileExt}`;
-
-
-    const uploadResult =
-      await sb.storage
-        .from(BUCKET)
-        .upload(
-          path,
-          file,
-          {
-            cacheControl:"3600",
-            upsert:false,
-            contentType:
-              file.type
-              ||
-              "image/jpeg"
-          }
-        );
-
-
-    if(uploadResult.error)
-      throw uploadResult.error;
-
-
-    const publicResult =
-      sb.storage
-        .from(BUCKET)
-        .getPublicUrl(path);
-
-
-    const imageUrl =
-      publicResult
-        ?.data
-        ?.publicUrl
-      ||
-      "";
-
+    const publicResult = sb.storage.from(BUCKET).getPublicUrl(path);
+    const imageUrl = publicResult?.data?.publicUrl || "";
 
     await q(
-
-      sb
-        .from("slider")
-        .insert({
-
-          id:id,
-
-          title:title,
-
-          subtitle:subtitle,
-
-          image_url:imageUrl,
-
-          sort_order:
-            sortOrder,
-
-          is_active:true
-
-        })
-
+      sb.from("slider").insert({
+        id,
+        title,
+        subtitle,
+        image_url: imageUrl,
+        sort_order: sortOrder,
+        is_active: true,
+      })
     );
 
-
-    toast(
-      "تمت إضافة السلايدر ✅"
-    );
-
-
-    if($("sliderForm"))
-      $("sliderForm").reset();
-
-
+    toast("تمت إضافة السلايدر ✅");
+    if ($("sliderForm")) $("sliderForm").reset();
     await loadSlider();
-
-
-  }catch(e){
-
-    console.error(
-      "addSlider error:",
-      e
-    );
-
-
-    toast(
-      "تعذر إضافة السلايدر: " +
-      (
-        e.message
-        ||
-        "خطأ غير معروف"
-      )
-    );
+  } catch (e) {
+    console.error("addSlider error:", e);
+    toast("تعذر إضافة السلايدر: " + (e.message || "خطأ غير معروف"));
   }
 }
 
+async function deleteSlider(id) {
+  if (!id) return;
+  if (!confirm("هل أنت متأكد من حذف هذا السلايدر؟")) return;
 
-async function deleteSlider(id){
+  try {
+    const item = slides.find((x) => String(x.id) === String(id));
 
-  if(!id)
-    return;
+    await q(sb.from("slider").delete().eq("id", id));
 
+    if (item?.image_url) {
+      try {
+        const marker = `/storage/v1/object/public/${BUCKET}/`;
+        const index = item.image_url.indexOf(marker);
 
-  const confirmed =
-    confirm(
-      "هل أنت متأكد من حذف هذا السلايدر؟"
-    );
-
-
-  if(!confirmed)
-    return;
-
-
-  try{
-
-    const item =
-      slides.find(
-        x =>
-          String(x.id)
-          ===
-          String(id)
-      );
-
-
-    await q(
-
-      sb
-        .from("slider")
-        .delete()
-        .eq(
-          "id",
-          id
-        )
-
-    );
-
-
-    if(item?.image_url){
-
-      try{
-
-        const marker =
-          `/storage/v1/object/public/${BUCKET}/`;
-
-
-        const index =
-          item.image_url
-            .indexOf(marker);
-
-
-        if(index !== -1){
-
-          const path =
-            decodeURIComponent(
-
-              item.image_url
-                .substring(
-                  index + marker.length
-                )
-
-            );
-
-
-          if(path){
-
-            await sb.storage
-              .from(BUCKET)
-              .remove([path]);
-
-          }
+        if (index !== -1) {
+          const path = decodeURIComponent(item.image_url.substring(index + marker.length));
+          if (path) await sb.storage.from(BUCKET).remove([path]);
         }
-
-      }catch(storageError){
-
-        console.warn(
-          "تعذر حذف صورة السلايدر من Storage:",
-          storageError
-        );
+      } catch (storageError) {
+        console.warn("تعذر حذف صورة السلايدر من Storage:", storageError);
       }
     }
 
-
-    slides =
-      slides.filter(
-        x =>
-          String(x.id)
-          !==
-          String(id)
-      );
-
-
-    toast(
-      "تم حذف السلايدر ✅"
-    );
-
-
+    slides = slides.filter((x) => String(x.id) !== String(id));
+    toast("تم حذف السلايدر ✅");
     renderSlider();
-
     updateStats();
-
-
-  }catch(e){
-
-    console.error(
-      "deleteSlider error:",
-      e
-    );
-
-
-    toast(
-      "تعذر حذف السلايدر: " +
-      (
-        e.message
-        ||
-        "خطأ غير معروف"
-      )
-    );
+  } catch (e) {
+    console.error("deleteSlider error:", e);
+    toast("تعذر حذف السلايدر: " + (e.message || "خطأ غير معروف"));
   }
 }
 
+const sliderForm = $("sliderForm");
 
-const sliderForm =
-$("sliderForm");
-
-
-if(sliderForm){
-
-  sliderForm.addEventListener(
-    "submit",
-    async function(e){
-
-      e.preventDefault();
-      e.stopPropagation();
-
-      await addSlider();
-
-    }
-  );
+if (sliderForm) {
+  sliderForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    await addSlider();
+  });
 }
-
 
 /* ================================
    DELIVERY
 ================================ */
 
-async function loadDeliveryAreas(){
-
-  try{
-
-    const result =
-      await q(
-
-        sb
-          .from("delivery_areas")
-          .select("*")
-          .order(
-            "id",
-            {
-              ascending:true
-            }
-          )
-
-      );
-
-
-    deliveryAreas =
-      result || [];
-
-
+async function loadDeliveryAreas() {
+  try {
+    const result = await q(sb.from("delivery_areas").select("*").order("id", { ascending: true }));
+    deliveryAreas = result || [];
     renderDeliveryAreas();
-
-
-  }catch(e){
-
-    console.error(
-      "loadDeliveryAreas error:",
-      e
-    );
-
-
-    toast(
-      "خطأ تحميل مناطق التوصيل: " +
-      (
-        e.message
-        ||
-        "خطأ غير معروف"
-      )
-    );
+  } catch (e) {
+    console.error("loadDeliveryAreas error:", e);
+    toast("خطأ تحميل مناطق التوصيل: " + (e.message || "خطأ غير معروف"));
   }
 }
 
+function renderDeliveryAreas() {
+  const container = $("deliveryList");
+  if (!container) return;
 
-function renderDeliveryAreas(){
-
-  const container =
-    $("deliveryList");
-
-  if(!container)
-    return;
-
-
-  if(!deliveryAreas.length){
-
-    container.innerHTML = `
-
-      <div class="empty">
-
-        لا توجد مناطق توصيل.
-
-      </div>
-
-    `;
-
+  if (!deliveryAreas.length) {
+    container.innerHTML = `<div class="empty">لا توجد مناطق توصيل.</div>`;
     return;
   }
 
-
-  container.innerHTML =
-    deliveryAreas
-      .map(area => {
-
-        return `
-
-          <div class="setting-row">
-
-            <div>
-
-              <strong>
-
-                ${esc(
-                  area.name
-                  ||
-                  area.area
-                  ||
-                  ""
-                )}
-
-              </strong>
-
-            </div>
-
-
-            <div>
-
-              <strong>
-
-                ${Number(
-                  area.price || 0
-                ).toLocaleString("ar")} ₪
-
-              </strong>
-
-            </div>
-
-          </div>
-
-        `;
-
-      })
-      .join("");
+  container.innerHTML = deliveryAreas
+    .map(
+      (area) => `
+        <div class="setting-row">
+          <div><strong>${esc(area.name || area.area || "")}</strong></div>
+          <div><strong>${Number(area.price || 0).toLocaleString("ar")} ₪</strong></div>
+        </div>
+      `
+    )
+    .join("");
 }
-
 
 /* ================================
    DOCUMENT CLICK
 ================================ */
 
-document.addEventListener(
-  "click",
-  function(e){
-
-    const pageButton =
-      e.target.closest(
-        "[data-page]"
-      );
-
-
-    if(pageButton){
-
-      const page =
-        pageButton.getAttribute(
-          "data-page"
-        );
-
-
-      if(page){
-
-        openPage(page);
-
-      }
-
-    }
-
+document.addEventListener("click", function (e) {
+  const pageButton = e.target.closest("[data-page]");
+  if (pageButton) {
+    const page = pageButton.getAttribute("data-page");
+    if (page) openPage(page);
   }
-);
-
+});
 
 /* ================================
    AUTH STATE
 ================================ */
 
-sb.auth.onAuthStateChange(
-  async function(event,session){
+sb.auth.onAuthStateChange(async function (event, session) {
+  console.log("Auth event:", event);
 
-    console.log(
-      "Auth event:",
-      event
-    );
+  if (event === "SIGNED_OUT") {
+    showLogin();
+    return;
+  }
 
-
-    if(
-      event === "SIGNED_OUT"
-    ){
-
+  if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+    if (!session) {
       showLogin();
-
       return;
     }
 
+    try {
+      const admin = await isAdmin();
 
-    if(
-      event === "SIGNED_IN"
-      ||
-      event === "TOKEN_REFRESHED"
-    ){
-
-      if(!session){
-
+      if (admin) {
+        showApp();
+        /* لا نستدعي loadAll هنا، لأن login / restoreSession يتكفلان بذلك */
+      } else {
+        await sb.auth.signOut();
         showLogin();
-
-        return;
+        toast("هذا الحساب ليس لديه صلاحية دخول لوحة التحكم");
       }
-
-
-      try{
-
-        const admin =
-          await isAdmin();
-
-
-        if(admin){
-
-          showApp();
-
-          /*
-           * لا نستدعي loadAll هنا،
-           * لأن login / restoreSession
-           * يتكفلان بذلك.
-           */
-
-        }else{
-
-          await sb.auth.signOut();
-
-          showLogin();
-
-          toast(
-            "هذا الحساب ليس لديه صلاحية دخول لوحة التحكم"
-          );
-        }
-
-
-      }catch(e){
-
-        console.error(
-          "Auth state admin check error:",
-          e
-        );
-
-
-        showLogin();
-      }
-
+    } catch (e) {
+      console.error("Auth state admin check error:", e);
+      showLogin();
     }
-
   }
-);
-
+});
 
 /* ================================
    START
 ================================ */
 
 restoreSession();
-
-</script>
-
-</body>
-</html>
-```
